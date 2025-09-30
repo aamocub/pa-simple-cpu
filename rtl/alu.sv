@@ -1,3 +1,5 @@
+`include "opcode.vh"
+
 module alu #(
     parameter integer DATAWIDTH = 32
 ) (
@@ -9,15 +11,20 @@ module alu #(
 
     always_comb
         case (opcode_i)
-            4'b0000: out_o = a_i + b_i;  // add
-            4'b0001: out_o = a_i + b_i;  // lw
-            4'b0010: out_o = a_i + b_i;  // sw
-            4'b0011: out_o = a_i - b_i;  // sub
-            4'b0100: out_o = a_i * b_i;  // mul
-            4'b0101: out_o = a_i / b_i;  // div
-            4'b0110: out_o = a_i & b_i;  // and
-            4'b0111: out_o = a_i | b_i;  // or
-            4'b1000: out_o = a_i ^ b_i;  // xor
+            `ADD_OP: out_o = a_i + b_i;
+            `LW_OP : out_o = a_i + b_i;
+            `SW_OP : out_o = a_i + b_i;
+            `SUB_OP: out_o = a_i - b_i;
+            `MUL_OP: out_o = a_i * b_i;
+            `DIV_OP: out_o = a_i / b_i;
+            `AND_OP: out_o = a_i & b_i;
+            `OR_OP : out_o = a_i | b_i;
+            `XOR_OP: out_o = a_i ^ b_i;
+            `JMP_OP: out_o = a_i + b_i;
+            `BEQ_OP: out_o = a_i + b_i;
+            `BGT_OP: out_o = a_i + b_i;
+            `BLT_OP: out_o = a_i + b_i;
+            `LI_OP : out_o = a_i + b_i;
             default: out_o = 'x;
         endcase
 
