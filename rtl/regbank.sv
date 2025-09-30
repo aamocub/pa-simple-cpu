@@ -10,26 +10,26 @@ module regbank #(
     input wire rst_i,
 
     // reading port A
-    input  wire                     re_a_i,     // read A enable
-    output wire [    DATAWIDTH-1:0] rdata_a_o,  // read A data
-    input  wire [$clog2(NUMREGS):0] raddr_a_i,  // read A address
+    input  wire                       re_a_i,     // read A enable
+    output wire [      DATAWIDTH-1:0] rdata_a_o,  // read A data
+    input  wire [$clog2(NUMREGS)-1:0] raddr_a_i,  // read A address
 
     // reading port B
-    input  wire                     re_b_i,     // read B enable
-    output wire [    DATAWIDTH-1:0] rdata_b_o,  // read B data
-    input  wire [$clog2(NUMREGS):0] raddr_b_i,  // read B address
+    input  wire                       re_b_i,     // read B enable
+    output wire [      DATAWIDTH-1:0] rdata_b_o,  // read B data
+    input  wire [$clog2(NUMREGS)-1:0] raddr_b_i,  // read B address
 
     // writing port
-    input wire                     we_i,     // write enable
-    input wire [    DATAWIDTH-1:0] wdata_i,  // write data
-    input wire [$clog2(NUMREGS):0] waddr_i   // write address
+    input wire                       we_i,     // write enable
+    input wire [      DATAWIDTH-1:0] wdata_i,  // write data
+    input wire [$clog2(NUMREGS)-1:0] waddr_i   // write address
 );
 
   reg [DATAWIDTH-1:0] bank[NUMREGS];  // register bank
 
   integer i;  // iterator for 'for loop'
 
-  // Read combinational logic ( same in both ports, so explained for port A, but it applies for both)
+  // Read combinational logic (same in both ports, so explained for port A, but it applies for both)
   //
   // if reading and writing to/from the same register: rdata_a_o would be assigned wdata_i
   // else: rdata_a_o would be bank[raddr_a_i]

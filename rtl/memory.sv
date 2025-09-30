@@ -11,21 +11,21 @@ module memory #(
     input wire rst_i,
 
     // reading port
-    input  wire                      re_i,     // read enable
-    output wire [     DATAWIDTH-1:0] rdata_o,  // read data
-    input  wire [$clog2(NUMWORDS):0] raddr_i,  // read address
+    input  wire                        re_i,     // read enable
+    output wire [       DATAWIDTH-1:0] rdata_o,  // read data
+    input  wire [$clog2(NUMWORDS)-1:0] raddr_i,  // read address
 
     // writing port
-    input wire                      we_i,     // write enable
-    input wire [     DATAWIDTH-1:0] wdata_i,  // write data
-    input wire [$clog2(NUMWORDS):0] waddr_i   // write address
+    input wire                        we_i,     // write enable
+    input wire [       DATAWIDTH-1:0] wdata_i,  // write data
+    input wire [$clog2(NUMWORDS)-1:0] waddr_i   // write address
 );
 
   reg [DATAWIDTH-1:0] mem[NUMWORDS];  // memory
 
   integer i;  // iterator for 'for loop'
 
-  // Read combinatinoal logic ( same in both ports, so explained for port A, but it applies for both)
+  // Read combinatinoal logic (same in both ports, so explained for port A, but it applies for both)
   //
   // if reading and writing to/from the same register: rdata_a_o would be assigned wdata_i
   // else: rdata_a_o would be mem[raddr_a_i]
