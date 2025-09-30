@@ -21,7 +21,7 @@ module memory #(
     input wire [$clog2(NUMWORDS):0] waddr_i   // write address
 );
 
-  reg [DATAWIDTH-1:0] mem[NUMWORDS];  // register mem
+  reg [DATAWIDTH-1:0] mem[NUMWORDS];  // memory
 
   integer i;  // iterator for 'for loop'
 

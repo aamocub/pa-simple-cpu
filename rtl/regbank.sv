@@ -29,7 +29,7 @@ module regbank #(
 
   integer i;  // iterator for 'for loop'
 
-  // Read combinatinoal logic ( same in both ports, so explained for port A, but it applies for both)
+  // Read combinational logic ( same in both ports, so explained for port A, but it applies for both)
   //
   // if reading and writing to/from the same register: rdata_a_o would be assigned wdata_i
   // else: rdata_a_o would be bank[raddr_a_i]
