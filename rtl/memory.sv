@@ -21,29 +21,29 @@ module memory #(
     input wire [$clog2(NUMWORDS)-1:0] waddr_i   // write address
 );
 
-  reg [DATAWIDTH-1:0] mem[NUMWORDS];  // memory
+    reg [DATAWIDTH-1:0] mem[NUMWORDS];  // memory
 
-  integer i;  // iterator for 'for loop'
+    integer i;  // iterator for 'for loop'
 
-  // Read combinatinoal logic (same in both ports, so explained for port A, but it applies for both)
-  //
-  // if reading and writing to/from the same register: rdata_a_o would be assigned wdata_i
-  // else: rdata_a_o would be mem[raddr_a_i]
-  assign rdata_o = (re_i & we_i & raddr_i == waddr_i) ? wdata_i : (re_i) ? mem[raddr_i] : 0;
+    // Read combinatinoal logic (same in both ports, so explained for port A, but it applies for both)
+    //
+    // if reading and writing to/from the same register: rdata_a_o would be assigned wdata_i
+    // else: rdata_a_o would be mem[raddr_a_i]
+    assign rdata_o = (re_i & we_i & raddr_i == waddr_i) ? wdata_i : (re_i) ? mem[raddr_i] : 0;
 
-  // Write sequential logic
-  always @(posedge clk_i or posedge rst_i) begin
-    // reset all registers to value 0
-    if (rst_i) begin
-      for (i = 0; i < NUMWORDS; i = i + 1) begin
-        mem[i] <= 32'b0;
-      end
-    end else begin
-      // if write enable, write data to mem[waddr_i] register
-      if (we_i) begin
-        mem[waddr_i] <= wdata_i;
-      end
+    // Write sequential logic
+    always @(posedge clk_i or posedge rst_i) begin
+        // reset all registers to value 0
+        if (rst_i) begin
+            for (i = 0; i < NUMWORDS; i = i + 1) begin
+                mem[i] <= 32'b0;
+            end
+        end else begin
+            // if write enable, write data to mem[waddr_i] register
+            if (we_i) begin
+                mem[waddr_i] <= wdata_i;
+            end
+        end
     end
-  end
 
 endmodule

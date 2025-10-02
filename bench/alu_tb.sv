@@ -1,0 +1,66 @@
+`include "opcode.vh"
+
+`define assert(op, signal, value) \
+        if (signal != value) begin \
+            $display("ASSERTION FAILED in %m: op(%0d) %s(%0d) != %0d", op, `"signal`", signal, value); \
+            // $finish; \
+        end
+
+module alu_tb ();
+
+localparam integer DW = 32;
+
+reg clk;
+reg rst;
+reg [DW-1:0] a_i;
+reg [DW-1:0] b_i;
+reg [3:0] opcode_i;
+reg [DW-1:0] out_o;
+
+always #10 clk = ~clk;
+
+alu #(
+        .DATAWIDTH(DW)
+) alu (
+        .a_i     (a_i),
+        .b_i     (b_i),
+        .opcode_i(opcode_i),
+        .out_o   (out_o)
+);
+
+reg [3:0] i;
+initial begin
+        clk = 1;
+        rst = 1;
+        #20; // wait 20 units of time
+        rst = 0;
+        #20; // wait 20 units of time
+        a_i = 32'd34;
+        b_i = 32'd35;
+        #20;
+        for (i = 0; i < 14; i = i + 1) begin
+                opcode_i = i;
+                #20;
+                case (opcode_i)
+                        `ADD_OP: `assert(opcode_i, out_o, a_i + b_i)
+                        `LW_OP:  `assert(opcode_i, out_o, a_i + b_i)
+                        `SW_OP:  `assert(opcode_i, out_o, a_i + b_i)
+                        `SUB_OP: `assert(opcode_i, out_o, a_i - b_i)
+                        `MUL_OP: `assert(opcode_i, out_o, a_i * b_i)
+                        `DIV_OP: `assert(opcode_i, out_o, a_i / b_i)
+                        `AND_OP: `assert(opcode_i, out_o, a_i & b_i)
+                        `OR_OP:  `assert(opcode_i, out_o, a_i | b_i)
+                        `XOR_OP: `assert(opcode_i, out_o, a_i ^ b_i)
+                        `JMP_OP: `assert(opcode_i, out_o, a_i + b_i)
+                        `BEQ_OP: `assert(opcode_i, out_o, a_i + b_i)
+                        `BGT_OP: `assert(opcode_i, out_o, a_i + b_i)
+                        `BLT_OP: `assert(opcode_i, out_o, a_i + b_i)
+                        `LI_OP:  `assert(opcode_i, out_o, a_i + b_i)
+                endcase
+                $display("OP %0d A %0d B %0d OUT %0d", opcode_i, a_i, b_i, out_o);
+                #20;
+        end
+        $finish();
+end
+
+endmodule
