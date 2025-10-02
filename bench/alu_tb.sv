@@ -1,9 +1,9 @@
 `include "opcode.vh"
 
 `define assert(op, signal, value) \
-        if (signal != value) begin \
+        if ((signal) != (value)) begin \
             $display("ASSERTION FAILED in %m: op(%0d) %s(%0d) != %0d", op, `"signal`", signal, value); \
-            // $finish; \
+            $finish; \
         end
 
 module alu_tb ();
