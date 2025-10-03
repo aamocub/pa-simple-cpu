@@ -8,7 +8,8 @@
 
 module alu_tb ();
 
-localparam integer DW = 32;
+localparam integer DW = 32; // Data width
+localparam integer CLK_PERIOD = 20;
 
 reg clk;
 reg rst;
@@ -17,7 +18,8 @@ reg [DW-1:0] b_i;
 reg [3:0] opcode_i;
 reg [DW-1:0] out_o;
 
-always #10 clk = ~clk;
+// Generate clock signal
+always #(CLK_PERIOD / 2) clk = ~clk;
 
 alu #(
         .DATAWIDTH(DW)
@@ -32,15 +34,19 @@ reg [3:0] i;
 initial begin
         clk = 1;
         rst = 1;
-        #20; // wait 20 units of time
+        #CLK_PERIOD;
+
         rst = 0;
-        #20; // wait 20 units of time
+        #CLK_PERIOD;
+
         a_i = 32'd34;
         b_i = 32'd35;
-        #20;
         for (i = 0; i < 14; i = i + 1) begin
+        #CLK_PERIOD;
+
                 opcode_i = i;
-                #20;
+                #CLK_PERIOD;
+
                 case (opcode_i)
                         `ADD_OP: `assert(opcode_i, out_o, a_i + b_i)
                         `LW_OP:  `assert(opcode_i, out_o, a_i + b_i)
@@ -58,7 +64,7 @@ initial begin
                         `LI_OP:  `assert(opcode_i, out_o, a_i + b_i)
                 endcase
                 $display("OP %0d A %0d B %0d OUT %0d", opcode_i, a_i, b_i, out_o);
-                #20;
+                #CLK_PERIOD;
         end
         $finish();
 end
