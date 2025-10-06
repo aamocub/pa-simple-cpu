@@ -41,9 +41,9 @@ initial begin
 
         a_i = 32'd34;
         b_i = 32'd35;
-        for (i = 0; i < 14; i = i + 1) begin
         #CLK_PERIOD;
 
+        for (i = 0; i < 14; i = i + 1) begin
                 opcode_i = i;
                 #CLK_PERIOD;
 
