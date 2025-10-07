@@ -1,3 +1,5 @@
+`include "opcode.svh"
+
 module top #(
     parameter integer DATAWIDTH = 32
 ) (
@@ -13,11 +15,15 @@ module top #(
     wire [ 4:0] D_rb;
     wire [ 4:0] D_rd;
     wire [ 3:0] D_opcode;
-
     wire [31:0] D_a;
     wire [31:0] D_b;
+    wire [31:0] D_imm;
 
     wire [31:0] X_d;
+
+    wire [31:0] M_d;
+
+    assign D_imm = {{19{D_offset[12]}}, D_offset[11:0]};  // Sign extend
 
     register #(
         .DATAWIDTH(32)
@@ -38,9 +44,9 @@ module top #(
         .re_i   (1),
         .rdata_o(F_inst),
         .raddr_i(F_pc),
-        .we_i   (),
-        .wdata_i(),
-        .waddr_i()
+        .we_i   (0),
+        .wdata_i(0),
+        .waddr_i(0)
     );
 
     decoder #() decoder (
@@ -58,12 +64,12 @@ module top #(
     ) dmem (
         .clk_i  (clk_i),
         .rst_i  (rst_i),
-        .re_i   (),
-        .rdata_o(),
-        .raddr_i(),
-        .we_i   (),
-        .wdata_i(),
-        .waddr_i()
+        .re_i   (1),
+        .rdata_o(M_d),
+        .raddr_i(X_d),
+        .we_i   ((D_opcode == `SW_OP) ? 1 : 0),
+        .wdata_i(D_b),
+        .waddr_i(X_d)
     );
 
     regbank #(
@@ -79,7 +85,7 @@ module top #(
         .rdata_b_o(D_b),
         .raddr_b_i(D_rb),
         .we_i     (1),
-        .wdata_i  (X_d),
+        .wdata_i  ((D_opcode == `LW_OP) ? M_d : X_d),
         .waddr_i  (D_rd)
     );
 
@@ -87,7 +93,7 @@ module top #(
         .DATAWIDTH(32)
     ) alu (
         .a_i     (D_a),
-        .b_i     (D_b),
+        .b_i     ((D_opcode == `LW_OP || D_opcode == `SW_OP) ? D_imm : D_b),
         .opcode_i(D_opcode),
         .out_o   (X_d)
     );
@@ -95,8 +101,8 @@ module top #(
     cmp #(
         .DATAWIDTH(32)
     ) cmp (
-        .a_i (),
-        .b_i (),
+        .a_i (D_a),
+        .b_i (D_b),
         .eq_o(),
         .gt_o(),
         .lt_o()
