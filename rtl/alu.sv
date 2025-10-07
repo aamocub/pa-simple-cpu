@@ -1,4 +1,4 @@
-`include "opcode.vh"
+`include "opcode.svh"
 
 module alu #(
     parameter integer DATAWIDTH = 32

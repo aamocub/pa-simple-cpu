@@ -1,4 +1,4 @@
-`include "opcode.vh"
+`include "opcode.svh"
 
 `define assert(op, signal, value) \
         if ((signal) != (value)) begin \
