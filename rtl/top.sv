@@ -6,26 +6,29 @@ module top #(
     input wire clk_i,
     input wire rst_i
 );
+    /* Naming convention: wires are prefixed with their stage (Fetch, Decode, eXecute, Memory, Writeback) */
 
-    wire [31:0] F_pc;
-    wire [31:0] F_inst;
+    wire [31:0] F_pc;  // Program counter
+    wire [31:0] F_inst;  // Instruction
 
+    /* Instruction breakdown */
     wire [12:0] D_offset;
     wire [ 4:0] D_ra;
     wire [ 4:0] D_rb;
     wire [ 4:0] D_rd;
     wire [ 3:0] D_opcode;
-    wire [31:0] D_a;
-    wire [31:0] D_b;
-    wire [31:0] D_imm;
-    wire [ 1:0] D_cmp_op;
 
-    wire [31:0] X_d;
-    wire        X_taken;
+    wire [31:0] D_a;  // Contents of register a
+    wire [31:0] D_b;  // Contents of register B
+    wire [31:0] D_imm;  // Sign-extended immediate
+    wire [ 1:0] D_cmp_op;  // CMP operation (none, ==, >, >=)
 
-    wire [31:0] M_d;
+    wire [31:0] X_d;  // ALU output
+    wire        X_taken;  // 1 if branch is taken
 
-    assign D_imm = {{19{D_offset[12]}}, D_offset[11:0]};  // Sign extend
+    wire [31:0] M_d;  // Memory output
+
+    assign D_imm = {{19{D_offset[12]}}, D_offset[11:0]};  // Sign extend immediate
     assign D_cmp_op = D_opcode == `BEQ_OP ? 2'b01 : D_opcode == `BGT_OP ? 2'b10 : D_opcode == `BGE_OP ? 2'b11 : 0;
 
     register #(
