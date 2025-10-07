@@ -32,7 +32,7 @@ module top #(
     assign D_cmp_op = D_opcode == `BEQ_OP ? 2'b01 : D_opcode == `BGT_OP ? 2'b10 : D_opcode == `BGE_OP ? 2'b11 : 0;
 
     register #(
-        .DATAWIDTH(32)
+        .DATAWIDTH(DATAWIDTH)
     ) pcreg (
         .clk_i(clk_i),
         .rst_i(rst_i),
@@ -96,7 +96,7 @@ module top #(
     );
 
     alu #(
-        .DATAWIDTH(32)
+        .DATAWIDTH(DATAWIDTH)
     ) alu (
         .a_i     (D_a),
         .b_i     ((D_opcode == `LW_OP || D_opcode == `SW_OP) ? D_imm : D_b),
@@ -105,7 +105,7 @@ module top #(
     );
 
     cmp #(
-        .DATAWIDTH(32)
+        .DATAWIDTH(DATAWIDTH)
     ) cmp (
         .a_i  (D_a),
         .b_i  (D_b),
