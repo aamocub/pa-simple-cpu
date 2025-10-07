@@ -11,4 +11,8 @@ activar en función de esa información.
 4. LSU? (Ahora no deberia de hacer falta dado que todo es monociclo)
 5. Controlador de memoria? (Probablemente no hace falta)
 
+## Testbench
+
+Si hicieramos este procesador como toca, deberiamos de hacer un testbench por cada uno de los módulos que hayamos diseñado, pero jeje.
+
 ## Excepciones y control del procesador
