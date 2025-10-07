@@ -7,8 +7,8 @@
 `define AND_OP 4'b0110
 `define OR_OP  4'b0111
 `define XOR_OP 4'b1000
-`define JMP_OP 4'b1001
-`define BEQ_OP 4'b1010
-`define BGT_OP 4'b1011
-`define BLT_OP 4'b1100
+`define BEQ_OP 4'b1001
+`define BGT_OP 4'b1010
+`define BGE_OP 4'b1011
+`define JMP_OP 4'b1100
 `define LI_OP  4'b1101

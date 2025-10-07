@@ -20,10 +20,10 @@ module alu #(
             `AND_OP: out_o = a_i & b_i;
             `OR_OP:  out_o = a_i | b_i;
             `XOR_OP: out_o = a_i ^ b_i;
-            `JMP_OP: out_o = a_i + b_i;
             `BEQ_OP: out_o = a_i + b_i;
             `BGT_OP: out_o = a_i + b_i;
-            `BLT_OP: out_o = a_i + b_i;
+            `BGE_OP: out_o = a_i + b_i;
+            `JMP_OP: out_o = a_i + b_i;
             `LI_OP:  out_o = a_i + b_i;
             default: out_o = 'x;
         endcase
