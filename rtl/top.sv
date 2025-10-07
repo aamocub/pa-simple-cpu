@@ -18,12 +18,15 @@ module top #(
     wire [31:0] D_a;
     wire [31:0] D_b;
     wire [31:0] D_imm;
+    wire [ 1:0] D_cmp_op;
 
     wire [31:0] X_d;
+    wire        X_taken;
 
     wire [31:0] M_d;
 
     assign D_imm = {{19{D_offset[12]}}, D_offset[11:0]};  // Sign extend
+    assign D_cmp_op = D_opcode == `BEQ_OP ? 2'b01 : D_opcode == `BGT_OP ? 2'b10 : D_opcode == `BGE_OP ? 2'b11 : 0;
 
     register #(
         .DATAWIDTH(32)
@@ -103,8 +106,8 @@ module top #(
     ) cmp (
         .a_i  (D_a),
         .b_i  (D_b),
-        .op_i (),
-        .out_o()
+        .op_i (D_cmp_op),
+        .out_o(X_taken)
     );
 
 
