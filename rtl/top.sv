@@ -101,11 +101,10 @@ module top #(
     cmp #(
         .DATAWIDTH(32)
     ) cmp (
-        .a_i (D_a),
-        .b_i (D_b),
-        .eq_o(),
-        .gt_o(),
-        .lt_o()
+        .a_i  (D_a),
+        .b_i  (D_b),
+        .op_i (),
+        .out_o()
     );
 
 
