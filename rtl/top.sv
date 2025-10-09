@@ -24,12 +24,16 @@ module top #(
     wire [ 1:0] D_cmp_op;  // CMP operation (none, ==, >, >=)
 
     wire [31:0] X_d;  // ALU output
-    wire        X_taken;  // 1 if branch is taken
+    wire        X_cmp_out;  // CMP output
+    wire        X_taken;  // 1 if jump/branch is taken
+    wire [31:0] X_next_pc;
 
     wire [31:0] M_d;  // Memory output
 
     assign D_imm = {{19{D_offset[12]}}, D_offset[11:0]};  // Sign extend immediate
     assign D_cmp_op = D_opcode == `BEQ_OP ? 2'b01 : D_opcode == `BGT_OP ? 2'b10 : D_opcode == `BGE_OP ? 2'b11 : 0;
+    assign X_taken = X_cmp_out || D_opcode == `JMP_OP;
+    assign X_next_pc = X_taken ? X_d : F_pc + 4;
 
     register #(
         .DATAWIDTH(DATAWIDTH)
@@ -37,7 +41,7 @@ module top #(
         .clk_i(clk_i),
         .rst_i(rst_i),
         .en_i (1),
-        .d_i  (F_pc + 4),
+        .d_i  (X_next_pc),
         .q_o  (F_pc)
     );
 
@@ -110,7 +114,7 @@ module top #(
         .a_i  (D_a),
         .b_i  (D_b),
         .op_i (D_cmp_op),
-        .out_o(X_taken)
+        .out_o(X_cmp_out)
     );
 
 
