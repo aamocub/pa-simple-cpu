@@ -19,11 +19,13 @@
 
 `define ALU(ra, rb, rd, op) {{13{1'b0}}, (ra), (rb), (rd), (op)}
 `define MEM(off, ra, rb, op) {(off), (ra), (rb), 5'b00000, (op)}
+`define JMP(off, ra, rb, op) {(off), (ra), (rb), 5'b00000, (op)}
 
 module top_tb ();
 
 reg [31:0] add_instr = `ALU(5'b00001, 5'b00001, 5'b00011, `SW_OP);
 reg [31:0] lw_instr = `MEM(13'd420, 5'b00000, 5'b00100, 4'b0010);
+reg [31:0] jmp_instr = `JMP(13'd420, 5'b00100, 5'b00100, `BEQ_OP);
 
 parameter integer CLK_PERIOD = 20;
 
@@ -38,7 +40,7 @@ top#(
 ) top (
         .clk_i(clk),
         .rst_i(rst),
-        .instr_debug_i(lw_instr)
+        .instr_debug_i(jmp_instr)
 );
 
 initial begin

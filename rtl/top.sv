@@ -38,7 +38,7 @@ module top #(
     assign D_imm = {{19{D_offset[12]}}, D_offset[12:0]};  // Sign extend immediate
     assign D_cmp_op = D_opcode == `BEQ_OP ? 2'b01 : D_opcode == `BGT_OP ? 2'b10 : D_opcode == `BGE_OP ? 2'b11 : 0;
     assign X_taken = X_cmp_out || D_opcode == `JMP_OP;
-    assign X_next_pc = D_exception ? EXCEPTION_ADDRESS : X_taken ? X_d : F_pc + 4;
+    assign X_next_pc = D_exception ? EXCEPTION_ADDRESS : X_taken ? F_pc + D_imm : F_pc + 4;
 
     register #(
         .DATAWIDTH(DATAWIDTH)
