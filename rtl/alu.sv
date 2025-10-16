@@ -3,10 +3,10 @@
 module alu #(
     parameter integer DATAWIDTH = 32
 ) (
-    input logic [DATAWIDTH-1:0] a_i,
-    input logic [DATAWIDTH-1:0] b_i,
-    input logic [3:0] opcode_i,
-    output logic [DATAWIDTH-1:0] out_o
+    input wire [DATAWIDTH-1:0] a_i,
+    input wire [DATAWIDTH-1:0] b_i,
+    input wire [3:0] opcode_i,
+    output reg [DATAWIDTH-1:0] out_o
 );
 
     always_comb

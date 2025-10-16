@@ -21,7 +21,7 @@ module memory #(
     input wire [$clog2(NUMWORDS)-1:0] waddr_i   // write address
 );
 
-    reg [DATAWIDTH-1:0] mem[NUMWORDS];  // memory
+    logic [DATAWIDTH-1:0] mem[NUMWORDS];  // memory
 
     integer i;  // iterator for 'for loop'
 
@@ -32,7 +32,7 @@ module memory #(
     assign rdata_o = (re_i & we_i & raddr_i == waddr_i) ? wdata_i : (re_i) ? mem[raddr_i] : 0;
 
     // Write sequential logic
-    always @(posedge clk_i or posedge rst_i) begin
+    always_ff @(posedge clk_i or posedge rst_i) begin
         // reset all registers to value 0
         if (rst_i) begin
             for (i = 0; i < NUMWORDS; i = i + 1) begin

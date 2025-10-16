@@ -41,11 +41,12 @@ module regbank #(
         // reset all registers to value 0
         if (rst_i) begin
             for (i = 0; i < NUMREGS; i = i + 1) begin
-                bank[i] <= 32'b0;
+                // bank[i] <= 32'b0;
+                bank[i] <= i;
             end
         end else begin
             // if write enable, write data to bank[waddr_i] register
-            if (we_i && waddr_i != 0) begin
+            if (we_i && (waddr_i != 0)) begin
                 bank[waddr_i] <= wdata_i;
             end
         end

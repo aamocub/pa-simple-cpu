@@ -1,23 +1,34 @@
 
 // Instruction Encoding - 32-bits
 // ________________________________________________________________
-// | offset[31:21] | ra[20:15] | rb[14:9] | rd[8:4] | opcode[3:0] |
+// | offset[31:19] | ra[18:14] | rb[13:9] | rd[8:4] | opcode[3:0] |
 // ----------------------------------------------------------------
 
-module decoder (
-    input logic [31:0] instr_i,
+`include "opcode.svh"
 
-    output logic [31:21] offset_o,
-    output logic [20:15] ra_o,
-    output logic [ 14:9] rb_o,
-    output logic [  8:4] rd_o,
-    output logic [  3:0] opcode_o
+module decoder (
+    input wire [31:0] instr_i,
+
+    output wire [31:19] offset_o,
+    output wire [18:14] ra_o,
+    output wire [ 13:9] rb_o,
+    output wire [  8:4] rd_o,
+    output wire [  3:0] opcode_o,
+    output wire         exception_o
 );
 
-    assign offset_o = instr_i[31:21];
-    assign ra_o     = instr_i[20:15];
-    assign rb_o     = instr_i[14:9];
-    assign rd_o     = instr_i[8:4];
+    assign offset_o = instr_i[31:19];
+    assign ra_o = instr_i[18:14];
+    assign rb_o = instr_i[13:9];
+    assign rd_o = instr_i[8:4];
     assign opcode_o = instr_i[3:0];
+
+    assign exception_o = (opcode_o < `LAST_OP) &&
+                         (((opcode_o == `SW_OP  && rd_o == 0)) ||
+                          ((opcode_o == `BEQ_OP && rd_o == 0)) ||
+                          ((opcode_o == `BGT_OP && rd_o == 0)) ||
+                          ((opcode_o == `BGE_OP && rd_o == 0)) ||
+                          ((opcode_o == `JMP_OP && rd_o == 0))
+                         )? 0 : 1;
 
 endmodule

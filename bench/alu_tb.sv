@@ -60,7 +60,7 @@ initial begin
                         `JMP_OP: `assert(opcode_i, out_o, a_i + b_i)
                         `BEQ_OP: `assert(opcode_i, out_o, a_i + b_i)
                         `BGT_OP: `assert(opcode_i, out_o, a_i + b_i)
-                        `BLT_OP: `assert(opcode_i, out_o, a_i + b_i)
+                        `BGE_OP: `assert(opcode_i, out_o, a_i + b_i)
                         `LI_OP:  `assert(opcode_i, out_o, a_i + b_i)
                 endcase
                 $display("OP %0d A %0d B %0d OUT %0d", opcode_i, a_i, b_i, out_o);

@@ -1,11 +1,15 @@
 `include "opcode.svh"
 
 module top #(
-    parameter integer DATAWIDTH = 32
+    parameter integer DATAWIDTH = 32,
+    parameter DEBUG = 0
 ) (
     input wire clk_i,
-    input wire rst_i
+    input wire rst_i,
+    input wire [31:0] instr_debug_i
 );
+    localparam EXCEPTION_ADDRESS = 32'd69;
+
     /* Naming convention: wires are prefixed with their stage (Fetch, Decode, eXecute, Memory, Writeback) */
 
     wire [31:0] F_pc;  // Program counter
@@ -22,6 +26,7 @@ module top #(
     wire [31:0] D_b;  // Contents of register B
     wire [31:0] D_imm;  // Sign-extended immediate
     wire [ 1:0] D_cmp_op;  // CMP operation (none, ==, >, >=)
+    wire        D_exception;  // Illegal instruction detected
 
     wire [31:0] X_d;  // ALU output
     wire        X_cmp_out;  // CMP output
@@ -30,10 +35,10 @@ module top #(
 
     wire [31:0] M_d;  // Memory output
 
-    assign D_imm = {{19{D_offset[12]}}, D_offset[11:0]};  // Sign extend immediate
+    assign D_imm = {{19{D_offset[12]}}, D_offset[12:0]};  // Sign extend immediate
     assign D_cmp_op = D_opcode == `BEQ_OP ? 2'b01 : D_opcode == `BGT_OP ? 2'b10 : D_opcode == `BGE_OP ? 2'b11 : 0;
     assign X_taken = X_cmp_out || D_opcode == `JMP_OP;
-    assign X_next_pc = X_taken ? X_d : F_pc + 4;
+    assign X_next_pc = D_exception ? EXCEPTION_ADDRESS : X_taken ? X_d : F_pc + 4;
 
     register #(
         .DATAWIDTH(DATAWIDTH)
@@ -60,12 +65,13 @@ module top #(
     );
 
     decoder #() decoder (
-        .instr_i (F_inst),
-        .offset_o(D_offset),
-        .ra_o    (D_ra),
-        .rb_o    (D_rb),
-        .rd_o    (D_rd),
-        .opcode_o(D_opcode)
+        .instr_i    (DEBUG ? instr_debug_i : F_inst),
+        .offset_o   (D_offset),
+        .ra_o       (D_ra),
+        .rb_o       (D_rb),
+        .rd_o       (D_rd),
+        .opcode_o   (D_opcode),
+        .exception_o(D_exception)
     );
 
     memory #(
@@ -94,9 +100,9 @@ module top #(
         .re_b_i   (1),
         .rdata_b_o(D_b),
         .raddr_b_i(D_rb),
-        .we_i     (1),
+        .we_i     ((D_opcode == `SW_OP) ? 0 : 1),       // TODO: Hacer write enable de verdad
         .wdata_i  ((D_opcode == `LW_OP) ? M_d : X_d),
-        .waddr_i  (D_rd)
+        .waddr_i  ((D_opcode == `LW_OP) ? D_rb : D_rd)
     );
 
     alu #(
