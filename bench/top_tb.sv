@@ -23,11 +23,26 @@
 
 module top_tb ();
 
-reg [31:0] add_instr = `ALU(5'b00001, 5'b00001, 5'b00011, `SW_OP);
-reg [31:0] lw_instr = `MEM(13'd420, 5'b00000, 5'b00100, 4'b0010);
-reg [31:0] jmp_instr = `JMP(13'd420, 5'b00100, 5'b00100, `BEQ_OP);
+reg [31:0] add_instr = `ALU(5'b00001, 5'b00001, 5'b00011, `ADD_OP);
+reg [31:0] sub_instr = `ALU(5'b00011, 5'b00100, 5'b00101, `SUB_OP);
+reg [31:0] mul_instr = `ALU(5'b00110, 5'b00111, 5'b01000, `MUL_OP);
+reg [31:0] div_instr = `ALU(5'b01001, 5'b01010, 5'b01011, `DIV_OP);
+reg [31:0] and_instr = `ALU(5'b01100, 5'b01110, 5'b01111, `AND_OP);
+reg [31:0] or_instr  = `ALU(5'b10000, 5'b10001, 5'b10010, `OR_OP);
+reg [31:0] xor_instr = `ALU(5'b10011, 5'b10100, 5'b10101, `XOR_OP);
+
+reg [31:0] lw_instr = `MEM(13'd15, 5'b00000, 5'b00100, `LW_OP);
+reg [31:0] sw_instr = `MEM(13'd15, 5'b00000, 5'b00111, `SW_OP);
+
+reg [31:0] beq_instr = `JMP(13'd15, 5'b00100, 5'b00100, `BEQ_OP);
+reg [31:0] bgt_instr = `JMP(13'd15, 5'b00100, 5'b00100, `BGT_OP);
+reg [31:0] bge_instr = `JMP(13'd15, 5'b00100, 5'b00100, `BGE_OP);
+
+reg [31:0] instr_list [12] = {add_instr,  sub_instr, mul_instr, div_instr, and_instr, or_instr, xor_instr, lw_instr, sw_instr, beq_instr, bgt_instr, bge_instr};
 
 parameter integer CLK_PERIOD = 20;
+
+reg [31:0] current_instr;
 
 reg clk;
 reg rst;
@@ -40,17 +55,20 @@ top#(
 ) top (
         .clk_i(clk),
         .rst_i(rst),
-        .instr_debug_i(jmp_instr)
+        .instr_debug_i(current_instr)
 );
+
+integer i;
 
 initial begin
         $dumpfile("top_tb.vcd");
         $dumpvars(0, top_tb);
         clk = 1;
         rst = 1;
-        #10
-        rst = 0;
-        #20
+        #10 rst = 0;
+        for (i = 0; i < 12; i = i+1) begin
+                #10 current_instr = instr_list[i];
+        end
         $finish();
 end
 

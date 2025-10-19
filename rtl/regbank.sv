@@ -46,7 +46,7 @@ module regbank #(
             end
         end else begin
             // if write enable, write data to bank[waddr_i] register
-            if (we_i && (waddr_i != 0)) begin
+            if (we_i && (waddr_i != 5'b0)) begin
                 bank[waddr_i] <= wdata_i;
             end
         end

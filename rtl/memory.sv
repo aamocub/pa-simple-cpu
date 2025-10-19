@@ -45,5 +45,4 @@ module memory #(
             end
         end
     end
-
 endmodule

@@ -51,7 +51,7 @@ module top #(
     );
 
     memory #(
-        .NUMWORDS (4096),
+        .NUMWORDS (32),
         .DATAWIDTH(DATAWIDTH)
     ) imem (
         .clk_i  (clk_i),
@@ -75,7 +75,7 @@ module top #(
     );
 
     memory #(
-        .NUMWORDS (4096),
+        .NUMWORDS (32),
         .DATAWIDTH(DATAWIDTH)
     ) dmem (
         .clk_i  (clk_i),
@@ -100,7 +100,7 @@ module top #(
         .re_b_i   (1),
         .rdata_b_o(D_b),
         .raddr_b_i(D_rb),
-        .we_i     ((D_opcode == `SW_OP) ? 0 : 1),       // TODO: Hacer write enable de verdad
+        .we_i     ((D_rd == 0) ? 0 : 1),                // TODO: Hacer write enable de verdad
         .wdata_i  ((D_opcode == `LW_OP) ? M_d : X_d),
         .waddr_i  ((D_opcode == `LW_OP) ? D_rb : D_rd)
     );
