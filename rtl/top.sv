@@ -35,10 +35,18 @@ module top #(
 
     wire [31:0] M_d;  // Memory output
 
+    wire        W_is_wb;  // Enable write to regbank
+
     assign D_imm = {{19{D_offset[12]}}, D_offset[12:0]};  // Sign extend immediate
     assign D_cmp_op = D_opcode == `BEQ_OP ? 2'b01 : D_opcode == `BGT_OP ? 2'b10 : D_opcode == `BGE_OP ? 2'b11 : 0;
     assign X_taken = X_cmp_out || D_opcode == `JMP_OP;
     assign X_next_pc = D_exception ? EXCEPTION_ADDRESS : X_taken ? F_pc + D_imm : F_pc + 4;
+    assign W_is_wb = (((D_opcode == `SW_OP )) ||
+                      ((D_opcode == `BEQ_OP)) ||
+                      ((D_opcode == `BGT_OP)) ||
+                      ((D_opcode == `BGE_OP)) ||
+                      ((D_opcode == `JMP_OP))
+                     ) ? 0 : 1;
 
     register #(
         .DATAWIDTH(DATAWIDTH)
@@ -100,7 +108,7 @@ module top #(
         .re_b_i   (1),
         .rdata_b_o(D_b),
         .raddr_b_i(D_rb),
-        .we_i     ((D_rd == 0) ? 0 : 1),                // TODO: Hacer write enable de verdad
+        .we_i     (W_is_wb),
         .wdata_i  ((D_opcode == `LW_OP) ? M_d : X_d),
         .waddr_i  ((D_opcode == `LW_OP) ? D_rb : D_rd)
     );
