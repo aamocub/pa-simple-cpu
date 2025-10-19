@@ -23,12 +23,6 @@ module decoder (
     assign rd_o = instr_i[8:4];
     assign opcode_o = instr_i[3:0];
 
-    assign exception_o = (opcode_o < `LAST_OP) &&
-                         (((opcode_o == `SW_OP  && rd_o == 0)) ||
-                          ((opcode_o == `BEQ_OP && rd_o == 0)) ||
-                          ((opcode_o == `BGT_OP && rd_o == 0)) ||
-                          ((opcode_o == `BGE_OP && rd_o == 0)) ||
-                          ((opcode_o == `JMP_OP && rd_o == 0))
-                         )? 0 : 1;
+    assign exception_o = (opcode_o < `LAST_OP) ? 0 : 1;
 
 endmodule
