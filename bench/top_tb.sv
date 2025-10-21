@@ -2,20 +2,7 @@
 // ________________________________________________________________
 // | offset[31:19] | ra[18:14] | rb[13:9] | rd[8:4] | opcode[3:0] |
 // ----------------------------------------------------------------
-`define ADD_OP  4'b0000
-`define LW_OP   4'b0001
-`define SW_OP   4'b0010
-`define SUB_OP  4'b0011
-`define MUL_OP  4'b0100
-`define DIV_OP  4'b0101
-`define AND_OP  4'b0110
-`define OR_OP   4'b0111
-`define XOR_OP  4'b1000
-`define BEQ_OP  4'b1001
-`define BGT_OP  4'b1010
-`define BGE_OP  4'b1011
-`define JMP_OP  4'b1100
-`define LI_OP   4'b1101
+`include "opcode.svh"
 
 `define ALU(ra, rb, rd, op) {{13{1'b0}}, (ra), (rb), (rd), (op)}
 `define MEM(off, ra, rb, op) {(off), (ra), (rb), 5'b00000, (op)}
@@ -32,11 +19,11 @@ reg [31:0] or_instr  = `ALU(5'b10000, 5'b10001, 5'b10010, `OR_OP);
 reg [31:0] xor_instr = `ALU(5'b10011, 5'b10100, 5'b10101, `XOR_OP);
 
 reg [31:0] lw_instr = `MEM(13'd15, 5'b00000, 5'b00100, `LW_OP);
-reg [31:0] sw_instr = `MEM(13'd15, 5'b00000, 5'b00111, `SW_OP);
+reg [31:0] sw_instr = `MEM(13'd16, 5'b00000, 5'b00111, `SW_OP);
 
 reg [31:0] beq_instr = `JMP(13'd15, 5'b00100, 5'b00100, `BEQ_OP);
-reg [31:0] bgt_instr = `JMP(13'd15, 5'b00100, 5'b00100, `BGT_OP);
-reg [31:0] bge_instr = `JMP(13'd15, 5'b00100, 5'b00100, `BGE_OP);
+reg [31:0] bgt_instr = `JMP(13'd16, 5'b00100, 5'b00100, `BGT_OP);
+reg [31:0] bge_instr = `JMP(13'd17, 5'b00100, 5'b00100, `BGE_OP);
 
 reg [31:0] instr_list [12] = {add_instr,  sub_instr, mul_instr, div_instr, and_instr, or_instr, xor_instr, lw_instr, sw_instr, beq_instr, bgt_instr, bge_instr};
 

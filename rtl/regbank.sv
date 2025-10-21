@@ -11,12 +11,12 @@ module regbank #(
 
     // reading port A
     input  wire                       re_a_i,     // read A enable
-    output wire [      DATAWIDTH-1:0] rdata_a_o,  // read A data
+    output reg  [      DATAWIDTH-1:0] rdata_a_o,  // read A data
     input  wire [$clog2(NUMREGS)-1:0] raddr_a_i,  // read A address
 
     // reading port B
     input  wire                       re_b_i,     // read B enable
-    output wire [      DATAWIDTH-1:0] rdata_b_o,  // read B data
+    output reg  [      DATAWIDTH-1:0] rdata_b_o,  // read B data
     input  wire [$clog2(NUMREGS)-1:0] raddr_b_i,  // read B address
 
     // writing port
@@ -33,11 +33,20 @@ module regbank #(
     //
     // if reading and writing to/from the same register: rdata_a_o would be assigned wdata_i
     // else: rdata_a_o would be bank[raddr_a_i]
-    assign rdata_a_o = (re_a_i & we_i & raddr_a_i == waddr_i) ? wdata_i : (re_a_i) ? bank[raddr_a_i] : 0;
-    assign rdata_b_o = (re_b_i & we_i & raddr_b_i == waddr_i) ? wdata_i : (re_b_i) ? bank[raddr_b_i] : 0;
+    // assign rdata_a_o = (re_a_i & we_i & raddr_a_i == waddr_i) ? wdata_i : (re_a_i) ? bank[raddr_a_i] : 0;
+    // assign rdata_b_o = (re_b_i & we_i & raddr_b_i == waddr_i) ? wdata_i : (re_b_i) ? bank[raddr_b_i] : 0;
+
+    always_ff @(posedge clk_i or posedge rst_i) begin
+        rdata_a_o <= (re_b_i & we_i & raddr_b_i == waddr_i) ? wdata_i : (re_b_i) ? bank[raddr_b_i] : 0;
+        rdata_b_o <= (re_b_i & we_i & raddr_b_i == waddr_i) ? wdata_i : (re_b_i) ? bank[raddr_b_i] : 0;
+        if (rst_i) begin
+            rdata_a_o <= 0;
+            rdata_b_o <= 0;
+        end
+    end
 
     // Write sequential logic
-    always @(posedge clk_i or posedge rst_i) begin
+    always_ff @(posedge clk_i or posedge rst_i) begin
         // reset all registers to value 0
         if (rst_i) begin
             for (i = 0; i < NUMREGS; i = i + 1) begin
