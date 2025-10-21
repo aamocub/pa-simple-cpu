@@ -25,9 +25,11 @@ module regbank #(
     input wire [$clog2(NUMREGS)-1:0] waddr_i   // write address
 );
 
-    reg [DATAWIDTH-1:0] bank[NUMREGS];  // register bank
+    reg     [DATAWIDTH-1:0] bank                          [NUMREGS];  // register bank
 
-    integer i;  // iterator for 'for loop'
+    reg                     should_write;
+
+    integer                 i;  // iterator for 'for loop'
 
     // Read combinational logic (same in both ports, so explained for port A, but it applies for both)
     //
@@ -36,26 +38,22 @@ module regbank #(
     // assign rdata_a_o = (re_a_i & we_i & raddr_a_i == waddr_i) ? wdata_i : (re_a_i) ? bank[raddr_a_i] : 0;
     // assign rdata_b_o = (re_b_i & we_i & raddr_b_i == waddr_i) ? wdata_i : (re_b_i) ? bank[raddr_b_i] : 0;
 
-    always_ff @(posedge clk_i or posedge rst_i) begin
-        rdata_a_o <= (re_b_i & we_i & raddr_b_i == waddr_i) ? wdata_i : (re_b_i) ? bank[raddr_b_i] : 0;
+    // Write sequential logic
+    always_ff @(posedge clk_i, posedge rst_i, should_write, wdata_i) begin
+        rdata_a_o <= (re_a_i & we_i & raddr_a_i == waddr_i) ? wdata_i : (re_a_i) ? bank[raddr_a_i] : 0;
         rdata_b_o <= (re_b_i & we_i & raddr_b_i == waddr_i) ? wdata_i : (re_b_i) ? bank[raddr_b_i] : 0;
+        should_write <= (we_i && (waddr_i != 0)) ? 1 : 0;
+        // reset all registers to value 0
         if (rst_i) begin
             rdata_a_o <= 0;
             rdata_b_o <= 0;
-        end
-    end
-
-    // Write sequential logic
-    always_ff @(posedge clk_i or posedge rst_i) begin
-        // reset all registers to value 0
-        if (rst_i) begin
             for (i = 0; i < NUMREGS; i = i + 1) begin
                 // bank[i] <= 32'b0;
                 bank[i] <= i;
             end
         end else begin
             // if write enable, write data to bank[waddr_i] register
-            if (we_i && (waddr_i != 5'b0)) begin
+            if (should_write) begin
                 bank[waddr_i] <= wdata_i;
             end
         end

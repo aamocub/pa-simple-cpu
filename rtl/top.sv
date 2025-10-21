@@ -45,6 +45,7 @@ module top #(
                       ((D_opcode == `BEQ_OP)) ||
                       ((D_opcode == `BGT_OP)) ||
                       ((D_opcode == `BGE_OP)) ||
+                      ((D_opcode == `NOP_OP)) ||
                       ((D_opcode == `JMP_OP))
                      ) ? 0 : 1;
 
@@ -108,7 +109,7 @@ module top #(
         .re_b_i   (1),
         .rdata_b_o(D_b),
         .raddr_b_i(D_rb),
-        .we_i     (W_is_wb),
+        .we_i     (W_is_wb & ~rst_i),
         .wdata_i  ((D_opcode == `LW_OP) ? M_d : X_d),
         .waddr_i  ((D_opcode == `LW_OP) ? D_rb : D_rd)
     );
@@ -117,7 +118,7 @@ module top #(
         .DATAWIDTH(DATAWIDTH)
     ) alu (
         .a_i     (D_a),
-        .b_i     ((D_opcode == `LW_OP || D_opcode == `SW_OP) ? D_imm : D_b),
+        .b_i     ((D_opcode == `LW_OP || D_opcode == `SW_OP || D_opcode == `ADDI_OP) ? D_imm : D_b),
         .opcode_i(D_opcode),
         .out_o   (X_d)
     );

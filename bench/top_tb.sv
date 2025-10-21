@@ -11,6 +11,8 @@
 module top_tb ();
 
 reg [31:0] add_instr = `ALU(5'b00001, 5'b00001, 5'b00011, `ADD_OP);
+reg [31:0] add_instr2 = `ALU(5'b00001, 5'b00011, 5'b10110, `ADD_OP);
+reg [31:0] add_instr3 = `ALU(5'b00001, 5'b10110, 5'b10111, `ADD_OP);
 reg [31:0] sub_instr = `ALU(5'b00011, 5'b00100, 5'b00101, `SUB_OP);
 reg [31:0] mul_instr = `ALU(5'b00110, 5'b00111, 5'b01000, `MUL_OP);
 reg [31:0] div_instr = `ALU(5'b01001, 5'b01010, 5'b01011, `DIV_OP);
@@ -25,7 +27,7 @@ reg [31:0] beq_instr = `JMP(13'd15, 5'b00100, 5'b00100, `BEQ_OP);
 reg [31:0] bgt_instr = `JMP(13'd16, 5'b00100, 5'b00100, `BGT_OP);
 reg [31:0] bge_instr = `JMP(13'd17, 5'b00100, 5'b00100, `BGE_OP);
 
-reg [31:0] instr_list [12] = {add_instr,  sub_instr, mul_instr, div_instr, and_instr, or_instr, xor_instr, lw_instr, sw_instr, beq_instr, bgt_instr, bge_instr};
+reg [31:0] instr_list [14] = {add_instr, add_instr2, add_instr3, sub_instr, mul_instr, div_instr, and_instr, or_instr, xor_instr, lw_instr, sw_instr, beq_instr, bgt_instr, bge_instr};
 
 parameter integer CLK_PERIOD = 20;
 
@@ -52,9 +54,9 @@ initial begin
         $dumpvars(0, top_tb);
         clk = 1;
         rst = 1;
-        #10 rst = 0;
-        for (i = 0; i < 12; i = i+1) begin
-                #10 current_instr = instr_list[i];
+        #CLK_PERIOD rst = 0;
+        for (i = 0; i < 14; i = i+1) begin
+                #CLK_PERIOD current_instr = instr_list[i];
         end
         $finish();
 end

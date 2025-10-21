@@ -11,21 +11,21 @@ module alu #(
 
     always_comb
         case (opcode_i)
-            `ADD_OP: out_o = a_i + b_i;
-            `LW_OP:  out_o = a_i + b_i;
-            `SW_OP:  out_o = a_i + b_i;
-            `SUB_OP: out_o = a_i - b_i;
-            `MUL_OP: out_o = a_i * b_i;
-            `DIV_OP: out_o = a_i / b_i;
-            `AND_OP: out_o = a_i & b_i;
-            `OR_OP:  out_o = a_i | b_i;
-            `XOR_OP: out_o = a_i ^ b_i;
-            `BEQ_OP: out_o = a_i + b_i;
-            `BGT_OP: out_o = a_i + b_i;
-            `BGE_OP: out_o = a_i + b_i;
-            `JMP_OP: out_o = a_i + b_i;
-            `LI_OP:  out_o = a_i + b_i;
-            default: out_o = 'x;
+            `ADD_OP:  out_o = a_i + b_i;
+            `LW_OP:   out_o = a_i + b_i;
+            `SW_OP:   out_o = a_i + b_i;
+            `SUB_OP:  out_o = a_i - b_i;
+            `MUL_OP:  out_o = a_i * b_i;
+            `DIV_OP:  out_o = a_i / b_i;
+            `AND_OP:  out_o = a_i & b_i;
+            `OR_OP:   out_o = a_i | b_i;
+            `XOR_OP:  out_o = a_i ^ b_i;
+            `BEQ_OP:  out_o = a_i + b_i;
+            `BGT_OP:  out_o = a_i + b_i;
+            `BGE_OP:  out_o = a_i + b_i;
+            `JMP_OP:  out_o = a_i + b_i;
+            `ADDI_OP: out_o = a_i + b_i;
+            default:  out_o = 'x;
         endcase
 
 endmodule
