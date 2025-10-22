@@ -43,11 +43,12 @@ initial begin
         b_i = 32'd35;
         #CLK_PERIOD;
 
-        for (i = 0; i < 14; i = i + 1) begin
+        for (i = 0; i < 15; i = i + 1) begin
                 opcode_i = i;
                 #CLK_PERIOD;
 
                 case (opcode_i)
+                        `NOP_OP: `assert(opcode_i, out_o, 32'b0)
                         `ADD_OP: `assert(opcode_i, out_o, a_i + b_i)
                         `LW_OP:  `assert(opcode_i, out_o, a_i + b_i)
                         `SW_OP:  `assert(opcode_i, out_o, a_i + b_i)
@@ -61,7 +62,7 @@ initial begin
                         `BEQ_OP: `assert(opcode_i, out_o, a_i + b_i)
                         `BGT_OP: `assert(opcode_i, out_o, a_i + b_i)
                         `BGE_OP: `assert(opcode_i, out_o, a_i + b_i)
-                        `LI_OP:  `assert(opcode_i, out_o, a_i + b_i)
+                        `ADDI_OP:  `assert(opcode_i, out_o, a_i + b_i)
                 endcase
                 $display("OP %0d A %0d B %0d OUT %0d", opcode_i, a_i, b_i, out_o);
                 #CLK_PERIOD;
