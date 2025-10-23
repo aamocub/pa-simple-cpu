@@ -19,7 +19,7 @@ reg [3:0] opcode_i;
 reg [DW-1:0] out_o;
 
 // Generate clock signal
-always #(CLK_PERIOD / 2) clk = ~clk;
+always #(CLK_PERIOD / 2) clk <= ~clk;
 
 alu #(
         .DATAWIDTH(DW)
