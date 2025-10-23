@@ -11,6 +11,7 @@ module alu #(
 
     always_comb
         case (opcode_i)
+            `NOP_OP:  out_o = '0;
             `ADD_OP:  out_o = a_i + b_i;
             `LW_OP:   out_o = a_i + b_i;
             `SW_OP:   out_o = a_i + b_i;
