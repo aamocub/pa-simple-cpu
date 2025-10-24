@@ -4,9 +4,10 @@
 // ----------------------------------------------------------------
 `include "opcode.svh"
 
-`define ALU(ra, rb, rd, op) {{13{1'b0}}, (ra), (rb), (rd), (op)}
-`define MEM(off, ra, rb, op) {(off), (ra), (rb), 5'b00000, (op)}
-`define JMP(off, ra, rb, op) {(off), (ra), (rb), 5'b00000, (op)}
+`define ALU(ra, rb, rd, op)   {{13{1'b0}}, (ra), (rb), (rd), (op)}
+`define ALUI(off, ra, rd, op) {(off), (ra), 5'b0, (rd), (op)}
+`define MEM(off, ra, rb, op)  {(off), (ra), (rb), 5'b00000, (op)}
+`define JMP(off, ra, rb, op)  {(off), (ra), (rb), 5'b00000, (op)}
 
 module top_tb ();
 
@@ -19,6 +20,7 @@ reg [31:0] div_instr = `ALU(5'b01001, 5'b01010, 5'b01011, `DIV_OP);
 reg [31:0] and_instr = `ALU(5'b01100, 5'b01110, 5'b01111, `AND_OP);
 reg [31:0] or_instr  = `ALU(5'b10000, 5'b10001, 5'b10010, `OR_OP);
 reg [31:0] xor_instr = `ALU(5'b10011, 5'b10100, 5'b10101, `XOR_OP);
+reg [31:0] addi_instr = `ALUI(13'd69, 5'b00000, 5'b00001, `ADDI_OP);
 
 reg [31:0] lw_instr = `MEM(13'd15, 5'b00000, 5'b00100, `LW_OP);
 reg [31:0] sw_instr = `MEM(13'd16, 5'b00000, 5'b00111, `SW_OP);
@@ -27,7 +29,7 @@ reg [31:0] beq_instr = `JMP(13'd15, 5'b00100, 5'b00100, `BEQ_OP);
 reg [31:0] bgt_instr = `JMP(13'd16, 5'b00100, 5'b00100, `BGT_OP);
 reg [31:0] bge_instr = `JMP(13'd17, 5'b00100, 5'b00100, `BGE_OP);
 
-reg [31:0] instr_list [14] = {add_instr, add_instr2, add_instr3, sub_instr, mul_instr, div_instr, and_instr, or_instr, xor_instr, lw_instr, sw_instr, beq_instr, bgt_instr, bge_instr};
+reg [31:0] instr_list [15] = {add_instr, add_instr2, add_instr3, sub_instr, mul_instr, div_instr, and_instr, or_instr, xor_instr, addi_instr, lw_instr, sw_instr, beq_instr, bgt_instr, bge_instr};
 
 parameter integer CLK_PERIOD = 20;
 
