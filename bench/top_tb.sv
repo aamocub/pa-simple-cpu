@@ -38,7 +38,7 @@ reg [31:0] current_instr;
 reg clk;
 reg rst;
 
-always #(CLK_PERIOD/2) clk = ~clk;
+always #(CLK_PERIOD/2) clk <= ~clk;
 
 top#(
         .DATAWIDTH(32),

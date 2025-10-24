@@ -67,7 +67,7 @@ module top #(
         .rst_i  (rst_i),
         .re_i   (1),
         .rdata_o(F_inst),
-        .raddr_i(F_pc),
+        .raddr_i(F_pc[4:0]),
         .we_i   (0),
         .wdata_i(0),
         .waddr_i(0)
@@ -91,10 +91,10 @@ module top #(
         .rst_i  (rst_i),
         .re_i   (1),
         .rdata_o(M_d),
-        .raddr_i(X_d),
+        .raddr_i(X_d[4:0]),
         .we_i   ((D_opcode == `SW_OP) ? 1 : 0),
         .wdata_i(D_b),
-        .waddr_i(X_d)
+        .waddr_i(X_d[4:0])
     );
 
     regbank #(

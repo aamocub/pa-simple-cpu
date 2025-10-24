@@ -14,5 +14,5 @@
 `define JMP_OP  4'b1101
 `define ADDI_OP 4'b1110
 
-//
+// First invalid OP
 `define LAST_OP 4'b1111
