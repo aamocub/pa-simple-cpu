@@ -2,7 +2,7 @@
 // It is composed of NUMREGS amount of registers that can be accessed through the reading ports (A and B)
 // and writing port
 
-module regbank #(
+module regfile #(
     parameter integer NUMREGS   = 32,
     parameter integer DATAWIDTH = 32
 ) (

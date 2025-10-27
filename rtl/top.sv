@@ -35,7 +35,7 @@ module top #(
 
     wire [31:0] M_d;  // Memory output
 
-    wire        W_is_wb;  // Enable write to regbank
+    wire        W_is_wb;  // Enable write to regfile
 
     assign D_imm = {{19{D_offset[12]}}, D_offset[12:0]};  // Sign extend immediate
     assign D_cmp_op = D_opcode == `BEQ_OP ? 2'b01 : D_opcode == `BGT_OP ? 2'b10 : D_opcode == `BGE_OP ? 2'b11 : 0;
@@ -97,10 +97,10 @@ module top #(
         .waddr_i(X_d[4:0])
     );
 
-    regbank #(
+    regfile #(
         .NUMREGS  (32),
         .DATAWIDTH(DATAWIDTH)
-    ) regbank (
+    ) regfile (
         .clk_i    (clk_i),
         .rst_i    (rst_i),
         .re_a_i   (1),
