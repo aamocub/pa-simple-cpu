@@ -89,7 +89,7 @@ package riscv_pkg;
 
     // verilog_format: on
 
-    // INSTRUCTION TYPES
+    // Instruction Types
     typedef struct packed {
         logic [31:25] funct7;
         logic [24:20] rs2;
