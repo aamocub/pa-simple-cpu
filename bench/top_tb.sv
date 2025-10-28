@@ -11,7 +11,7 @@
 
 module top_tb ();
 
-reg [31:0] add_instr = `ALU(5'b00001, 5'b00001, 5'b00011, `ADD_OP);
+reg [31:0] add_instr = `ALU(5'b00001, 5'b00001, 5'b00011, `LAST_OP);
 reg [31:0] add_instr2 = `ALU(5'b00001, 5'b00011, 5'b10110, `ADD_OP);
 reg [31:0] add_instr3 = `ALU(5'b00001, 5'b10110, 5'b10111, `ADD_OP);
 reg [31:0] sub_instr = `ALU(5'b00011, 5'b00100, 5'b00101, `SUB_OP);
@@ -21,10 +21,8 @@ reg [31:0] and_instr = `ALU(5'b01100, 5'b01110, 5'b01111, `AND_OP);
 reg [31:0] or_instr  = `ALU(5'b10000, 5'b10001, 5'b10010, `OR_OP);
 reg [31:0] xor_instr = `ALU(5'b10011, 5'b10100, 5'b10101, `XOR_OP);
 reg [31:0] addi_instr = `ALUI(13'd69, 5'b00000, 5'b00001, `ADDI_OP);
-
 reg [31:0] lw_instr = `MEM(13'd15, 5'b00000, 5'b00100, `LW_OP);
 reg [31:0] sw_instr = `MEM(13'd16, 5'b00000, 5'b00111, `SW_OP);
-
 reg [31:0] beq_instr = `JMP(13'd15, 5'b00100, 5'b00100, `BEQ_OP);
 reg [31:0] bgt_instr = `JMP(13'd16, 5'b00100, 5'b00100, `BGT_OP);
 reg [31:0] bge_instr = `JMP(13'd17, 5'b00100, 5'b00100, `BGE_OP);
@@ -57,7 +55,7 @@ initial begin
         clk = 1;
         rst = 1;
         #CLK_PERIOD rst = 0;
-        for (i = 0; i < 14; i = i+1) begin
+        for (i = 0; i < 16; i = i+1) begin
                 #CLK_PERIOD current_instr = instr_list[i];
         end
         $finish();

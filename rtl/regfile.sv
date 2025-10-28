@@ -27,7 +27,7 @@ module regfile #(
 
     reg     [DATAWIDTH-1:0] bank                          [NUMREGS];  // register bank
 
-    reg                     should_write;
+    logic                   should_write;
 
     integer                 i;  // iterator for 'for loop'
 
@@ -38,11 +38,14 @@ module regfile #(
     // assign rdata_a_o = (re_a_i & we_i & raddr_a_i == waddr_i) ? wdata_i : (re_a_i) ? bank[raddr_a_i] : 0;
     // assign rdata_b_o = (re_b_i & we_i & raddr_b_i == waddr_i) ? wdata_i : (re_b_i) ? bank[raddr_b_i] : 0;
 
+    always_comb begin
+        should_write = we_i && (waddr_i != 0) ? 1 : 0;
+    end
+
     // Write sequential logic
     always_ff @(posedge clk_i, posedge rst_i, should_write, wdata_i) begin
         rdata_a_o <= (re_a_i & we_i & raddr_a_i == waddr_i) ? wdata_i : (re_a_i) ? bank[raddr_a_i] : 0;
         rdata_b_o <= (re_b_i & we_i & raddr_b_i == waddr_i) ? wdata_i : (re_b_i) ? bank[raddr_b_i] : 0;
-        should_write <= (we_i && (waddr_i != 0)) ? 1 : 0;
         // reset all registers to value 0
         if (rst_i) begin
             rdata_a_o <= 0;
