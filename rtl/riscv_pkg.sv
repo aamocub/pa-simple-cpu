@@ -17,7 +17,7 @@ package riscv_pkg;
     localparam OPCODE_ECALL = 7'b1110011;
     localparam OPCODE_EBREAK = 7'b1110011;
 
-    // INSTRUCTION TYPES
+    // Instruction Types
     typedef struct packed {
         logic [31:25] funct7;
         logic [24:20] rs2;
