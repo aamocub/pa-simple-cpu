@@ -12,35 +12,33 @@ module top #(
 
     /* Naming convention: wires are prefixed with their stage (Fetch, Decode, eXecute, Memory, Writeback) */
 
-    wire [31:0] F_pc;  // Program counter
-    wire [31:0] F_inst;  // Instruction
+    wire  [31:0] F_pc;  // Program counter
+    wire  [31:0] F_inst;  // Instruction
 
     /* Instruction breakdown */
-    wire [12:0] D_offset;
-    wire [ 4:0] D_ra;
-    wire [ 4:0] D_rb;
-    wire [ 4:0] D_rd;
-    wire [ 3:0] D_opcode;
+    wire  [12:0] D_offset;
+    wire  [ 4:0] D_ra;
+    wire  [ 4:0] D_rb;
+    wire  [ 4:0] D_rd;
+    wire  [ 3:0] D_opcode;
 
-    wire [31:0] D_a;  // Contents of register a
-    wire [31:0] D_b;  // Contents of register B
-    wire [31:0] D_imm;  // Sign-extended immediate
-    wire [ 1:0] D_cmp_op;  // CMP operation (none, ==, >, >=)
-    wire        D_exception;  // Illegal instruction detected
+    wire  [31:0] D_a;  // Contents of register a
+    wire  [31:0] D_b;  // Contents of register B
+    wire  [31:0] D_imm;  // Sign-extended immediate
+    wire  [ 1:0] D_cmp_op;  // CMP operation (none, ==, >, >=)
+    wire         D_exception;  // Illegal instruction detected
 
-    wire [31:0] X_d;  // ALU output
-    wire        X_cmp_out;  // CMP output
-    wire        X_taken;  // 1 if jump/branch is taken
-    wire [31:0] X_next_pc;
+    wire  [31:0] X_d;  // ALU output
+    wire         X_cmp_out;  // CMP output
+    logic        X_taken;  // 1 if jump/branch is taken
+    logic [31:0] X_next_pc;
 
-    wire [31:0] M_d;  // Memory output
+    wire  [31:0] M_d;  // Memory output
 
-    wire        W_is_wb;  // Enable write to regfile
+    wire         W_is_wb;  // Enable write to regfile
 
     assign D_imm = {{19{D_offset[12]}}, D_offset[12:0]};  // Sign extend immediate
     assign D_cmp_op = D_opcode == `BEQ_OP ? 2'b01 : D_opcode == `BGT_OP ? 2'b10 : D_opcode == `BGE_OP ? 2'b11 : 0;
-    assign X_taken = X_cmp_out || D_opcode == `JMP_OP;
-    assign X_next_pc = D_exception ? EXCEPTION_ADDRESS : X_taken ? F_pc + D_imm : F_pc + 4;
     assign W_is_wb = (((D_opcode == `SW_OP )) ||
                       ((D_opcode == `BEQ_OP)) ||
                       ((D_opcode == `BGT_OP)) ||
@@ -48,6 +46,11 @@ module top #(
                       ((D_opcode == `NOP_OP)) ||
                       ((D_opcode == `JMP_OP))
                      ) ? 0 : 1;
+
+    always_comb begin
+        X_taken   = X_cmp_out || D_opcode == `JMP_OP;
+        X_next_pc = D_exception ? EXCEPTION_ADDRESS : X_taken ? F_pc + D_imm : F_pc + 4;
+    end
 
     register #(
         .DATAWIDTH(DATAWIDTH)
