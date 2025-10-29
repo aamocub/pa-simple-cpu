@@ -1,48 +1,31 @@
-// Memory module
-
-// It is assumed that all acceses are going to be of 32-bit words. In case of wanting to allow different sizes, like
-// byte and half acceses, well...
+// TODO: byte and half access
 
 module memory #(
-    parameter integer NUMWORDS  = 4096,
-    parameter integer DATAWIDTH = 32
+    parameter  NUMWORDS         = 4096,              // Number of words in the memory
+    parameter  DATAWIDTH        = 32,                // Bit width of a word
+    localparam ADDR_SIZE        = $clog2(NUMWORDS),
+    localparam MEM_ACCESS_DELAY = 5                  // How many cycles does it take the memory to access data
 ) (
-    input wire clk_i,
-    input wire rst_i,
-
-    // reading port
-    input  wire                        re_i,     // read enable
-    output wire [       DATAWIDTH-1:0] rdata_o,  // read data
-    input  wire [$clog2(NUMWORDS)-1:0] raddr_i,  // read address
-
-    // writing port
-    input wire                        we_i,     // write enable
-    input wire [       DATAWIDTH-1:0] wdata_i,  // write data
-    input wire [$clog2(NUMWORDS)-1:0] waddr_i   // write address
+    input  logic                 clk_i,
+    input  logic                 rst_i,
+    input  logic                 read_en_i,     // read enable
+    input  logic [ADDR_SIZE-1:0] read_addr_i,   // read address
+    output logic                 read_valid_o,  // read valid
+    output logic [DATAWIDTH-1:0] read_data_o,   // read data
+    input  logic                 write_en_i,    // write enable
+    input  logic [ADDR_SIZE-1:0] write_addr_i,  // write address
+    input  logic [DATAWIDTH-1:0] write_data_i   // write data
 );
 
-    logic [DATAWIDTH-1:0] mem[NUMWORDS];  // memory
+    logic [DATAWIDTH-1:0][ADDR_SIZE-1:0] mem;  // memory array to store and read memory values
+    logic [$clog2(MEM_ACCESS_DELAY)-1:0] delay_cnt;  // delay counter register
 
-    integer i;  // iterator for 'for loop'
-
-    // Read combinatinoal logic (same in both ports, so explained for port A, but it applies for both)
-    //
-    // if reading and writing to/from the same register: rdata_a_o would be assigned wdata_i
-    // else: rdata_a_o would be mem[raddr_a_i]
-    assign rdata_o = (re_i & we_i & raddr_i == waddr_i) ? wdata_i : (re_i) ? mem[raddr_i] : 0;
-
-    // Write sequential logic
-    always_ff @(posedge clk_i or posedge rst_i) begin
-        // reset all registers to value 0
+    always_ff @(posedge clk_i, posedge rst_i) begin
         if (rst_i) begin
-            for (i = 0; i < NUMWORDS; i = i + 1) begin
-                mem[i] <= 32'b0;
-            end
+            delay_cnt <= 0;
+            for (int i = 0; i < NUMWORDS; ++i) mem[i] <= '0;
         end else begin
-            // if write enable, write data to mem[waddr_i] register
-            if (we_i) begin
-                mem[waddr_i] <= wdata_i;
-            end
         end
     end
+
 endmodule

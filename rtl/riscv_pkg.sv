@@ -137,12 +137,13 @@ package riscv_pkg;
         logic [6:0]   opcode;
     } jinstr_t;
     typedef union packed {
-        rinstr_t rtype;
-        iinstr_t itype;
-        sinstr_t stype;
-        uinstr_t utype;
-        binstr_t btype;
-        jinstr_t jtype;
+        logic [31:0] raw;
+        rinstr_t     rtype;
+        iinstr_t     itype;
+        sinstr_t     stype;
+        uinstr_t     utype;
+        binstr_t     btype;
+        jinstr_t     jtype;
     } instruction_t;
 
 endpackage
