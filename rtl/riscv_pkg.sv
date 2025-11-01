@@ -6,7 +6,7 @@ package riscv_pkg;
     localparam XLEN = 32;  // Data size of registers
 
     // OpCodes list
-    localparam OPCODE_OP     = 7'b0110011;
+    localparam OPCODE_ALU    = 7'b0110011;
     localparam OPCODE_IMM    = 7'b0010011;
     localparam OPCODE_LOAD   = 7'b0000011;
     localparam OPCODE_STORE  = 7'b0100011;
