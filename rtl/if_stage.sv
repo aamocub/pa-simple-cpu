@@ -12,10 +12,10 @@ module if_stage
 ) (
     input  logic      clk_i,   // Clock signal
     input  logic      rst_i,   // Reset signal
-    input  ctrl_if_t  ctrl_i,  // Control data being sent by the control unit
-    output if_req_t   req_o,   // Request new instruction to memory
-    input  if_resp_t  resp_i,  // Response from memory with new instruction
-    output if_stage_t if_o     // Output data from the IF stage
+    input  ctrl_if_t  ctrl_i,  // Control signals
+    output if_req_t   req_o,   // Memory request
+    input  if_resp_t  resp_i,  // Memory response
+    output if_stage_t if_o     // Fetched instruction
 );
     // verilog_format: off
     enum { IDLE, PC_GEN, PC_RESP } state;
