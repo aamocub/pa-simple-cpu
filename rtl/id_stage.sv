@@ -46,28 +46,28 @@ module id_stage
     always_comb begin
         case (fetch_i.instr.rtype.opcode)
             OPCODE_ALU: begin
-                case ({
-                    fetch_i.instr.rtype.funct7, fetch_i.instr.rtype.funct3
-                })
-                    {FUNCT7_ADD, FUNCT3_ADD} : decode_o.op = ADD;
-                    {FUNCT7_SUB, FUNCT3_SUB} : decode_o.op = SUB;
-                    {FUNCT7_SLL, FUNCT3_SLL} : decode_o.op = SLL;
-                    {FUNCT7_SLT, FUNCT3_SLT} : decode_o.op = SLT;
-                    {FUNCT7_SLTU, FUNCT3_SLTU} : decode_o.op = SLTU;
-                    {FUNCT7_XOR, FUNCT3_XOR} : decode_o.op = XOR;
-                    {FUNCT7_SRL, FUNCT3_SRL} : decode_o.op = SRL;
-                    {FUNCT7_SRA, FUNCT3_SRA} : decode_o.op = SRA;
-                    {FUNCT7_OR, FUNCT3_OR} : decode_o.op = OR;
-                    {FUNCT7_AND, FUNCT3_AND} : decode_o.op = AND;
-                    {FUNCT7_MUL, FUNCT3_MUL} : decode_o.op = MUL;
-                    {FUNCT7_MULH, FUNCT3_MULH} : decode_o.op = MULH;
-                    {FUNCT7_MULHSU, FUNCT3_MULHSU} : decode_o.op = MULHSU;
-                    {FUNCT7_MULHU, FUNCT3_MULHU} : decode_o.op = MULHU;
-                    {FUNCT7_DIV, FUNCT3_DIV} : decode_o.op = DIV;
-                    {FUNCT7_DIVU, FUNCT3_DIVU} : decode_o.op = DIVU;
-                    {FUNCT7_REM, FUNCT3_REM} : decode_o.op = REM;
-                    {FUNCT7_REMU, FUNCT3_REMU} : decode_o.op = REMU;
+                // verilog_format: off
+                case ({fetch_i.instr.rtype.funct7, fetch_i.instr.rtype.funct3})
+                    {FUNCT7_ADD,    FUNCT3_ADD}:    decode_o.op = ADD;
+                    {FUNCT7_SUB,    FUNCT3_SUB}:    decode_o.op = SUB;
+                    {FUNCT7_SLL,    FUNCT3_SLL}:    decode_o.op = SLL;
+                    {FUNCT7_SLT,    FUNCT3_SLT}:    decode_o.op = SLT;
+                    {FUNCT7_SLTU,   FUNCT3_SLTU}:   decode_o.op = SLTU;
+                    {FUNCT7_XOR,    FUNCT3_XOR}:    decode_o.op = XOR;
+                    {FUNCT7_SRL,    FUNCT3_SRL}:    decode_o.op = SRL;
+                    {FUNCT7_SRA,    FUNCT3_SRA}:    decode_o.op = SRA;
+                    {FUNCT7_OR,     FUNCT3_OR}:     decode_o.op = OR;
+                    {FUNCT7_AND,    FUNCT3_AND}:    decode_o.op = AND;
+                    {FUNCT7_MUL,    FUNCT3_MUL}:    decode_o.op = MUL;
+                    {FUNCT7_MULH,   FUNCT3_MULH}:   decode_o.op = MULH;
+                    {FUNCT7_MULHSU, FUNCT3_MULHSU}: decode_o.op = MULHSU;
+                    {FUNCT7_MULHU,  FUNCT3_MULHU}:  decode_o.op = MULHU;
+                    {FUNCT7_DIV,    FUNCT3_DIV}:    decode_o.op = DIV;
+                    {FUNCT7_DIVU,   FUNCT3_DIVU}:   decode_o.op = DIVU;
+                    {FUNCT7_REM,    FUNCT3_REM}:    decode_o.op = REM;
+                    {FUNCT7_REMU,   FUNCT3_REMU}:   decode_o.op = REMU;
                 endcase
+                // verilog_format: on
             end
             OPCODE_IMM: begin
                 case (fetch_i.instr.rtype.funct3)
