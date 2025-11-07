@@ -33,7 +33,7 @@ package pa_pkg;
         instr_op_t   op;     // Operation to perform
     } id_stage_t;
 
-    /* Memory controller */
+    /* Memory arbitrer */
     typedef struct packed {
         logic valid;
         logic [PHY_ADDR_LEN-1:0] addr;
