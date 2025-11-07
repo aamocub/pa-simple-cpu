@@ -25,12 +25,14 @@ package pa_pkg;
     typedef struct packed {instruction_t instr;} if_stage_t;
 
     typedef struct packed {
-        logic [4:0]  rs1;    // Source register 1
-        logic [4:0]  rs2;    // Source register 2
-        logic [4:0]  rd;     // Destination register
-        logic        is_wb;  // Is it going to write to regfile
-        logic [31:0] imm;    // Is it going to write to regfile
-        instr_op_t   op;     // Operation to perform
+        logic [4:0]      rs1;       // Source register 1
+        logic [4:0]      rs2;       // Source register 2
+        logic [XLEN-1:0] data_rs1;  // Value of register 1
+        logic [XLEN-1:0] data_rs2;  // Value of register 2
+        logic [4:0]      rd;        // Destination register
+        logic            is_wb;     // Is it going to write to regfile
+        logic [XLEN-1:0] imm;       // Is it going to write to regfile
+        instr_op_t       op;        // Operation to perform
     } id_stage_t;
 
     /* Memory arbitrer */
