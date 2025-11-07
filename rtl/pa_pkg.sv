@@ -8,6 +8,7 @@ package pa_pkg;
     localparam PHY_ADDR_LEN = 32;  // Bit width of physical address
     localparam PC_RESET_ADDR = 32'h1000;
     localparam PC_EXCEPTION_ADDR = 32'h8000;
+    localparam RF_NUMREGS = 32;
 
     // verilog_format: off
     typedef enum {

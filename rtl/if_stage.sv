@@ -5,6 +5,8 @@
 // 4. Sends result to if_o
 // 5. Go to step 1
 
+// TODO: make this a 1-cycle stage
+
 module if_stage
     import pa_pkg::*;
     import riscv_pkg::*;
@@ -12,13 +14,13 @@ module if_stage
 ) (
     input  logic      clk_i,   // Clock signal
     input  logic      rst_i,   // Reset signal
-    input  ctrl_if_t  ctrl_i,  // Control signals
-    output if_req_t   req_o,   // Memory request
-    input  if_resp_t  resp_i,  // Memory response
-    output if_stage_t if_o     // Fetched instruction
+    input  ctrl_if_t  ctrl_i,  // Control data being sent by the control unit
+    output if_req_t   req_o,   // Request new instruction to memory
+    input  if_resp_t  resp_i,  // Response from memory with new instruction
+    output if_stage_t if_o     // Output data from the IF stage
 );
     // verilog_format: off
-    enum { IDLE, PC_GEN, PC_RESP } state;
+    enum { PC_GEN, PC_FETCH } state;
     // verilog_format: on
 
     logic [PHY_ADDR_LEN-1:0] pc;
@@ -26,20 +28,22 @@ module if_stage
 
     always_comb begin
         case (state)
-            IDLE: begin
-                pc <= PC_RESET_ADDR;
-                next_pc <= PC_RESET_ADDR;
-            end
             PC_GEN: begin
-                case (ctrl_i.pc_sel)
-                    0: next_pc <= pc + 4;
-                    1: next_pc <= pc + 4;
-                endcase
-                pc <= next_pc;
-                req_o.valid <= 1;
-                req_o.addr <= next_pc;
+                if (rst_i) begin
+                    pc <= PC_RESET_ADDR;
+                    next_pc <= PC_RESET_ADDR;
+                end else begin
+                    case (ctrl_i.pc_sel)
+                        // TODO: add proper pc selection
+                        0: next_pc <= pc + 4;
+                        1: next_pc <= pc + 4;
+                    endcase
+                    pc <= next_pc;
+                    req_o.valid <= 1;
+                    req_o.addr <= next_pc;
+                end
             end
-            PC_RESP: begin
+            PC_FETCH: begin
                 if (resp_i.valid) begin
                     req_o.valid <= 0;
                     if_o.instr  <= resp_i.data;
@@ -53,13 +57,11 @@ module if_stage
 
     always_ff @(posedge clk_i, posedge rst_i) begin
         if (rst_i) begin
-            state <= IDLE;
+            state <= PC_GEN;
         end else begin
             unique case (state)
-                IDLE: state <= PC_GEN;
-                PC_GEN: state <= PC_RESP;
-                PC_RESP: state <= resp_i.valid ? PC_GEN : state;
-                default: state <= state;
+                PC_GEN:   state <= PC_FETCH;
+                PC_FETCH: state <= resp_i.valid ? PC_GEN : state;
             endcase
         end
     end

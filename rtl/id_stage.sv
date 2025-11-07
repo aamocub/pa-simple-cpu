@@ -2,7 +2,9 @@ module id_stage
     import pa_pkg::*;
     import riscv_pkg::*;
 (
-    input  if_stage_t fetch_i,
+    input clk_i,
+    input rst_i,
+    input if_stage_t fetch_i,
     output id_stage_t decode_o
 );
 
@@ -19,21 +21,11 @@ module id_stage
     // Immediate
     always_comb begin
         case (fetch_i.instr.rtype.opcode)
-            OPCODE_LUI, OPCODE_AUIPC: begin
-                decode_o.imm <= u_imm;
-            end
-            OPCODE_JAL: begin
-                decode_o.imm <= j_imm;
-            end
-            OPCODE_IMM, OPCODE_LOAD, OPCODE_JALR: begin
-                decode_o.imm <= i_imm;
-            end
-            OPCODE_STORE: begin
-                decode_o.imm <= s_imm;
-            end
-            OPCODE_BRANCH: begin
-                decode_o.imm <= b_imm;
-            end
+            OPCODE_LUI, OPCODE_AUIPC: decode_o.imm <= u_imm;
+            OPCODE_JAL: decode_o.imm <= j_imm;
+            OPCODE_IMM, OPCODE_LOAD, OPCODE_JALR: decode_o.imm <= i_imm;
+            OPCODE_STORE: decode_o.imm <= s_imm;
+            OPCODE_BRANCH: decode_o.imm <= b_imm;
             default: decode_o.imm <= '0;
         endcase
     end
@@ -41,5 +33,23 @@ module id_stage
     // Instruction decoding
     always_comb begin
     end
+
+    // Regfile access (in parallel to decoding)
+    regfile #(
+        .NUMREGS  (RF_NUMREGS),
+        .DATAWIDTH(XLEN)
+    ) regfile (
+        .clk_i    (clk_i),
+        .rst_i    (rst_i),
+        .re_a_i   (),
+        .rdata_a_o(),
+        .raddr_a_i(),
+        .re_b_i   (),
+        .rdata_b_o(),
+        .raddr_b_i(),
+        .we_i     (),
+        .wdata_i  (),
+        .waddr_i  ()
+    );
 
 endmodule
