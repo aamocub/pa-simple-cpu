@@ -77,6 +77,9 @@ module id_stage
                     FUNCT3_XORI:  decode_o.op = XORI;
                     FUNCT3_ORI:   decode_o.op = ORI;
                     FUNCT3_ANDI:  decode_o.op = ANDI;
+                    FUNCT3_SLLI:  decode_o.op = SLLI;
+                    FUNCT3_SRLI:  decode_o.op = SRLI;
+                    FUNCT3_SRAI:  decode_o.op = SRAI;
                 endcase
             end
             OPCODE_LOAD: begin
