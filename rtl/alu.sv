@@ -22,8 +22,8 @@ module alu
 
             // Shifts
             SLL, SLLI:   out_o = a_i << b_i[4:0];  // shift left logical
-            SLT, SLTI:   out_o = ($signed(a_i) < $signed(b_i)) ? 32'd1 : 32'd0;  // signed less than
-            SLTU, SLTIU: out_o = (a_i < b_i) ? 32'd1 : 32'd0;  // unsigned less than
+            SLT, SLTI:   out_o = ($signed(a_i) < $signed(b_i)) ? 'b1 : 'b0;  // signed less than
+            SLTU, SLTIU: out_o = (a_i < b_i) ? 'b1 : 'b0;  // unsigned less than
             SRL, SRLI:   out_o = a_i >> b_i[4:0];  // shift right logical
             SRA, SRAI:   out_o = $signed(a_i) >>> b_i[4:0];  // shift right arithmetic
 
