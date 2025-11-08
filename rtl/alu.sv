@@ -14,18 +14,18 @@ module alu
 
     always_comb
         case (opcode_i)
-            ADD: out_o = a_i + b_i;
-            SUB: out_o = a_i - b_i;
-            XOR: out_o = a_i ^ b_i;
-            OR:  out_o = a_i | b_i;
-            AND: out_o = a_i & b_i;
+            ADD, ADDI: out_o = a_i + b_i;
+            SUB:       out_o = a_i - b_i;
+            XOR, XORI: out_o = a_i ^ b_i;
+            OR, ORI:   out_o = a_i | b_i;
+            AND, ANDI: out_o = a_i & b_i;
 
             // Shifts
-            SLL:  out_o = a_i << b_i[4:0];  // shift left logical
-            SLT:  out_o = ($signed(a_i) < $signed(b_i)) ? 32'd1 : 32'd0;  // signed less than
-            SLTU: out_o = (a_i < b_i) ? 32'd1 : 32'd0;  // unsigned less than
-            SRL:  out_o = a_i >> b_i[4:0];  // shift right logical
-            SRA:  out_o = $signed(a_i) >>> b_i[4:0];  // shift right arithmetic
+            SLL, SLLI:   out_o = a_i << b_i[4:0];  // shift left logical
+            SLT, SLTI:   out_o = ($signed(a_i) < $signed(b_i)) ? 32'd1 : 32'd0;  // signed less than
+            SLTU, SLTIU: out_o = (a_i < b_i) ? 32'd1 : 32'd0;  // unsigned less than
+            SRL, SRLI:   out_o = a_i >> b_i[4:0];  // shift right logical
+            SRA, SRAI:   out_o = $signed(a_i) >>> b_i[4:0];  // shift right arithmetic
 
             // Multiplication
             MUL: begin
