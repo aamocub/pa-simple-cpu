@@ -1,32 +1,58 @@
 `include "opcode.svh"
 
-module alu #(
-    parameter integer DATAWIDTH = 32
-) (
-    input wire [DATAWIDTH-1:0] a_i,
-    input wire [DATAWIDTH-1:0] b_i,
-    input wire [3:0] opcode_i,
-    output reg [DATAWIDTH-1:0] out_o
+module alu
+    import pa_pkg::*;
+    import riscv_pkg::*;
+(
+    input  logic      [XLEN-1:0] a_i,
+    input  logic      [XLEN-1:0] b_i,
+    input  instr_op_t            opcode_i,
+    output logic      [XLEN-1:0] out_o
 );
+
+    logic [XLEN*2-1:0] mul_tmp;
 
     always_comb
         case (opcode_i)
-            `NOP_OP:  out_o = '0;
-            `ADD_OP:  out_o = a_i + b_i;
-            `LW_OP:   out_o = a_i + b_i;
-            `SW_OP:   out_o = a_i + b_i;
-            `SUB_OP:  out_o = a_i - b_i;
-            `MUL_OP:  out_o = a_i * b_i;
-            `DIV_OP:  out_o = a_i / b_i;
-            `AND_OP:  out_o = a_i & b_i;
-            `OR_OP:   out_o = a_i | b_i;
-            `XOR_OP:  out_o = a_i ^ b_i;
-            `BEQ_OP:  out_o = a_i + b_i;
-            `BGT_OP:  out_o = a_i + b_i;
-            `BGE_OP:  out_o = a_i + b_i;
-            `JMP_OP:  out_o = a_i + b_i;
-            `ADDI_OP: out_o = a_i + b_i;
-            default:  out_o = 'x;
+            ADD: out_o = a_i + b_i;
+            SUB: out_o = a_i - b_i;
+            XOR: out_o = a_i ^ b_i;
+            OR:  out_o = a_i | b_i;
+            AND: out_o = a_i & b_i;
+
+            // Shifts
+            SLL:  out_o = a_i << b_i[4:0];  // shift left logical
+            SLT:  out_o = ($signed(a_i) < $signed(b_i)) ? 32'd1 : 32'd0;  // signed less than
+            SLTU: out_o = (a_i < b_i) ? 32'd1 : 32'd0;  // unsigned less than
+            SRL:  out_o = a_i >> b_i[4:0];  // shift right logical
+            SRA:  out_o = $signed(a_i) >>> b_i[4:0];  // shift right arithmetic
+
+            // Multiplication
+            MUL: begin
+                mul_tmp = a_i * b_i;
+                out_o   = mul_tmp[XLEN-1:0];  // low XLEN bits
+            end
+            MULH: begin
+                mul_tmp = $signed(a_i) * $signed(b_i);
+                out_o   = mul_tmp[2*XLEN-1:XLEN];  // high XLEN bits (signed * signed)
+            end
+            MULHSU: begin
+                mul_tmp = $signed(a_i) * $unsigned(b_i);
+                out_o   = mul_tmp[2*XLEN-1:XLEN];  // high XLEN bits (signed * unsigned)
+            end
+            MULHU: begin
+                mul_tmp = $unsigned(a_i) * $unsigned(b_i);
+                out_o   = mul_tmp[2*XLEN-1:XLEN];  // high XLEN bits (unsigned * unsigned)
+            end
+
+            // Division / Remainder
+            // TODO: Exceptions on div by 0
+            DIV:  out_o = (b_i == 0) ? 'x : $signed(a_i) / $signed(b_i);
+            DIVU: out_o = (b_i == 0) ? 'x : a_i / b_i;
+            REM:  out_o = (b_i == 0) ? 'x : $signed(a_i) % $signed(b_i);
+            REMU: out_o = (b_i == 0) ? 'x : a_i % b_i;
+
+            default: out_o = 'x;
         endcase
 
 endmodule
