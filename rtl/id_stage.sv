@@ -78,8 +78,10 @@ module id_stage
                     FUNCT3_ORI:   decode_o.op = ORI;
                     FUNCT3_ANDI:  decode_o.op = ANDI;
                     FUNCT3_SLLI:  decode_o.op = SLLI;
-                    FUNCT3_SRLI:  decode_o.op = SRLI;
-                    FUNCT3_SRAI:  decode_o.op = SRAI;
+                    FUNCT3_SRLI, FUNCT3_SRAI: begin
+                        decode_o.op = fetch_i.instr.rtype.funct7 == FUNCT7_SRLI ? SRLI :
+                                      fetch_i.instr.rtype.funct7 == FUNCT7_SRAI ? SRAI : 'x;
+                    end
                 endcase
             end
             OPCODE_LOAD: begin

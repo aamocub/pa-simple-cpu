@@ -28,6 +28,7 @@ module alu
             SRA, SRAI:   out_o = $signed(a_i) >>> b_i[4:0];  // shift right arithmetic
 
             // Multiplication
+            // TODO: Add delay of 5 cycles
             MUL: begin
                 mul_tmp = a_i * b_i;
                 out_o   = mul_tmp[XLEN-1:0];  // low XLEN bits
