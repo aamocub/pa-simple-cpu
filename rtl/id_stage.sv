@@ -2,10 +2,10 @@ module id_stage
     import pa_pkg::*;
     import riscv_pkg::*;
 (
-    input clk_i,
-    input rst_i,
-    input if_stage_t fetch_i,
-    input wb_id_t from_wb_i,
+    input  logic      clk_i,
+    input  logic      rst_i,
+    input  if_stage_t fetch_i,
+    input  wb_id_t    from_wb_i,
     output id_stage_t decode_o
 );
 
