@@ -8,20 +8,20 @@ module alu
     input  logic      [XLEN-1:0] b_i,
     input  instr_op_t            opcode_i,
     output logic      [XLEN-1:0] out_o,
-    output logic                 stall
+    output logic                 stall_o
 );
 
     logic [           XLEN*2-1:0] mul_tmp;  // mul intermediate result
     logic [$clog2(MUL_DELAY)-1:0] mul_delay;  // mul delay counter register
 
     always_comb begin
-        stall = 0;  // Do not stall by default
+        stall_o = 0;  // Do not stall by default
 
         if (mul_delay == MUL_DELAY - 1) begin
             out_o = mul_tmp[XLEN-1:0];
             mul_delay = 0;
         end else if (mul_delay > 0) begin
-            stall = 1;
+            stall_o = 1;
             mul_delay++;
         end else begin
             case (opcode_i)
@@ -43,25 +43,25 @@ module alu
                 // Multiplication
                 MUL: begin  // low XLEN bits
                     mul_tmp = a_i * b_i;
-                    stall   = 1;
+                    stall_o = 1;
                     mul_delay++;
                 end
                 MULH: begin  // high XLEN bits (signed * signed)
                     mul_tmp = $signed(a_i) * $signed(b_i);
                     mul_tmp = mul_tmp[2*XLEN-1:XLEN];
-                    stall   = 1;
+                    stall_o = 1;
                     mul_delay++;
                 end
                 MULHSU: begin  // high XLEN bits (signed * unsigned)
                     mul_tmp = $signed(a_i) * $unsigned(b_i);
                     mul_tmp = mul_tmp[2*XLEN-1:XLEN];
-                    stall   = 1;
+                    stall_o = 1;
                     mul_delay++;
                 end
                 MULHU: begin  // high XLEN bits (unsigned * unsigned)
                     mul_tmp = $unsigned(a_i) * $unsigned(b_i);
                     mul_tmp = mul_tmp[2*XLEN-1:XLEN];
-                    stall   = 1;
+                    stall_o = 1;
                     mul_delay++;
                 end
 
