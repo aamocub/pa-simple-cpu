@@ -35,26 +35,32 @@ package pa_pkg;
 
     /* Memory arbitrer */
     typedef struct packed {
-        logic valid;
+        logic                    valid;
         logic [PHY_ADDR_LEN-1:0] addr;
     } if_req_t;
     typedef struct packed {
-        logic valid;
+        logic            valid;
         logic [XLEN-1:0] data;
     } if_resp_t;
     typedef struct packed {
-        logic valid;
+        logic                    valid;
         logic [PHY_ADDR_LEN-1:0] addr;
     } m_read_req_t;
     typedef struct packed {
-        logic valid;
+        logic            valid;
         logic [XLEN-1:0] data;
     } m_read_resp_t;
     typedef struct packed {
-        logic valid;
+        logic                    valid;
         logic [PHY_ADDR_LEN-1:0] addr;
-        logic [XLEN-1:0] data;
+        logic [XLEN-1:0]         data;
     } m_write_req_t;
     typedef struct packed {logic valid;} m_write_resp_t;
+
+    typedef struct packed {
+        logic            is_wb;
+        logic [4:0]      rd;
+        logic [XLEN-1:0] data;
+    } wb_id_t;  // from WB to ID stage
 
 endpackage
