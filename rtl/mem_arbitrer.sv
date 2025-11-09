@@ -5,12 +5,12 @@ module mem_arbitrer
     input logic clk_i,
     input logic rst_i,
 
-    input  if_req_t       if_req_i,
-    output if_resp_t      if_resp_o,
-    input  m_read_req_t   m_read_req_i,
-    output m_read_resp_t  m_read_resp_o,
-    input  m_write_req_t  m_write_req_i,
-    output m_write_resp_t m_write_resp_o,
+    input  if_req_t        if_req_i,
+    output if_resp_t       if_resp_o,
+    input  mm_read_req_t   m_read_req_i,
+    output mm_read_resp_t  m_read_resp_o,
+    input  mm_write_req_t  m_write_req_i,
+    output mm_write_resp_t m_write_resp_o,
 
     output logic                    read_en_o,
     output logic [PHY_ADDR_LEN-1:0] read_addr_o,

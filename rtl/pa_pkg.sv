@@ -14,7 +14,7 @@ package pa_pkg;
     typedef enum {
         LUI, AUIPC, JAL, JALR, BEQ, BNE, BLT, BGE, BLTU, BGEU, LB, LH, LW, LBU, LHU, SB, SH, SW, ADDI, SLTI, SLTIU,
         XORI, ORI, ANDI, SLLI, SRLI, SRAI, ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND, ECALL, EBREAK, MUL, MULH,
-        MULHSU, MULHU, DIV, DIVU, REM, REMU
+        MULHSU, MULHU, DIV, DIVU, REM, REMU, ILLEGAL
     } instr_op_t;
     // verilog_format: on
 
@@ -31,9 +31,22 @@ package pa_pkg;
         logic [XLEN-1:0] data_rs2;  // Value of register 2
         logic [4:0]      rd;        // Destination register
         logic            is_wb;     // Is it going to write to regfile
-        logic [XLEN-1:0] imm;       // Is it going to write to regfile
+        logic            is_ld;     // Is it a load
+        logic            is_st;     // Is it a store
+        logic            uses_rs2;  // Does the instruction use rs2
+        logic [XLEN-1:0] imm;       // Immediate
         instr_op_t       op;        // Operation to perform
     } id_stage_t;
+
+    typedef struct packed {
+        logic [XLEN-1:0] alu_result;
+        logic            cmp_result;
+        logic            is_wb;       // Is it going to write to regfile
+        logic            is_ld;       // Is it a load
+        logic            is_st;       // Is it a store
+        logic            uses_rs2;    // Does the instruction use rs2
+        logic [XLEN-1:0] data_rs2;    // Value of register 2
+    } ex_stage_t;
 
     /* Memory arbitrer */
     typedef struct packed {
@@ -47,17 +60,28 @@ package pa_pkg;
     typedef struct packed {
         logic                    valid;
         logic [PHY_ADDR_LEN-1:0] addr;
-    } m_read_req_t;
+    } mm_read_req_t;
     typedef struct packed {
         logic            valid;
         logic [XLEN-1:0] data;
-    } m_read_resp_t;
+    } mm_read_resp_t;
     typedef struct packed {
         logic                    valid;
         logic [PHY_ADDR_LEN-1:0] addr;
         logic [XLEN-1:0]         data;
-    } m_write_req_t;
-    typedef struct packed {logic valid;} m_write_resp_t;
+    } mm_write_req_t;
+    typedef struct packed {logic valid;} mm_write_resp_t;
+
+    typedef struct packed {
+        logic [XLEN-1:0] data;
+        logic [XLEN-1:0] data_rs2;  // Value of register 2
+        logic is_wb;  // Is it going to write to regfile
+        logic stall;
+        mm_read_req_t read_req;
+        mm_read_resp_t read_resp;
+        mm_write_req_t write_req;
+        mm_write_resp_t write_resp;
+    } mm_stage_t;
 
     typedef struct packed {
         logic            is_wb;
