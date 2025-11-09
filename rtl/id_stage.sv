@@ -9,6 +9,7 @@ module id_stage
     output id_stage_t decode_o
 );
 
+    // TODO: change sign extension based on if the instruction uses sign or unsigned numbers
     logic [31:0] i_imm = {{20{fetch_i.instr[31]}}, fetch_i.instr.itype.imm};
     logic [31:0] s_imm = {{20{fetch_i.instr[31]}}, fetch_i.instr.stype.imm_1, fetch_i.instr.stype.imm_2};
     logic [31:0] b_imm = {
@@ -39,7 +40,7 @@ module id_stage
             OPCODE_IMM, OPCODE_LOAD, OPCODE_JALR: decode_o.imm <= i_imm;
             OPCODE_STORE:                         decode_o.imm <= s_imm;
             OPCODE_BRANCH:                        decode_o.imm <= b_imm;
-            default:                              decode_o.imm <= '0;
+            default:                              decode_o.imm <= 0;
         endcase
     end
 
@@ -69,6 +70,7 @@ module id_stage
                     {FUNCT7_REMU,   FUNCT3_REMU}:   decode_o.op = REMU;
                 endcase
                 // verilog_format: on
+                decode_o.uses_rs2 = 1;
             end
             OPCODE_IMM: begin
                 case (fetch_i.instr.rtype.funct3)
@@ -80,10 +82,11 @@ module id_stage
                     FUNCT3_ANDI:  decode_o.op = ANDI;
                     FUNCT3_SLLI:  decode_o.op = SLLI;
                     FUNCT3_SRLI, FUNCT3_SRAI: begin
-                        decode_o.op = fetch_i.instr.rtype.funct7 == FUNCT7_SRLI ? SRLI :
-                                      fetch_i.instr.rtype.funct7 == FUNCT7_SRAI ? SRAI : 'x;
+                        decode_o.op = (fetch_i.instr.rtype.funct7 == FUNCT7_SRLI) ? SRLI :
+                                      (fetch_i.instr.rtype.funct7 == FUNCT7_SRAI) ? SRAI : ILLEGAL;
                     end
                 endcase
+                decode_o.uses_rs2 = 0;
             end
             OPCODE_LOAD: begin
                 case (fetch_i.instr.rtype.funct3)
@@ -93,6 +96,7 @@ module id_stage
                     FUNCT3_LBU: decode_o.op = LBU;
                     FUNCT3_LHU: decode_o.op = LHU;
                 endcase
+                decode_o.uses_rs2 = 0;
             end
             OPCODE_STORE: begin
                 case (fetch_i.instr.rtype.funct3)
@@ -100,6 +104,7 @@ module id_stage
                     FUNCT3_SH: decode_o.op = SH;
                     FUNCT3_SW: decode_o.op = SW;
                 endcase
+                decode_o.uses_rs2 = 1;
             end
             OPCODE_BRANCH: begin
                 case (fetch_i.instr.rtype.funct3)
@@ -110,24 +115,30 @@ module id_stage
                     FUNCT3_BLTU: decode_o.op = BLTU;
                     FUNCT3_BGEU: decode_o.op = BGEU;
                 endcase
+                decode_o.uses_rs2 = 1;
             end
             OPCODE_JAL: begin
                 decode_o.op = JAL;
+                decode_o.uses_rs2 = 0;
             end
             OPCODE_JALR: begin
                 decode_o.op = JALR;
+                decode_o.uses_rs2 = 0;
             end
             OPCODE_LUI: begin
                 decode_o.op = LUI;
+                decode_o.uses_rs2 = 0;
             end
             OPCODE_AUIPC: begin
                 decode_o.op = AUIPC;
+                decode_o.uses_rs2 = 0;
             end
             OPCODE_ECALL: begin
                 case (fetch_i.instr.itype.imm)
                     IMM_ECALL:  decode_o.op = ECALL;
                     IMM_EBREAK: decode_o.op = EBREAK;
                 endcase
+                decode_o.uses_rs2 = 0;
             end
             // TODO: Throw exception on default
         endcase
