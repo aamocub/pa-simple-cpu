@@ -87,6 +87,10 @@ package riscv_pkg;
     localparam FUNCT7_REM    = 7'b0000001;
     localparam FUNCT7_REMU   = 7'b0000001;
 
+    // Immediate for ECALL and EBREAK
+    localparam IMM_ECALL  = 12'b000000000000;
+    localparam IMM_EBREAK = 12'b000000000001;
+
     // verilog_format: on
 
     // Instruction Types

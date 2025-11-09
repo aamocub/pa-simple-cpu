@@ -12,14 +12,14 @@ module mem_arbitrer
     input  m_write_req_t  m_write_req_i,
     output m_write_resp_t m_write_resp_o,
 
-    output logic                 read_en_o,
-    output logic [ADDR_SIZE-1:0] read_addr_o,
-    input  logic                 read_valid_i,
-    input  logic [DATAWIDTH-1:0] read_data_i,
-    output logic                 write_en_o,
-    output logic [ADDR_SIZE-1:0] write_addr_o,
-    output logic [DATAWIDTH-1:0] write_data_o,
-    input  logic                 write_valid_i
+    output logic                    read_en_o,
+    output logic [PHY_ADDR_LEN-1:0] read_addr_o,
+    input  logic                    read_valid_i,
+    input  logic [        XLEN-1:0] read_data_i,
+    output logic                    write_en_o,
+    output logic [PHY_ADDR_LEN-1:0] write_addr_o,
+    output logic [        XLEN-1:0] write_data_o,
+    input  logic                    write_valid_i
 );
 
     logic if_busy;
