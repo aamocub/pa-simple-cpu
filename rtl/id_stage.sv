@@ -5,6 +5,7 @@ module id_stage
     input clk_i,
     input rst_i,
     input if_stage_t fetch_i,
+    input wb_id_t from_wb_i,
     output id_stage_t decode_o
 );
 
@@ -145,9 +146,9 @@ module id_stage
         .re_b_i   (1),
         .rdata_b_o(decode_o.data_rs2),
         .raddr_b_i(rs2),
-        .we_i     (),
-        .wdata_i  (),
-        .waddr_i  ()
+        .we_i     (from_wb_i.is_wb),
+        .wdata_i  (from_wb_i.data),
+        .waddr_i  (from_wb_i.rd)
     );
 
 endmodule
