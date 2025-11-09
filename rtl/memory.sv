@@ -34,7 +34,7 @@ module memory #(
             wr_delay <= 0;
             for (int i = 0; i < NUMWORDS; ++i) mem[i] <= '0;
         end else begin
-            if (wr_delay == MEM_ACCESS_DELAY) begin
+            if (wr_delay == MEM_ACCESS_DELAY - 1) begin
                 mem[wr_addr]  <= {<<8{wr_data}};  // little endian
                 write_valid_o <= 1;
                 wr_delay      <= 0;
@@ -46,7 +46,7 @@ module memory #(
                 wr_delay <= wr_delay + 1;
             end
 
-            if (rd_delay == MEM_ACCESS_DELAY) begin
+            if (rd_delay == MEM_ACCESS_DELAY - 1) begin
                 read_data_o  <= {<<8{mem[rd_addr]}};  // little endian
                 read_valid_o <= 1;
                 rd_delay     <= 0;
