@@ -1,5 +1,3 @@
-`include "opcode.svh"
-
 module alu
     import pa_pkg::*;
     import riscv_pkg::*;
