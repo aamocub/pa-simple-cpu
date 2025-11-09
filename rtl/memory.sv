@@ -42,8 +42,9 @@ module memory #(
             end else if (wr_delay > 0) begin
                 wr_delay <= wr_delay + 1;
             end else if (write_en_i) begin
-                write_addr <= write_addr_i;
-                wr_delay   <= wr_delay + 1;
+                wr_data  <= write_data_i;
+                wr_addr  <= write_addr_i;
+                wr_delay <= wr_delay + 1;
             end
 
             if (rd_delay == MEM_ACCESS_DELAY) begin
