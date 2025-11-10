@@ -1,12 +1,12 @@
 module register #(
-    parameter integer DATAWIDTH = 32
+    type reg_t = logic
 ) (
-    input  logic                 clk_i,
-    input  logic                 rst_i,
-    input  logic                 en_i,
-    input  logic                 flush_i,
-    input  logic [DATAWIDTH-1:0] d_i,
-    output logic [DATAWIDTH-1:0] q_o
+    input  logic clk_i,
+    input  logic rst_i,
+    input  logic en_i,
+    input  logic flush_i,
+    input  reg_t d_i,
+    output reg_t q_o
 );
 
     always_ff @(posedge clk_i, posedge rst_i) begin
