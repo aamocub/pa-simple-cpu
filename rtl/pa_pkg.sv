@@ -40,7 +40,7 @@ package pa_pkg;
 
     typedef struct packed {
         logic [XLEN-1:0] alu_result;
-        logic            cmp_result;
+        logic            is_taken;    // Is branch taken
         logic            is_wb;       // Is it going to write to regfile
         logic            is_ld;       // Is it a load
         logic            is_st;       // Is it a store

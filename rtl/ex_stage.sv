@@ -20,7 +20,7 @@ module ex_stage
         .a_i  (id_i.data_rs1),
         .b_i  (id_i.data_rs2),
         .op_i (id_i.op),
-        .out_o(ex_o.cmp_result)
+        .out_o(ex_o.is_taken)
     );
 
     alu alu (
