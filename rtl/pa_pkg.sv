@@ -19,7 +19,8 @@ package pa_pkg;
     // verilog_format: on
 
     typedef struct packed {
-        logic pc_sel;
+        logic taken;
+        logic [PHY_ADDR_LEN-1:0] addr;
         logic stall;
         logic flush;
     } cu_if_t;

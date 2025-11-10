@@ -13,7 +13,7 @@ module if_stage
 (
     input  logic      clk_i,   // Clock signal
     input  logic      rst_i,   // Reset signal
-    input  ctrl_if_t  ctrl_i,  // Control data being sent by the control unit
+    input  cu_if_t    ctrl_i,  // Control data being sent by the control unit
     output if_req_t   req_o,   // Request new instruction to memory
     input  if_resp_t  resp_i,  // Response from memory with new instruction
     output if_stage_t if_o     // Output data from the IF stage
@@ -26,32 +26,34 @@ module if_stage
     logic [PHY_ADDR_LEN-1:0] next_pc;
 
     always_comb begin
-        case (state)
-            PC_GEN: begin
-                if (rst_i) begin
-                    pc <= PC_RESET_ADDR;
-                    next_pc <= PC_RESET_ADDR;
-                end else begin
-                    case (ctrl_i.pc_sel)
-                        // TODO: add proper pc selection
-                        0: next_pc <= pc + 4;
-                        1: next_pc <= pc + 4;
-                    endcase
-                    pc <= next_pc;
-                    req_o.valid <= 1;
-                    req_o.addr <= next_pc;
+        if (ctrl_i.flush) begin
+            if_o.instr = NOP_INSTR;
+        end else begin
+            unique case (state)
+                PC_GEN: begin
+                    if (rst_i) begin
+                        pc = PC_RESET_ADDR;
+                        next_pc = PC_RESET_ADDR;
+                    end else begin
+                        case (ctrl_i.taken)
+                            0: next_pc = pc + 4;
+                            1: next_pc = ctrl_i.addr;
+                        endcase
+                        pc = next_pc;
+                        req_o.valid = 1;
+                        req_o.addr = next_pc;
+                    end
                 end
-            end
-            PC_FETCH: begin
-                if (resp_i.valid) begin
-                    req_o.valid <= 0;
-                    if_o.instr  <= resp_i.data;
-                end else begin
-                    if_o.instr <= '0;
+                PC_FETCH: begin
+                    if (resp_i.valid) begin
+                        req_o.valid = 0;
+                        if_o.instr  = resp_i.data;
+                    end else begin
+                        if_o.instr = NOP_INSTR;
+                    end
                 end
-            end
-            default: ;
-        endcase
+            endcase
+        end
     end
 
     always_ff @(posedge clk_i, posedge rst_i) begin

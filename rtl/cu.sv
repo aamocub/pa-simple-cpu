@@ -15,7 +15,26 @@ module cu
     output cu_wb_t wb_o
 );
     always_comb begin
-        if_o.pc_sel = ex_i.is_taken;
+        // Do not stall by default
+        if_o.stall = 0;
+        id_o.stall = 0;
+        ex_o.stall = 0;
+        mm_o.stall = 0;
+        wb_o.stall = 0;
+
+        // Do not flush by default
+        if_o.flush = 0;
+        id_o.flush = 0;
+        ex_o.flush = 0;
+        mm_o.flush = 0;
+        wb_o.flush = 0;
+
+        if_o.taken = ex_i.is_taken;
+        if (ex_i.is_taken) begin  // Branch
+            id_o.flush = 1;
+            ex_o.flush = 1;
+            if_o.addr  = ex_i.alu_result;
+        end
     end
 
 endmodule
