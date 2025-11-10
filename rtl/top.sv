@@ -16,7 +16,7 @@ module top
     // IF Stage
     // ----------------------------------------------------------------------------------------------------------------
 
-    if_stage #() if_stage (
+    if_stage if_stage (
         .clk_i (clk_i),
         .rst_i (rst_i),
         .ctrl_i(ctrl_i),

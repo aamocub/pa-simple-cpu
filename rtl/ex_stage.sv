@@ -1,8 +1,7 @@
 module ex_stage
     import pa_pkg::*;
     import riscv_pkg::*;
-#(
-) (
+(
     input logic clk_i,
     input logic rst_i,
     input id_stage_t id_i,

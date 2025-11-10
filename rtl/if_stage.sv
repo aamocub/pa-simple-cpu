@@ -10,8 +10,7 @@
 module if_stage
     import pa_pkg::*;
     import riscv_pkg::*;
-#(
-) (
+(
     input  logic      clk_i,   // Clock signal
     input  logic      rst_i,   // Reset signal
     input  ctrl_if_t  ctrl_i,  // Control data being sent by the control unit
