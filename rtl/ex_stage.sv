@@ -14,6 +14,7 @@ module ex_stage
         ex_o.is_st    = id_i.is_st;
         ex_o.uses_rs2 = id_i.uses_rs2;
         ex_o.data_rs2 = id_i.data_rs2;
+        ex_o.rd       = id_i.rd;
     end
 
     cmp cmp (
