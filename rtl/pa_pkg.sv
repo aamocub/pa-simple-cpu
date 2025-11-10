@@ -21,7 +21,24 @@ package pa_pkg;
     typedef struct packed {
         logic pc_sel;
         logic stall;
+        logic flush;
     } cu_if_t;
+    typedef struct packed {
+        logic stall;
+        logic flush;
+    } cu_id_t;
+    typedef struct packed {
+        logic stall;
+        logic flush;
+    } cu_ex_t;
+    typedef struct packed {
+        logic stall;
+        logic flush;
+    } cu_mm_t;
+    typedef struct packed {
+        logic stall;
+        logic flush;
+    } cu_wb_t;
     typedef struct packed {instruction_t instr;} if_stage_t;
 
     typedef struct packed {
@@ -89,6 +106,5 @@ package pa_pkg;
         logic            is_wb;
         logic [4:0]      rd;
         logic [XLEN-1:0] data;
-    } wb_id_t;  // from WB to ID stage
-
+    } wb_stage_t;  // from WB to ID stage
 endpackage
