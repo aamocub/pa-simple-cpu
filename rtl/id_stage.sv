@@ -5,7 +5,7 @@ module id_stage
     input  logic      clk_i,
     input  logic      rst_i,
     input  if_stage_t fetch_i,
-    input  wb_id_t    from_wb_i,
+    input  wb_stage_t from_wb_i,
     output id_stage_t decode_o
 );
 
