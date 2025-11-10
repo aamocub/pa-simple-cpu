@@ -18,6 +18,8 @@ package pa_pkg;
     } instr_op_t;
     // verilog_format: on
 
+    /* Control unit types */
+
     typedef struct packed {
         logic taken;
         logic [PHY_ADDR_LEN-1:0] addr;
@@ -40,7 +42,12 @@ package pa_pkg;
         logic stall;
         logic flush;
     } cu_wb_t;
-    typedef struct packed {instruction_t instr;} if_stage_t;
+
+    /* Module types */
+
+    typedef struct packed {
+        instruction_t instr;  // Instruction
+    } if_stage_t;
 
     typedef struct packed {
         logic [4:0]      rs1;       // Source register 1
