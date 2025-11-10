@@ -7,10 +7,10 @@ module mem_arbitrer
 
     input  if_req_t        if_req_i,
     output if_resp_t       if_resp_o,
-    input  mm_read_req_t   m_read_req_i,
-    output mm_read_resp_t  m_read_resp_o,
-    input  mm_write_req_t  m_write_req_i,
-    output mm_write_resp_t m_write_resp_o,
+    input  mm_read_req_t   mm_read_req_i,
+    output mm_read_resp_t  mm_read_resp_o,
+    input  mm_write_req_t  mm_write_req_i,
+    output mm_write_resp_t mm_write_resp_o,
 
     output logic                    read_en_o,
     output logic [PHY_ADDR_LEN-1:0] read_addr_o,
@@ -23,31 +23,31 @@ module mem_arbitrer
 );
 
     logic if_busy;
-    logic m_busy;
+    logic mm_busy;
 
     always_ff @(posedge clk_i, posedge rst_i) begin
         if_busy <= 0;
-        m_busy  <= 0;
+        mm_busy <= 0;
 
-        if (if_req_i.valid && !m_busy) begin
+        if (if_req_i.valid && !mm_busy) begin
             read_en_o       <= 1;
             read_addr_o     <= if_req_i.addr;
             if_busy         <= !read_valid_i;
             if_resp_o.valid <= read_valid_i;
             if_resp_o.data  <= read_data_i;
-        end else if (m_read_req_i.valid && !if_busy) begin
-            read_en_o           <= 1;
-            read_addr_o         <= m_read_req_i.addr;
-            m_busy              <= !read_valid_i;
-            m_read_resp_o.valid <= read_valid_i;
-            m_read_resp_o.data  <= read_data_i;
+        end else if (mm_read_req_i.valid && !if_busy) begin
+            read_en_o            <= 1;
+            read_addr_o          <= mm_read_req_i.addr;
+            mm_busy              <= !read_valid_i;
+            mm_read_resp_o.valid <= read_valid_i;
+            mm_read_resp_o.data  <= read_data_i;
         end
 
-        if (m_write_req_i.valid) begin
-            write_en_o           <= 1;
-            write_addr_o         <= m_write_req_i.addr;
-            m_write_resp_o.valid <= write_valid_i;
-            write_data_o         <= m_write_req_i.data;
+        if (mm_write_req_i.valid) begin
+            write_en_o            <= 1;
+            write_addr_o          <= mm_write_req_i.addr;
+            mm_write_resp_o.valid <= write_valid_i;
+            write_data_o          <= mm_write_req_i.data;
         end
     end
 

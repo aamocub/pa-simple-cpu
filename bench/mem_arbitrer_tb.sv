@@ -8,24 +8,24 @@ module mem_arbitrer_tb
 
     parameter integer CLK_PERIOD = 20;
 
-    reg                               clk;
-    reg                               rst;
+    reg                                clk;
+    reg                                rst;
 
-    if_req_t                          if_req_i;
-    if_resp_t                         if_resp_o;
-    m_read_req_t                      m_read_req_i;
-    m_read_resp_t                     m_read_resp_o;
-    m_write_req_t                     m_write_req_i;
-    m_write_resp_t                    m_write_resp_o;
+    if_req_t                           if_req_i;
+    if_resp_t                          if_resp_o;
+    mm_read_req_t                      mm_read_req_i;
+    mm_read_resp_t                     mm_read_resp_o;
+    mm_write_req_t                     mm_write_req_i;
+    mm_write_resp_t                    mm_write_resp_o;
 
-    logic                             read_en_o;
-    logic          [PHY_ADDR_LEN-1:0] read_addr_o;
-    logic                             read_valid_i;
-    logic          [        XLEN-1:0] read_data_i;
-    logic                             write_en_o;
-    logic          [PHY_ADDR_LEN-1:0] write_addr_o;
-    logic          [        XLEN-1:0] write_data_o;
-    logic                             write_valid_i;
+    logic                              read_en_o;
+    logic           [PHY_ADDR_LEN-1:0] read_addr_o;
+    logic                              read_valid_i;
+    logic           [        XLEN-1:0] read_data_i;
+    logic                              write_en_o;
+    logic           [PHY_ADDR_LEN-1:0] write_addr_o;
+    logic           [        XLEN-1:0] write_data_o;
+    logic                              write_valid_i;
 
     always #(CLK_PERIOD / 2) clk <= ~clk;
 
@@ -34,10 +34,10 @@ module mem_arbitrer_tb
         .rst_i(rst),
         .if_req_i(if_req_i),
         .if_resp_o(if_resp_o),
-        .m_read_req_i(m_read_req_i),
-        .m_read_resp_o(m_read_resp_o),
-        .m_write_req_i(m_write_req_i),
-        .m_write_resp_o(m_write_resp_o),
+        .mm_read_req_i(mm_read_req_i),
+        .mm_read_resp_o(mm_read_resp_o),
+        .mm_write_req_i(mm_write_req_i),
+        .mm_write_resp_o(mm_write_resp_o),
         .read_en_o(read_en_o),
         .read_addr_o(read_addr_o),
         .read_valid_i(read_valid_i),
