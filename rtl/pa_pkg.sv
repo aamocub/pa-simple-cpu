@@ -21,7 +21,7 @@ package pa_pkg;
     typedef struct packed {
         logic pc_sel;
         logic stall;
-    } ctrl_if_t;
+    } cu_if_t;
     typedef struct packed {instruction_t instr;} if_stage_t;
 
     typedef struct packed {
