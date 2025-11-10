@@ -22,10 +22,9 @@ module mm_stage
             state <= NO;
         end else begin
             unique case (state)
-                NO: state <= (ex_i.is_ld || ex_i.is_st) ? REQ : state;
-                REQ: state <= resp_valid ? RESP : state;
+                NO:   state <= (ex_i.is_ld || ex_i.is_st) ? REQ : state;
+                REQ:  state <= resp_valid ? RESP : state;
                 RESP: state <= NO;
-                default: ;
             endcase
         end
     end
