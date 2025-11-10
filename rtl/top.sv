@@ -16,29 +16,41 @@ module top
     // IF Stage
     // ----------------------------------------------------------------------------------------------------------------
 
+    if_stage_t if_out;
+
     if_stage if_stage (
         .clk_i (clk_i),
         .rst_i (rst_i),
         .ctrl_i(ctrl_i),
         .req_o (req_o),
         .resp_i(resp_i),
-        .if_o  (if_o)
-    );
-
-    register #(
-        .DATAWIDTH(32)
-    ) if_id (
-        .clk_i  (clk_i),
-        .rst_i  (rst_i),
-        .en_i   (en_i),
-        .flush_i(flush_i),
-        .d_i    (d_i),
-        .q_o    (q_o)
+        .if_o  (if_out)
     );
 
     // ----------------------------------------------------------------------------------------------------------------
     // ID Stage
     // ----------------------------------------------------------------------------------------------------------------
+
+    if_stage_t if_id;
+
+    register #(
+        .reg_t(if_stage_t)
+    ) if_id_pipeline_reg (
+        .clk_i  (clk_i),
+        .rst_i  (rst_i),
+        .en_i   (1),
+        .flush_i(0),
+        .d_i    (if_out),
+        .q_o    (if_id)
+    );
+
+    id_stage id_stage (
+        .clk_i    (clk_i),
+        .rst_i    (rst_i),
+        .fetch_i  (if_id),
+        .from_wb_i(),
+        .decode_o ()
+    );
 
     // ----------------------------------------------------------------------------------------------------------------
     // EX Stage
