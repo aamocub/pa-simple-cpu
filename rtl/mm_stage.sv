@@ -32,21 +32,21 @@ module mm_stage
     always_comb begin
         unique case (state)
             NO: begin
-                mm_o.data <= ex_i.alu_result;
+                mm_o.data = ex_i.alu_result;
             end
             REQ: begin
                 if (ex_i.is_ld) begin
-                    mm_o.read_req.valid <= 1;
-                    mm_o.read_req.addr  <= ex_i.alu_result;
+                    mm_o.read_req.valid = 1;
+                    mm_o.read_req.addr  = ex_i.alu_result;
                 end else begin
-                    mm_o.write_req.valid <= 1;
-                    mm_o.write_req.addr  <= ex_i.alu_result;
-                    mm_o.write_req.data  <= ex_i.data_rs2;
+                    mm_o.write_req.valid = 1;
+                    mm_o.write_req.addr  = ex_i.alu_result;
+                    mm_o.write_req.data  = ex_i.data_rs2;
                 end
             end
             RESP: begin
                 if (ex_i.is_ld) begin
-                    mm_o.data <= mm_o.read_resp.data;
+                    mm_o.data = mm_o.read_resp.data;
                 end
             end
         endcase
