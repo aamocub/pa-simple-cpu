@@ -5,7 +5,7 @@ module wb_stage
     input  logic      clk_i,
     input  logic      rst_i,
     input  mm_stage_t mm_i,
-    output wb_id_t    wb_o
+    output wb_stage_t wb_o
 );
 
     always_comb begin
