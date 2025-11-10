@@ -65,6 +65,7 @@ package pa_pkg;
         logic            uses_rs2;    // Does the instruction use rs2
         logic [XLEN-1:0] data_rs2;    // Value of register 2
         logic [4:0]      rd;          // Destination register
+        logic            do_stall;    // Should previous instr be stalled
     } ex_stage_t;
 
     /* Memory arbitrer */

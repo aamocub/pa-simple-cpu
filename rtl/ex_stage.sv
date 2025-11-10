@@ -27,7 +27,8 @@ module ex_stage
         .a_i     (id_i.data_rs1),
         .b_i     (id_i.uses_rs2 ? id_i.data_rs2 : id_i.imm),
         .opcode_i(id_i.op),
-        .out_o   (ex_o.alu_result)
+        .out_o   (ex_o.alu_result),
+        .stall_o (ex_o.do_stall)
     );
 
 endmodule
