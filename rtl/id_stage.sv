@@ -46,6 +46,7 @@ module id_stage
 
     // Instruction decoding
     always_comb begin
+        decode_o.uses_rs2 = 0;
         case (fetch_i.instr.rtype.opcode)
             OPCODE_ALU: begin
                 // verilog_format: off
@@ -86,7 +87,6 @@ module id_stage
                                       (fetch_i.instr.rtype.funct7 == FUNCT7_SRAI) ? SRAI : ILLEGAL;
                     end
                 endcase
-                decode_o.uses_rs2 = 0;
             end
             OPCODE_LOAD: begin
                 case (fetch_i.instr.rtype.funct3)
@@ -96,7 +96,6 @@ module id_stage
                     FUNCT3_LBU: decode_o.op = LBU;
                     FUNCT3_LHU: decode_o.op = LHU;
                 endcase
-                decode_o.uses_rs2 = 0;
             end
             OPCODE_STORE: begin
                 case (fetch_i.instr.rtype.funct3)
@@ -117,28 +116,15 @@ module id_stage
                 endcase
                 decode_o.uses_rs2 = 1;
             end
-            OPCODE_JAL: begin
-                decode_o.op = JAL;
-                decode_o.uses_rs2 = 0;
-            end
-            OPCODE_JALR: begin
-                decode_o.op = JALR;
-                decode_o.uses_rs2 = 0;
-            end
-            OPCODE_LUI: begin
-                decode_o.op = LUI;
-                decode_o.uses_rs2 = 0;
-            end
-            OPCODE_AUIPC: begin
-                decode_o.op = AUIPC;
-                decode_o.uses_rs2 = 0;
-            end
+            OPCODE_JAL:   decode_o.op = JAL;
+            OPCODE_JALR:  decode_o.op = JALR;
+            OPCODE_LUI:   decode_o.op = LUI;
+            OPCODE_AUIPC: decode_o.op = AUIPC;
             OPCODE_ECALL: begin
                 case (fetch_i.instr.itype.imm)
                     IMM_ECALL:  decode_o.op = ECALL;
                     IMM_EBREAK: decode_o.op = EBREAK;
                 endcase
-                decode_o.uses_rs2 = 0;
             end
             // TODO: Throw exception on default
         endcase
