@@ -33,6 +33,7 @@ module mm_stage
         unique case (state)
             NO: begin
                 mm_o.data = ex_i.alu_result;
+                mm_o.do_stall = 0;
             end
             REQ: begin
                 if (ex_i.is_ld) begin
@@ -43,11 +44,13 @@ module mm_stage
                     mm_o.write_req.addr  = ex_i.alu_result;
                     mm_o.write_req.data  = ex_i.data_rs2;
                 end
+                mm_o.do_stall = 1;
             end
             RESP: begin
                 if (ex_i.is_ld) begin
                     mm_o.data = mm_o.read_resp.data;
                 end
+                mm_o.do_stall = 0;
             end
         endcase
     end
