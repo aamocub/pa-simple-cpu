@@ -12,6 +12,7 @@ module alu
 );
 
     logic [           XLEN*2-1:0] mul_tmp;  // mul intermediate result
+    logic [             XLEN-1:0] mul_res;  // mul result
     logic [$clog2(MUL_DELAY)-1:0] mul_delay;  // mul delay counter register
 
     always_comb begin
@@ -43,24 +44,25 @@ module alu
                 // Multiplication
                 MUL: begin  // low XLEN bits
                     mul_tmp = a_i * b_i;
+                    mul_res = mul_tmp[XLEN-1:0];
                     stall_o = 1;
                     mul_delay++;
                 end
                 MULH: begin  // high XLEN bits (signed * signed)
                     mul_tmp = $signed(a_i) * $signed(b_i);
-                    mul_tmp = mul_tmp[2*XLEN-1:XLEN];
+                    mul_res = mul_tmp[2*XLEN-1:XLEN];
                     stall_o = 1;
                     mul_delay++;
                 end
                 MULHSU: begin  // high XLEN bits (signed * unsigned)
                     mul_tmp = $signed(a_i) * $unsigned(b_i);
-                    mul_tmp = mul_tmp[2*XLEN-1:XLEN];
+                    mul_res = mul_tmp[2*XLEN-1:XLEN];
                     stall_o = 1;
                     mul_delay++;
                 end
                 MULHU: begin  // high XLEN bits (unsigned * unsigned)
                     mul_tmp = $unsigned(a_i) * $unsigned(b_i);
-                    mul_tmp = mul_tmp[2*XLEN-1:XLEN];
+                    mul_res = mul_tmp[2*XLEN-1:XLEN];
                     stall_o = 1;
                     mul_delay++;
                 end
