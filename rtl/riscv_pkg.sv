@@ -93,6 +93,8 @@ package riscv_pkg;
 
     // verilog_format: on
 
+    localparam NOP_INSTR = {12'b0, 5'b0, FUNCT3_ADD, 5'b0, OPCODE_IMM};
+
     // Instruction Types
     typedef struct packed {
         logic [31:25] funct7;
