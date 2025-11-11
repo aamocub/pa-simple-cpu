@@ -14,11 +14,11 @@ module top
     input logic rst_i
 );
 
-    if_stage_t if_out, if_reg;
-    id_stage_t id_out, id_reg;
-    ex_stage_t ex_out, ex_reg;
-    mm_stage_t mm_out, mm_reg;
-    wb_stage_t wb_out, wb_reg;
+    if_stage_t if_out, if_id;
+    id_stage_t id_out, id_ex;
+    ex_stage_t ex_out, ex_mm;
+    mm_stage_t mm_out, mm_wb;
+    wb_stage_t wb_out, wb_id;
 
     cu_if_t cu_if;
     cu_id_t cu_id;
@@ -53,56 +53,41 @@ module top
         .if_o  (if_out)
     );
 
-    always_ff @(posedge clk_i, posedge rst_i) begin
-        if (rst_i || cu_if.flush) begin
-            if_reg.instr <= NOP_INSTR;
-        end else if (!cu_if.stall) begin
-            if_reg <= if_out;
-        end
-    end
+    register #(
+        .reg_t(if_stage_t)
+    ) if_id_pipeline_reg (
+        .clk_i    (clk_i),
+        .rst_i    (rst_i),
+        .en_i     (!cu_id.stall),
+        .flush_i  (cu_id.flush),
+        .default_i('{instr: NOP_INSTR}),
+        .d_i      (if_out),
+        .q_o      (if_id)
+    );
 
     // ----------------------------------------------------------------------------------------------------------------
     // ID Stage
     // ----------------------------------------------------------------------------------------------------------------
 
-    if_stage_t if_id;
-
-    register #(
-        .reg_t(if_stage_t)
-    ) if_id_pipeline_reg (
-        .clk_i  (clk_i),
-        .rst_i  (rst_i),
-        .en_i   (1),
-        .flush_i(0),
-        .d_i    (if_out),
-        .q_o    (if_id)
-    );
-
     id_stage id_stage (
         .clk_i    (clk_i),
         .rst_i    (rst_i),
-        .fetch_i  (if_reg),  // TODO: Convert if_reg to if_id
+        .fetch_i  (if_id),
         .from_wb_i(wb_out),
         .decode_o (id_out)
     );
 
-    always_ff @(posedge clk_i, posedge rst_i) begin
-        if (rst_i || cu_id.flush) begin
-            id_reg.rs1      <= '0;
-            id_reg.rs2      <= '0;
-            id_reg.data_rs1 <= '0;
-            id_reg.data_rs2 <= '0;
-            id_reg.rd       <= '0;
-            id_reg.is_wb    <= 0;
-            id_reg.is_ld    <= 0;
-            id_reg.is_st    <= 0;
-            id_reg.uses_rs2 <= 0;
-            id_reg.imm      <= '0;
-            id_reg.op       <= ADDI;
-        end else if (!cu_id.stall) begin
-            id_reg <= id_out;
-        end
-    end
+    register #(
+        .reg_t(id_stage_t)
+    ) id_ex_pipeline_reg (
+        .clk_i    (clk_i),
+        .rst_i    (rst_i),
+        .en_i     (!cu_ex.stall),
+        .flush_i  (cu_ex.flush),
+        .default_i('{default: '0, op: ADDI}),
+        .d_i      (id_out),
+        .q_o      (id_ex)
+    );
 
     // ----------------------------------------------------------------------------------------------------------------
     // EX Stage
@@ -115,21 +100,17 @@ module top
         .ex_o (ex_out)
     );
 
-    always_ff @(posedge clk_i, posedge rst_i) begin
-        if (rst_i || cu_ex.flush) begin
-            ex_reg.alu_result <= '0;
-            ex_reg.is_taken   <= 0;
-            ex_reg.is_wb      <= 0;
-            ex_reg.is_ld      <= 0;
-            ex_reg.is_st      <= 0;
-            ex_reg.uses_rs2   <= 0;
-            ex_reg.data_rs2   <= '0;
-            ex_reg.rd         <= '0;
-            ex_reg.do_stall   <= 0;
-        end else if (!cu_ex.stall) begin
-            ex_reg <= ex_out;
-        end
-    end
+    register #(
+        .reg_t(ex_stage_t)
+    ) ex_mm_pipeline_reg (
+        .clk_i    (clk_i),
+        .rst_i    (rst_i),
+        .en_i     (!cu_mm.stall),
+        .flush_i  (cu_mm.flush),
+        .default_i('{default: '0}),
+        .d_i      (ex_out),
+        .q_o      (ex_mm)
+    );
 
     // ----------------------------------------------------------------------------------------------------------------
     // M Stage
@@ -142,21 +123,17 @@ module top
         .mm_o (mm_out)
     );
 
-    always_ff @(posedge clk_i, posedge rst_i) begin
-        if (rst_i || cu_mm.flush) begin
-            mm_reg.data       <= '0;
-            mm_reg.data_rs2   <= '0;
-            mm_reg.is_wb      <= 0;
-            mm_reg.do_stall   <= 0;
-            mm_reg.rd         <= '0;
-            mm_reg.read_req   <= '0;
-            mm_reg.read_resp  <= '0;
-            mm_reg.write_req  <= '0;
-            mm_reg.write_resp <= '0;
-        end else if (!cu_mm.stall) begin
-            mm_reg <= mm_out;
-        end
-    end
+    register #(
+        .reg_t(mm_stage_t)
+    ) mm_wb_pipeline_reg (
+        .clk_i    (clk_i),
+        .rst_i    (rst_i),
+        .en_i     (!cu_wb.stall),
+        .flush_i  (cu_wb.flush),
+        .default_i('{default: '0}),
+        .d_i      (mm_out),
+        .q_o      (mm_wb)
+    );
 
     // ----------------------------------------------------------------------------------------------------------------
     // WB Stage
