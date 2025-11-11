@@ -8,8 +8,8 @@
 // TODO: make this a 1-cycle stage
 
 module if_stage
-    import pa_pkg::*;
     import riscv_pkg::*;
+    import pa_pkg::*;
 (
     input  logic      clk_i,   // Clock signal
     input  logic      rst_i,   // Reset signal
@@ -19,30 +19,27 @@ module if_stage
     output if_stage_t if_o     // Output data from the IF stage
 );
     // verilog_format: off
-    enum { PC_GEN, PC_FETCH } state;
+    enum { IDLE, PC_GEN, PC_FETCH } state;
     // verilog_format: on
 
     logic [PHY_ADDR_LEN-1:0] pc;
     logic [PHY_ADDR_LEN-1:0] next_pc;
 
     always_comb begin
-        if (ctrl_i.flush) begin
+        if (rst_i) begin
             if_o.instr = NOP_INSTR;
+            next_pc = pc;
         end else begin
-            unique case (state)
+            priority case (state)
+                IDLE: begin
+                end
                 PC_GEN: begin
-                    if (rst_i) begin
-                        pc = PC_RESET_ADDR;
-                        next_pc = PC_RESET_ADDR;
-                    end else begin
-                        case (ctrl_i.taken)
-                            0: next_pc = pc + 4;
-                            1: next_pc = ctrl_i.addr;
-                        endcase
-                        pc = next_pc;
-                        req_o.valid = 1;
-                        req_o.addr = next_pc;
-                    end
+                    case (ctrl_i.taken)
+                        0: next_pc = pc + 4;
+                        1: next_pc = ctrl_i.addr;
+                    endcase
+                    req_o.valid = 1;
+                    req_o.addr  = pc;
                 end
                 PC_FETCH: begin
                     if (resp_i.valid) begin
@@ -53,14 +50,20 @@ module if_stage
                     end
                 end
             endcase
+            if (ctrl_i.flush) begin
+                if_o.instr = NOP_INSTR;
+            end
         end
     end
 
     always_ff @(posedge clk_i, posedge rst_i) begin
         if (rst_i) begin
-            state <= PC_GEN;
+            state <= IDLE;
+            pc <= PC_RESET_ADDR;
         end else begin
+            pc <= next_pc;
             unique case (state)
+                IDLE:     state <= PC_FETCH;
                 PC_GEN:   state <= PC_FETCH;
                 PC_FETCH: state <= resp_i.valid ? PC_GEN : state;
             endcase
