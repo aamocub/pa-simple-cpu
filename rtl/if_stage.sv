@@ -32,6 +32,8 @@ module if_stage
         end else begin
             priority case (state)
                 IDLE: begin
+                    req_o.valid = 1;
+                    req_o.addr  = pc;
                 end
                 PC_GEN: begin
                     case (ctrl_i.taken)
