@@ -49,7 +49,7 @@ module mem_arbitrer_tb
     );
 
     initial begin
-        $dumpfile("mem_arbitrer_tb.vcd");
+        $dumpfile("mem_arbitrer_tb.fst");
         $dumpvars(0, mem_arbitrer_tb);
         clk = 1;
         rst = 1;
