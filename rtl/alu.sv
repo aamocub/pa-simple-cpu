@@ -74,6 +74,9 @@ module alu
                 REM:  out_o = (b_i == 0) ? 'x : $signed(a_i) % $signed(b_i);
                 REMU: out_o = (b_i == 0) ? 'x : a_i % b_i;
 
+                // Branches
+                BEQ, BNE, BLT, BGE, BLTU, BGEU: out_o = a_i + b_i;
+
                 default: out_o = 'x;
             endcase
         end
