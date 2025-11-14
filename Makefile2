@@ -1,0 +1,13 @@
+VFLAGS  = --quiet -Wall -Wno-fatal
+VFLAGS += --timing -j 0 --trace-fst --trace-structs --autoflush --assert -I./rtl -I./bench --prof-cfuncs -CFLAGS -DVL_DEBUG -Wno-UNUSEDPARAM -Wno-UNUSEDSIGNAL
+VFLAGS += --cc --exe --build
+
+VSRC = rtl/top.sv
+
+BUILD_DIR = ./obj_dir
+
+SIM_MAIN = bench/testbench.cpp
+
+all:
+	@verilator $(VFLAGS) $(SIM_MAIN) $(VSRC)
+	$(BUILD_DIR)/Vtop
