@@ -3,6 +3,9 @@
 package pa_pkg;
     import riscv_pkg::*;
 
+    /* Memory parameters*/
+    localparam MEM_ACCESS_DELAY = 5;  // How many cycles does it take the memory to access data
+
     /* Core definitions */
 
     localparam PHY_ADDR_LEN = 32;  // Bit width of physical address
@@ -17,6 +20,7 @@ package pa_pkg;
         MULHSU, MULHU, DIV, DIVU, REM, REMU, ILLEGAL
     } instr_op_t;
     // verilog_format: on
+
 
     /* Control unit types */
 
@@ -116,4 +120,24 @@ package pa_pkg;
         logic [4:0]      rd;
         logic [XLEN-1:0] data;
     } wb_stage_t;  // from WB to ID stage
+
+    // Memory and Memory Arbitrer structs
+    typedef logic [3:0] access_t;
+    typedef struct packed {
+        logic                    valid;
+        logic [PHY_ADDR_LEN-1:0] addr;
+        access_t                 byte_en;
+    } mem_read_req_t;
+    typedef struct packed {
+        logic            valid;
+        logic [XLEN-1:0] data;
+    } mem_read_resp_t;
+    typedef struct packed {
+        logic                    valid;
+        logic [PHY_ADDR_LEN-1:0] addr;
+        logic [XLEN-1:0]         data;
+        access_t                 byte_en;
+    } mem_write_req_t;
+    typedef struct packed {logic valid;} mem_write_resp_t;
+
 endpackage

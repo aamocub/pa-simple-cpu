@@ -1,59 +1,58 @@
-module memory #(
-    parameter  NUMWORDS         = 4096,              // Number of words in the memory
-    parameter  DATAWIDTH        = 32,                // Bit width of a word
-    localparam ADDR_SIZE        = $clog2(NUMWORDS),
-    localparam MEM_ACCESS_DELAY = 5                  // How many cycles does it take the memory to access data
-) (
-    input logic       clk_i,
-    input logic       rst_i,
-    input logic [3:0] read_en_i, // read enable
+import "DPI-C" context function int fill_memory();
 
-    input  logic [ADDR_SIZE-1:0] read_addr_i,   // read address
-    output logic                 read_valid_o,  // read valid
-    output logic [DATAWIDTH-1:0] read_data_o,   // read data
-    input  logic                 write_en_i,    // write enable
-    input  logic [ADDR_SIZE-1:0] write_addr_i,  // write address
-    input  logic [DATAWIDTH-1:0] write_data_i,  // write data
-    output logic                 write_valid_o  // write valid
+module memory
+    import riscv_pkg::*;
+    import pa_pkg::*;
+#(
+    localparam int unsigned NUMWORDS = 2 << 10
+) (
+    input logic clk_i,
+    input logic rst_i,
+
+    input  mem_read_req_t   read_i,
+    output mem_read_resp_t  read_o,
+    input  mem_write_req_t  write_i,
+    output mem_write_resp_t write_o
 );
 
-    logic [DATAWIDTH-1:0][ADDR_SIZE-1:0] mem;  // memory array to store and read memory values
+    logic [XLEN-1:0] mem[NUMWORDS];  // memory array to store and read memory values
     logic [$clog2(MEM_ACCESS_DELAY)-1:0] rd_delay;  // read delay counter register
-    logic [ADDR_SIZE-1:0] rd_addr;  // read address register
+    logic [PHY_ADDR_LEN-1:0] rd_addr;  // read address register
 
     logic [$clog2(MEM_ACCESS_DELAY)-1:0] wr_delay;  // write delay counter register
-    logic [ADDR_SIZE-1:0] wr_addr;  // write address register
-    logic [DATAWIDTH-1:0] wr_data;  // write data register
+    logic [PHY_ADDR_LEN-1:0] wr_addr;  // write address register
+    logic [XLEN-1:0] wr_data;  // write data register
 
     always_ff @(posedge clk_i, posedge rst_i) begin
-        read_valid_o  <= 0;
-        write_valid_o <= 0;
+        read_o.valid  <= 0;
+        write_o.valid <= 0;
 
         if (rst_i) begin
             rd_delay <= 0;
             wr_delay <= 0;
-            for (int i = 0; i < NUMWORDS; ++i) mem[i] <= '0;
+            // mem <= '{default: 0};
+            for (int i = 0; i < 1024; i = i + 1) mem[i] <= i;
         end else begin
             if (wr_delay == MEM_ACCESS_DELAY - 1) begin
                 mem[wr_addr]  <= {<<8{wr_data}};  // little endian
-                write_valid_o <= 1;
+                write_o.valid <= 1;
                 wr_delay      <= 0;
             end else if (wr_delay > 0) begin
                 wr_delay <= wr_delay + 1;
-            end else if (write_en_i) begin
-                wr_data  <= write_data_i;
-                wr_addr  <= write_addr_i;
+            end else if (write_i.valid) begin
+                wr_data  <= write_i.data;
+                wr_addr  <= write_i.addr;
                 wr_delay <= wr_delay + 1;
             end
 
             if (rd_delay == MEM_ACCESS_DELAY - 1) begin
-                read_data_o  <= {<<8{mem[rd_addr]}};  // little endian
-                read_valid_o <= 1;
+                read_o.data  <= {<<8{mem[rd_addr]}};  // little endian
+                read_o.valid <= 1;
                 rd_delay     <= 0;
             end else if (rd_delay > 0) begin
                 rd_delay <= rd_delay + 1;
-            end else if (read_en_i) begin
-                rd_addr  <= read_addr_i;
+            end else if (read_i.byte_en) begin
+                rd_addr  <= read_i.addr;
                 rd_delay <= rd_delay + 1;
             end
         end
