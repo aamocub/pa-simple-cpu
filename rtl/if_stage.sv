@@ -5,7 +5,7 @@
 // 4. Sends result to if_o
 // 5. Go to step 1
 
-// TODO: make this a 1-cycle stage
+// TODO: make this a 1-cycle stage or not
 
 module if_stage
     import riscv_pkg::*;
