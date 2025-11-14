@@ -26,8 +26,13 @@ module alu
             mul_delay++;
         end else begin
             case (opcode_i)
+                NOP: out_o = '0;
+
+                // Add / Sub
                 ADD, ADDI: out_o = a_i + b_i;
                 SUB:       out_o = a_i - b_i;
+
+                // Logic
                 XOR, XORI: out_o = a_i ^ b_i;
                 OR, ORI:   out_o = a_i | b_i;
                 AND, ANDI: out_o = a_i & b_i;
@@ -76,6 +81,9 @@ module alu
 
                 // Branches
                 BEQ, BNE, BLT, BGE, BLTU, BGEU: out_o = a_i + b_i;
+
+                // Load / Store
+                LB, LH, LW, LBU, LHU, SB, SH, SW: out_o = a_i + b_i;
 
                 default: out_o = 'x;
             endcase
