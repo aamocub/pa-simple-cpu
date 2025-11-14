@@ -26,8 +26,13 @@ module alu
             mul_delay++;
         end else begin
             case (opcode_i)
+                NOP: out_o = '0;
+
+                // Add / Sub
                 ADD, ADDI: out_o = a_i + b_i;
                 SUB:       out_o = a_i - b_i;
+
+                // Logic
                 XOR, XORI: out_o = a_i ^ b_i;
                 OR, ORI:   out_o = a_i | b_i;
                 AND, ANDI: out_o = a_i & b_i;
@@ -73,6 +78,12 @@ module alu
                 DIVU: out_o = (b_i == 0) ? 'x : a_i / b_i;
                 REM:  out_o = (b_i == 0) ? 'x : $signed(a_i) % $signed(b_i);
                 REMU: out_o = (b_i == 0) ? 'x : a_i % b_i;
+
+                // Branches
+                BEQ, BNE, BLT, BGE, BLTU, BGEU: out_o = a_i + b_i;
+
+                // Load / Store
+                LB, LH, LW, LBU, LHU, SB, SH, SW: out_o = a_i + b_i;
 
                 default: out_o = 'x;
             endcase

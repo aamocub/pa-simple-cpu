@@ -114,7 +114,6 @@ module id_stage
                     FUNCT3_BLTU: decode_o.op = BLTU;
                     FUNCT3_BGEU: decode_o.op = BGEU;
                 endcase
-                decode_o.uses_rs2 = 1;
             end
             OPCODE_JAL:   decode_o.op = JAL;
             OPCODE_JALR:  decode_o.op = JALR;
