@@ -1,5 +1,5 @@
 COMPILER=verilator
-VFLAGS=-Wall -Wno-fatal --timing --binary -j 0 --trace-fst --trace-structs --autoflush --assert -I./rtl -I./bench --prof-cfuncs -CFLAGS -DVL_DEBUG -Wno-UNUSEDPARAM -Wno-UNUSEDSIGNAL
+VFLAGS=--quiet -Wall -Wno-fatal --timing --binary -j 0 --trace-fst --trace-structs --autoflush --assert -I./rtl -I./bench --prof-cfuncs -CFLAGS -DVL_DEBUG -Wno-UNUSEDPARAM -Wno-UNUSEDSIGNAL
 SIM_ENGINE=vvp
 WAVE_VIEWER=gtkwave
 
@@ -33,19 +33,19 @@ all:
 
 compile:
 	$(call check_tb)
-	mkdir -p $(BUILD_DIR)
-	$(COMPILER) $(VFLAGS) $(TESTBENCHES_DIR)/$(TB)_tb.sv
-	cd $(BUILD_DIR) && ./V$(TB)_tb
+	@mkdir -p $(BUILD_DIR)
+	@$(COMPILER) $(VFLAGS) $(TESTBENCHES_DIR)/$(TB)_tb.sv
+	@cd $(BUILD_DIR) && ./V$(TB)_tb
 
 run:
 	$(call check_tb)
 	$(call check_file_exists,vvp)
-	cd $(BUILD_DIR) && $(SIM_ENGINE) $(TB)_tb.vvp
+	@cd $(BUILD_DIR) && $(SIM_ENGINE) $(TB)_tb.vvp
 
 wave: compile
 	$(call check_tb)
 	$(call check_file_exists,fst)
-	cd $(BUILD_DIR) && $(WAVE_VIEWER) -a $(TB)_tb.gtkw $(TB)_tb.fst
+	@cd $(BUILD_DIR) && $(WAVE_VIEWER) -a $(TB)_tb.gtkw $(TB)_tb.fst
 
 clean:
 	rm -rf $(BUILD_DIR)
