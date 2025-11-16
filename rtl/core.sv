@@ -83,7 +83,7 @@ module core
         .rst_i    (rst_i),
         .en_i     (!cu_id.stall),
         .flush_i  (cu_id.flush),
-        .default_i('{instr: NOP_INSTR}),
+        .default_i('{default: '0, instr: NOP_INSTR}),
         .d_i      (if_out),
         .q_o      (if_id)
     );

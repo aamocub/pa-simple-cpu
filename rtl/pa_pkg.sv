@@ -52,7 +52,8 @@ package pa_pkg;
     /* Module types */
 
     typedef struct packed {
-        instruction_t instr;  // Instruction
+        instruction_t    instr;  // Instruction
+        logic [XLEN-1:0] pc;     // Current PC
     } if_stage_t;
 
     typedef struct packed {

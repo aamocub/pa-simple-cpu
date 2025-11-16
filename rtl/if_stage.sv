@@ -26,6 +26,7 @@ module if_stage
     logic [PHY_ADDR_LEN-1:0] next_pc;
 
     always_comb begin
+        if_o.pc = pc;
         if (rst_i) begin
             if_o.instr = NOP_INSTR;
             next_pc = pc;

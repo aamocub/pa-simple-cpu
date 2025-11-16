@@ -26,7 +26,6 @@ module id_stage
     logic is_wb = (fetch_i.instr.rtype.opcode != OPCODE_STORE && fetch_i.instr.rtype.opcode != OPCODE_BRANCH) ? 1 : 0;
 
     always_comb begin
-        decode_o.rs1 = rs1;
         decode_o.rs2 = rs2;
         decode_o.rd = rd;
         decode_o.is_wb = is_wb;
@@ -46,6 +45,7 @@ module id_stage
 
     // Instruction decoding
     always_comb begin
+        decode_o.rs1 = rs1;
         decode_o.uses_rs2 = 0;
         case (fetch_i.instr.rtype.opcode)
             OPCODE_ALU: begin
@@ -114,6 +114,7 @@ module id_stage
                     FUNCT3_BLTU: decode_o.op = BLTU;
                     FUNCT3_BGEU: decode_o.op = BGEU;
                 endcase
+                decode_o.rs1 = fetch_i.pc;
             end
             OPCODE_JAL:   decode_o.op = JAL;
             OPCODE_JALR:  decode_o.op = JALR;
