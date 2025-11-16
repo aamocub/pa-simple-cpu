@@ -25,11 +25,14 @@ module core
     mm_stage_t mm_out, mm_wb;
     wb_stage_t wb_out, wb_id;
 
-    cu_if_t cu_if;
-    cu_id_t cu_id;
-    cu_ex_t cu_ex;
-    cu_mm_t cu_mm;
-    cu_wb_t cu_wb;
+    if_req_t  if_req;
+    if_resp_t if_resp;
+
+    cu_if_t   cu_if;
+    cu_id_t   cu_id;
+    cu_ex_t   cu_ex;
+    cu_mm_t   cu_mm;
+    cu_wb_t   cu_wb;
 
     cu cu (
         .if_i(if_out),
@@ -44,6 +47,21 @@ module core
         .wb_o(cu_wb)
     );
 
+    mem_arbitrer #() mem_arbitrer (
+        .clk_i           (clk_i),
+        .rst_i           (rst_i),
+        .if_req_i        (if_req),
+        .if_resp_o       (if_resp),
+        .mm_read_req_i   (),
+        .mm_read_resp_o  (),
+        .mm_write_req_i  (),
+        .mm_write_resp_o (),
+        .mem_write_req_o (write_req),
+        .mem_write_resp_i(write_resp),
+        .mem_read_req_o  (read_req),
+        .mem_read_resp_i (read_resp)
+    );
+
     // ----------------------------------------------------------------------------------------------------------------
     // IF Stage
     // ----------------------------------------------------------------------------------------------------------------
@@ -53,8 +71,8 @@ module core
         .clk_i (clk_i),
         .rst_i (rst_i),
         .ctrl_i(cu_if),
-        .req_o (),
-        .resp_i(),
+        .req_o (if_req),
+        .resp_i(if_resp),
         .if_o  (if_out)
     );
 
@@ -101,7 +119,7 @@ module core
     ex_stage ex_stage (
         .clk_i(clk_i),
         .rst_i(rst_i),
-        .id_i (id_reg),
+        .id_i (id_ex),
         .ex_o (ex_out)
     );
 
@@ -124,7 +142,7 @@ module core
     mm_stage mm_stage (
         .clk_i(clk_i),
         .rst_i(rst_i),
-        .ex_i (ex_reg),
+        .ex_i (ex_mm),
         .mm_o (mm_out)
     );
 
@@ -147,7 +165,7 @@ module core
     wb_stage wb_stage (
         .clk_i(clk_i),
         .rst_i(rst_i),
-        .mm_i (mm_reg),
+        .mm_i (mm_wb),
         .wb_o (wb_out)
     );
 

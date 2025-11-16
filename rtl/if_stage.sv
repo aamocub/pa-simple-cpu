@@ -19,7 +19,7 @@ module if_stage
     output if_stage_t if_o     // Output data from the IF stage
 );
     // verilog_format: off
-    enum { IDLE, PC_GEN, PC_FETCH } state;
+    enum { RST, IDLE, PC_GEN, PC_FETCH } state;
     // verilog_format: on
 
     logic [PHY_ADDR_LEN-1:0] pc;
@@ -31,22 +31,29 @@ module if_stage
             next_pc = pc;
         end else begin
             priority case (state)
+                RST: ;
                 IDLE: begin
-                    req_o.valid = 1;
                     req_o.addr  = pc;
+                    req_o.valid = 1;
                 end
                 PC_GEN: begin
                     case (ctrl_i.taken)
                         0: next_pc = pc + 4;
                         1: next_pc = ctrl_i.addr;
                     endcase
+                    req_o.addr  = next_pc;
                     req_o.valid = 1;
-                    req_o.addr  = pc;
                 end
                 PC_FETCH: begin
+                    req_o.valid = 0;
                     if (resp_i.valid) begin
-                        req_o.valid = 0;
-                        if_o.instr  = resp_i.data;
+                        if_o.instr = resp_i.data;
+                        case (ctrl_i.taken)
+                            0: next_pc = pc + 4;
+                            1: next_pc = ctrl_i.addr;
+                        endcase
+                        req_o.addr  = next_pc;
+                        req_o.valid = 1;
                     end else begin
                         if_o.instr = NOP_INSTR;
                     end
@@ -60,14 +67,18 @@ module if_stage
 
     always_ff @(posedge clk_i, posedge rst_i) begin
         if (rst_i) begin
-            state <= IDLE;
+            state <= RST;
             pc <= PC_RESET_ADDR;
         end else begin
             pc <= next_pc;
             unique case (state)
-                IDLE:     state <= PC_FETCH;
-                PC_GEN:   state <= PC_FETCH;
-                PC_FETCH: state <= resp_i.valid ? PC_GEN : state;
+                RST: state <= IDLE;
+                IDLE, PC_GEN: begin
+                    state <= PC_FETCH;
+                end
+                PC_FETCH: begin
+                    state <= resp_i.valid ? PC_GEN : state;
+                end
             endcase
         end
     end

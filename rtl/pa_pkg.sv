@@ -3,13 +3,15 @@
 package pa_pkg;
     import riscv_pkg::*;
 
+
     /* Memory parameters*/
-    localparam MEM_ACCESS_DELAY = 5;  // How many cycles does it take the memory to access data
+    localparam MEM_ACCESS_DELAY = 1;  // How many cycles does it take the memory to access data
 
     /* Core definitions */
 
     localparam PHY_ADDR_LEN = 32;  // Bit width of physical address
-    localparam PC_RESET_ADDR = 32'h1000;
+    // localparam PC_RESET_ADDR = 32'h1000;
+    localparam PC_RESET_ADDR = 32'h0000;
     localparam PC_EXCEPTION_ADDR = 32'h8000;
     localparam RF_NUMREGS = 32;
 

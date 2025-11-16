@@ -30,6 +30,8 @@ module mm_stage
     end
 
     always_comb begin
+        mm_o.rd = ex_i.rd;
+        mm_o.is_wb = ex_i.is_wb;
         unique case (state)
             NO: begin
                 mm_o.data = ex_i.alu_result;
