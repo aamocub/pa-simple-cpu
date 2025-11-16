@@ -43,6 +43,9 @@ module if_stage
                     endcase
                     req_o.addr  = next_pc;
                     req_o.valid = 1;
+                    if (resp_i.valid) begin
+                        if_o.instr = resp_i.data;
+                    end
                 end
                 PC_FETCH: begin
                     req_o.valid = 0;

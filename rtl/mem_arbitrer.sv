@@ -134,13 +134,14 @@ module mem_arbitrer
                     end
                 end
                 { IF_BUSY, MM_IDLE       }: begin
+                    if (mem_read_resp_i.valid) begin
+                        if_state <= IF_IDLE;
+                        if (if_req_i.valid) if_state <= IF_BUSY;
+                        else if (mm_read_req_i.valid) mm_state <= MM_BUSY;
+                    end
                     if (mm_read_req_i.valid) begin
                         mm_state   <= MM_PENDING;
                         mm_pending <= mm_read_req_i;
-                    end
-                    if (mem_read_resp_i.valid) begin
-                        if_state <= IF_IDLE;
-                        if (mm_read_req_i.valid) mm_state <= MM_BUSY;
                     end
                 end
                 { IF_BUSY, MM_PENDING    }: begin

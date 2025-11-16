@@ -2,8 +2,8 @@
 
 `define RINST(f7, rs2, rs1, f3, rd, opcode) {f7, rs2, rs1, f3, rd, opcode}
 `define IINST(imm, rs1, f3, rd, opcode) {imm, rs1, f3, rd, opcode}
-`define SINST(imm, rs2, rs1, f3, rd, opcode) {imm[11:5], rs2, rs1, f3, imm[4:0], opcode}
-`define BINST(imm, rs2, rs1, f3, rd, opcode) {imm[12], imm[10:5], rs2, rs1, f3, imm[4:1], imm[11], opcode}
+`define SINST(imm, rs2, rs1, f3, opcode) {imm[11:5], rs2, rs1, f3, imm[4:0], opcode}
+`define BINST(imm, rs2, rs1, f3, opcode) {imm[12], imm[10:5], rs2, rs1, f3, imm[4:1], imm[11], opcode}
 
 module memory
     import riscv_pkg::*;
@@ -21,12 +21,12 @@ module memory
     input  mem_write_req_t  write_i,
     output mem_write_resp_t write_o
 );
-    logic [12:1] jaddr = -12'd4;
+    logic [12:1] jaddr = 12'd3;
 
     logic [31:0] add = `RINST(riscv_pkg::FUNCT7_ADD, 5'd1, 5'd1, riscv_pkg::FUNCT3_ADD, 5'd31, riscv_pkg::OPCODE_ALU);
     logic [31:0] sub = `RINST(riscv_pkg::FUNCT7_SUB, 5'd2, 5'd2, riscv_pkg::FUNCT3_SUB, 5'd30, riscv_pkg::OPCODE_ALU);
     logic [31:0] addi = `IINST(12'd5, 5'd1, riscv_pkg::FUNCT3_ADDI, 5'd31, riscv_pkg::OPCODE_IMM);
-    logic [31:0] beq = `BINST(jaddr, 5'd1, 5'd1, riscv_pkg::FUNCT3_BEQ, 5'd31, riscv_pkg::OPCODE_BRANCH);
+    logic [31:0] beq = `BINST(jaddr, 5'd1, 5'd1, riscv_pkg::FUNCT3_BEQ, riscv_pkg::OPCODE_BRANCH);
     logic [31:0] instr_list[4] = {add, sub, addi, beq};
 
     logic [NUMWORDS-1:0][7:0] mem;  // memory array to store and read memory values
@@ -48,7 +48,7 @@ module memory
                 mem <= '{default: 0};
             end
         end else begin
-            if (wr_delay == MEM_ACCESS_DELAY - 1) begin
+            if (wr_delay == MEM_ACCESS_DELAY) begin  // TODO: colocar MEM_ACCESS_DELAY-1 de nuevo
                 // mem[wr_addr]  <= {<<8{wr_data}};  // little endian
                 mem[wr_addr]  <= wr_data;  // big endian
                 write_o.valid <= 1;
@@ -62,8 +62,10 @@ module memory
             end
 
             if (read_i.valid) begin  // TODO: quitar esta basura
-                rd_addr <= read_i.addr;
-                read_o.data <= {mem[rd_addr+3], mem[rd_addr+2], mem[rd_addr+1], mem[rd_addr+0]};  // big endian
+                // rd_addr <= read_i.addr;
+                read_o.data <= {
+                    mem[read_i.addr+3], mem[read_i.addr+2], mem[read_i.addr+1], mem[read_i.addr+0]
+                };  // big endian
                 read_o.valid <= 1;
             end
 
