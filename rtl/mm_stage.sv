@@ -10,9 +10,9 @@ module mm_stage
 
 
     enum {
+        NO,   // Don't do anything
         REQ,  // Request to memory and wait for response
-        RESP,  // Response from memory
-        NO  // Don't do anything
+        RESP  // Response from memory
     } state;
 
     logic resp_valid = mm_o.read_resp.valid | mm_o.write_resp.valid;
