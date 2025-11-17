@@ -13,11 +13,19 @@ module id_stage
     logic [31:0] i_imm = {{20{fetch_i.instr[31]}}, fetch_i.instr.itype.imm};
     logic [31:0] s_imm = {{20{fetch_i.instr[31]}}, fetch_i.instr.stype.imm_1, fetch_i.instr.stype.imm_2};
     logic [31:0] b_imm = {
-        {19{fetch_i.instr.btype.imm_1}}, fetch_i.instr.btype.imm_2, fetch_i.instr.btype.imm_3, fetch_i.instr.btype.imm_4
+        {20{fetch_i.instr.btype.imm_1}},
+        fetch_i.instr.btype.imm_2,
+        fetch_i.instr.btype.imm_3,
+        fetch_i.instr.btype.imm_4,
+        1'b0
     };
     logic [31:0] u_imm = {fetch_i.instr.utype.imm, 12'b0};
     logic [31:0] j_imm = {
-        {12{fetch_i.instr.jtype.imm_1}}, fetch_i.instr.jtype.imm_2, fetch_i.instr.jtype.imm_3, fetch_i.instr.jtype.imm_4
+        {12{fetch_i.instr.jtype.imm_1}},
+        fetch_i.instr.jtype.imm_2,
+        fetch_i.instr.jtype.imm_3,
+        fetch_i.instr.jtype.imm_4,
+        1'b0
     };
 
     logic [4:0] rd = fetch_i.instr.rtype.rd;
