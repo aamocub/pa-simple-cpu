@@ -82,6 +82,9 @@ module alu
                 // Branches
                 BEQ, BNE, BLT, BGE, BLTU, BGEU: out_o = a_i + b_i;
 
+                // Jumps
+                JAL, JALR: out_o = a_i + b_i;
+
                 // Load / Store
                 LB, LH, LW, LBU, LHU, SB, SH, SW: out_o = a_i + b_i;
 

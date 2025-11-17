@@ -126,8 +126,16 @@ module id_stage
                 endcase
                 decode_o.is_br = 1;
             end
-            OPCODE_JAL:   decode_o.op = JAL;
-            OPCODE_JALR:  decode_o.op = JALR;
+            OPCODE_JAL: begin
+                // NOTE: JAL currently does not link register
+                decode_o.op = JAL;
+                decode_o.is_br = 1;
+            end
+            OPCODE_JALR: begin
+                // TODO: JALR currently ignores base register
+                decode_o.op = JALR;
+                decode_o.is_br = 1;
+            end
             OPCODE_LUI:   decode_o.op = LUI;
             OPCODE_AUIPC: decode_o.op = AUIPC;
             OPCODE_ECALL: begin
