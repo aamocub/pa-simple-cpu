@@ -36,12 +36,12 @@ module id_stage
     // Immediate
     always_comb begin
         case (fetch_i.instr.rtype.opcode)
-            OPCODE_LUI, OPCODE_AUIPC:             decode_o.imm <= u_imm;
-            OPCODE_JAL:                           decode_o.imm <= j_imm;
-            OPCODE_IMM, OPCODE_LOAD, OPCODE_JALR: decode_o.imm <= i_imm;
-            OPCODE_STORE:                         decode_o.imm <= s_imm;
-            OPCODE_BRANCH:                        decode_o.imm <= b_imm;
-            default:                              decode_o.imm <= 0;
+            OPCODE_LUI, OPCODE_AUIPC:             decode_o.imm = u_imm;
+            OPCODE_JAL:                           decode_o.imm = j_imm;
+            OPCODE_IMM, OPCODE_LOAD, OPCODE_JALR: decode_o.imm = i_imm;
+            OPCODE_STORE:                         decode_o.imm = s_imm;
+            OPCODE_BRANCH:                        decode_o.imm = b_imm;
+            default:                              decode_o.imm = 0;
         endcase
     end
 
