@@ -24,7 +24,7 @@ module ex_stage
     );
 
     alu alu (
-        .a_i     (id_i.data_rs1),
+        .a_i     (id_i.is_br ? id_i.pc : id_i.data_rs1),
         .b_i     (id_i.uses_rs2 ? id_i.data_rs2 : id_i.imm),
         .opcode_i(id_i.op),
         .out_o   (ex_o.alu_result),
