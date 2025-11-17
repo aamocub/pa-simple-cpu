@@ -65,8 +65,10 @@ package pa_pkg;
         logic            is_wb;     // Is it going to write to regfile
         logic            is_ld;     // Is it a load
         logic            is_st;     // Is it a store
+        logic            is_br;     // Is it a branch
         logic            uses_rs2;  // Does the instruction use rs2
         logic [XLEN-1:0] imm;       // Immediate
+        logic [XLEN-1:0] pc;        // Current PC
         instr_op_t       op;        // Operation to perform
     } id_stage_t;
 
