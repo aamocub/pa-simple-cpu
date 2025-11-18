@@ -29,7 +29,7 @@ module memory
     logic [31:0] addi = `IINST(12'd5, 5'd1, riscv_pkg::FUNCT3_ADDI, 5'd31, riscv_pkg::OPCODE_IMM);
     logic [31:0] beq = `BINST(joffset, 5'd1, 5'd1, riscv_pkg::FUNCT3_BEQ, riscv_pkg::OPCODE_BRANCH);
     logic [31:0] mul = `RINST(riscv_pkg::FUNCT7_MUL, 5'd6, 5'd9, riscv_pkg::FUNCT3_MUL, 5'd31, riscv_pkg::OPCODE_ALU);
-    logic [31:0] instr_list[4] = {add, sub, addi, beq};
+    logic [31:0] instr_list[8] = {add, mul, sub, addi, sub, addi, mul, mul};
 
     logic [NUMWORDS-1:0][7:0] mem;  // memory array to store and read memory values
 
