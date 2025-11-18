@@ -110,14 +110,14 @@ package pa_pkg;
 
     typedef struct packed {
         logic [XLEN-1:0] data;
-        logic [XLEN-1:0] data_rs2;  // Value of register 2
-        logic            is_wb;     // Is it going to write to regfile
-        logic            do_stall;  // Should previous instr be stalled
-        logic [4:0]      rd;        // Destination register
-        // mm_read_req_t    read_req;
-        // mm_read_resp_t   read_resp;
-        // mm_write_req_t   write_req;
-        // mm_write_resp_t  write_resp;
+        logic [XLEN-1:0] data_rs2;    // Value of register 2
+        logic            is_wb;       // Is it going to write to regfile
+        logic            do_stall;    // Should previous instr be stalled
+        logic [4:0]      rd;          // Destination register
+        mm_read_req_t    read_req;
+        mm_read_resp_t   read_resp;
+        mm_write_req_t   write_req;
+        mm_write_resp_t  write_resp;
     } mm_stage_t;
 
     typedef struct packed {
