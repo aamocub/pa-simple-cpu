@@ -1,5 +1,5 @@
 COMPILER=verilator
-VFLAGS=--quiet -Wall -Wno-fatal --timing --binary -j 0 --trace-fst --trace-structs --autoflush --assert -I./rtl -I./bench --prof-cfuncs -CFLAGS -DVL_DEBUG -Wno-UNUSEDPARAM -Wno-UNUSEDSIGNAL
+VFLAGS=--quiet --report-unoptflat -Wall -Wno-fatal --timing --binary -j 0 --trace-fst --trace-structs --autoflush --assert -I./rtl -I./bench --prof-cfuncs -CFLAGS -DVL_DEBUG -Wno-UNUSEDPARAM -Wno-UNUSEDSIGNAL
 SIM_ENGINE=vvp
 # WAVE_VIEWER=gtkwave
 WAVE_VIEWER=surfer
