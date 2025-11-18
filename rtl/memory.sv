@@ -86,9 +86,9 @@ module memory
 
     initial begin
         if (DEBUG) begin
-            mem <= '{default: 0};
+            mem = '{default: 0};
             for (int i = 0; i < $size(instr_list); i = i + 1) begin
-                mem[PC_RESET_ADDR+4*i+:4] <= instr_list[i];
+                mem[PC_RESET_ADDR+4*i+:4] = instr_list[i];
             end
         end
     end
