@@ -47,7 +47,7 @@ wave: compile
 	$(call check_tb)
 	$(call check_file_exists,fst)
 # @cd $(BUILD_DIR) && $(WAVE_VIEWER) -a $(TB)_tb.gtkw $(TB)_tb.fst
-	@cd $(BUILD_DIR) && $(WAVE_VIEWER) $(TB)_tb.fst
+	@cd $(BUILD_DIR) && >/dev/null $(WAVE_VIEWER) $(TB)_tb.fst &
 
 clean:
 	rm -rf $(BUILD_DIR)
