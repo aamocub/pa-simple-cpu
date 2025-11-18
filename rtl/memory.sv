@@ -11,6 +11,7 @@ module memory
 #(
     // localparam int NUMWORDS = 2 << 12,
     localparam int NUMWORDS = 32,
+    localparam int DELAY_SIZE = (MEM_ACCESS_DELAY == 1) ? 1 : $clog2(MEM_ACCESS_DELAY),
     parameter DEBUG = 0
 ) (
     input logic clk_i,
@@ -28,13 +29,14 @@ module memory
     logic [31:0] addi = `IINST(12'd5, 5'd1, riscv_pkg::FUNCT3_ADDI, 5'd31, riscv_pkg::OPCODE_IMM);
     logic [31:0] beq = `BINST(joffset, 5'd1, 5'd1, riscv_pkg::FUNCT3_BEQ, riscv_pkg::OPCODE_BRANCH);
     logic [31:0] mul = `RINST(riscv_pkg::FUNCT7_MUL, 5'd6, 5'd9, riscv_pkg::FUNCT3_MUL, 5'd31, riscv_pkg::OPCODE_ALU);
-    logic [31:0] instr_list[8] = {add, sub, addi, beq, mul, mul, mul, mul};
+    logic [31:0] instr_list[4] = {add, sub, addi, beq};
 
     logic [NUMWORDS-1:0][7:0] mem;  // memory array to store and read memory values
-    logic [$clog2(MEM_ACCESS_DELAY)-1:0] rd_delay;  // read delay counter register
+
+    logic [DELAY_SIZE-1:0] rd_delay;  // read delay counter register
     logic [PHY_ADDR_LEN-1:0] rd_addr;  // read address register
 
-    logic [$clog2(MEM_ACCESS_DELAY)-1:0] wr_delay;  // write delay counter register
+    logic [DELAY_SIZE-1:0] wr_delay;  // write delay counter register
     logic [PHY_ADDR_LEN-1:0] wr_addr;  // write address register
     logic [XLEN-1:0] wr_data;  // write data register
 

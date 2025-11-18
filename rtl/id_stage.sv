@@ -56,6 +56,8 @@ module id_stage
     // Instruction decoding
     always_comb begin
         decode_o.is_br = 0;
+        decode_o.is_ld = 0;
+        decode_o.is_st = 0;
         decode_o.uses_rs2 = 0;
         case (fetch_i.instr.rtype.opcode)
             OPCODE_ALU: begin
@@ -106,6 +108,7 @@ module id_stage
                     FUNCT3_LBU: decode_o.op = LBU;
                     FUNCT3_LHU: decode_o.op = LHU;
                 endcase
+                decode_o.is_ld = 1;
             end
             OPCODE_STORE: begin
                 case (fetch_i.instr.rtype.funct3)
@@ -113,6 +116,7 @@ module id_stage
                     FUNCT3_SH: decode_o.op = SH;
                     FUNCT3_SW: decode_o.op = SW;
                 endcase
+                decode_o.is_st = 1;
                 decode_o.uses_rs2 = 1;
             end
             OPCODE_BRANCH: begin

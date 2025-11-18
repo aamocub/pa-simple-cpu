@@ -32,6 +32,8 @@ module mm_stage
     always_comb begin
         mm_o.rd = ex_i.rd;
         mm_o.is_wb = ex_i.is_wb;
+        mm_o.data_rs2 = ex_i.data_rs2;
+        mm_o.data = ex_i.alu_result;
         unique case (state)
             NO: begin
                 mm_o.data = ex_i.alu_result;

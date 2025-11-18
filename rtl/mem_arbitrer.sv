@@ -1,10 +1,3 @@
-// TODO: El dato que recibe arbitrer de memoria no se pasa directamente a IF o MM,
-// sino que tarda un ciclo de más. Hay que mover la logica fuera del `always_ff` y
-// hacerla combinacional
-
-// TODO: Hay que implementar un sistema de prioridad que permita servir a la etapa MM
-// porque, si no, la etapa IF acapara todos los accesos
-
 module mem_arbitrer
     import pa_pkg::*;
     import riscv_pkg::*;
@@ -39,67 +32,93 @@ module mem_arbitrer
     enum { MM_IDLE, MM_PENDING, MM_BUSY } mm_state;
     // verilog_format: on
 
-    always_comb begin
+    function void send_if_req;
+        if (if_pending.valid) begin
+            mem_read_req_o.valid = if_pending.valid;
+            mem_read_req_o.addr  = if_pending.addr;
+        end else begin
+            mem_read_req_o.valid = if_req_i.valid;
+            mem_read_req_o.addr  = if_req_i.addr;
+        end
+    endfunction
+    function void send_mm_req;
+        if (mm_pending.valid) begin
+            mem_read_req_o.valid = mm_pending.valid;
+            mem_read_req_o.addr  = mm_pending.addr;
+        end else begin
+            mem_read_req_o.valid = mm_read_req_i.valid;
+            mem_read_req_o.addr  = mm_read_req_i.addr;
+        end
+    endfunction
+    function void recv_mm_resp;
+        mm_read_resp_o.valid = mem_read_resp_i.valid;
+        mm_read_resp_o.data  = mem_read_resp_i.data;
+    endfunction
+    function void recv_if_resp;
+        if_resp_o.valid = mem_read_resp_i.valid;
+        if_resp_o.data  = mem_read_resp_i.data;
+    endfunction
+
+    // Function used to send a new request to memory.
+    function void send_new_req;
+        mem_read_req_o.valid = 0;
+        if (if_pending.valid) begin
+            mem_read_req_o.valid = if_pending.valid;
+            mem_read_req_o.addr  = if_pending.addr;
+        end else if (mm_pending.valid) begin
+            mem_read_req_o.valid = mm_pending.valid;
+            mem_read_req_o.addr  = mm_pending.addr;
+        end else if (if_req_i.valid && mm_read_req_i.valid) begin
+            mem_read_req_o.valid = if_req_i.valid;
+            mem_read_req_o.addr  = if_req_i.addr;
+            // store MM read request on state transition block
+        end else if (if_req_i.valid) begin
+            mem_read_req_o.valid = if_req_i.valid;
+            mem_read_req_o.addr  = if_req_i.addr;
+        end else if (mm_read_req_i.valid) begin
+            mem_read_req_o.valid = mm_read_req_i.valid;
+            mem_read_req_o.addr  = mm_read_req_i.addr;
+        end
+    endfunction
+
+    always_comb begin : automata
         if_resp_o.valid       = 0;
         mm_read_resp_o.valid  = 0;
         mm_write_resp_o.valid = 0;
         // verilog_format: off
         priority case ({ if_state, mm_state })
             { IF_IDLE, MM_IDLE } : begin
-                if (if_req_i.valid) begin
-                    mem_read_req_o.valid = 1;
-                    mem_read_req_o.addr  = if_req_i.addr;
-                end else if (mm_read_req_i.valid) begin
-                    mem_read_req_o.valid = 1;
-                    mem_read_req_o.addr  = mm_read_req_i.addr;
-                end
+                send_new_req();
             end
             { IF_IDLE, MM_BUSY       }: begin
                 if (mem_read_resp_i.valid) begin
-                    mm_read_resp_o.valid = 1;
-                    mm_read_resp_o.data  = mem_read_resp_i.data;
-
-                    mem_read_req_o.valid = if_req_i.valid;
-                    mem_read_req_o.addr  = if_req_i.addr;
+                    recv_mm_resp();
+                    send_new_req();
                 end
             end
             { IF_PENDING, MM_BUSY    }: begin
                 if (mem_read_resp_i.valid) begin
-                    mm_read_resp_o.valid = 1;
-                    mm_read_resp_o.data  = mem_read_resp_i.data;
-
-                    mem_read_req_o.valid = 1;
-                    mem_read_req_o.addr  = if_pending.addr;
+                    recv_mm_resp();
+                    send_new_req();
                 end
             end
             { IF_BUSY, MM_IDLE       }: begin
                 if (mem_read_resp_i.valid) begin
-                    if_resp_o.valid = 1;
-                    if_resp_o.data  = mem_read_resp_i.data;
-
-                    if (if_req_i.valid) begin
-                        mem_read_req_o.valid = 1;
-                        mem_read_req_o.addr  = if_req_i.addr;
-                    end else if (mm_read_req_i.valid) begin
-                        mem_read_req_o.valid = 1;
-                        mem_read_req_o.addr  = mm_read_req_i.addr;
-                    end
+                    recv_if_resp();
+                    send_new_req();
                 end
             end
             { IF_BUSY, MM_PENDING    }: begin
                 if (mem_read_resp_i.valid) begin
-                    if_resp_o.valid = 1;
-                    if_resp_o.data  = mem_read_resp_i.data;
-
-                    mem_read_req_o.valid = 1;
-                    mem_read_req_o.addr  = mm_pending.addr;
+                    recv_if_resp();
+                    send_new_req();
                 end
             end
         endcase
         // verilog_format: on
     end
 
-    always_ff @(posedge clk_i, posedge rst_i) begin
+    always_ff @(posedge clk_i, posedge rst_i) begin : transitions
         if (rst_i) begin
             if_state <= IF_IDLE;
             mm_state <= MM_IDLE;
@@ -154,74 +173,4 @@ module mem_arbitrer
             // verilog_format: on
         end
     end
-
-    /*
-    always_comb begin
-        if (rst_i) begin
-            if_pending = '{default: 0};
-            mm_pending = '{default: 0};
-        end else begin
-            if (if_busy && mem_read_resp_i.valid) begin
-                if_busy = 0;
-                if_pending = '{default: 0};
-                mem_read_req_o.valid = 0;
-            end else if (if_pending.valid && !mm_read_busy) begin
-                if_busy = 1;
-                mem_read_req_o.valid = 1;
-                mem_read_req_o.addr = if_pending.addr;
-            end else if (if_req_i.valid && !mm_read_busy) begin
-                mem_read_req_o.valid = 1;
-                mem_read_req_o.addr = if_req_i.addr;
-                if_busy = 1;
-            end else if (if_req_i.valid && mm_read_busy) begin
-                if_pending = if_req_i;
-            end
-            if (mm_read_busy && mem_read_resp_i.valid) begin
-                mm_read_busy = 0;
-                mm_pending = '{default: 0};
-                mem_read_req_o.valid = 0;
-            end else if (mm_pending.valid && !if_busy) begin
-                mm_read_busy = 1;
-                mem_read_req_o.valid = 1;
-                mem_read_req_o.addr = mm_pending.addr;
-            end else if (mm_read_req_i.valid && !if_busy && !if_pending.valid) begin
-                mem_read_req_o.valid = 1;
-                mem_read_req_o.addr = mm_read_req_i.addr;
-                mm_read_busy = 1;
-            end else if (mm_read_req_i.valid && (if_busy || if_pending.valid)) begin
-                mm_pending = mm_read_req_i;
-            end
-        end
-    end
-    */
-
-    // always_ff @(posedge clk_i, posedge rst_i) begin
-    //     mm_read_busy               <= 0;
-    //     // mem_read_req_o.valid  <= 0;
-    //     mem_write_req_o.valid <= 0;
-    //     if_resp_o.data        <= 0;
-
-    //     if (if_req_i.valid && !mm_read_busy) begin
-    //         // mem_read_req_o.valid   <= 1;
-    //         // mem_read_req_o.addr    <= if_req_i.addr;
-    //         mem_read_req_o.byte_en <= 15;
-    //         // if_busy                <= !mem_read_resp_i.valid;
-    //         if_resp_o.valid        <= mem_read_resp_i.valid;
-    //         if_resp_o.data         <= mem_read_resp_i.data;
-    //     end else if (mm_read_req_i.valid && !if_busy) begin
-    //         // mem_read_req_o.valid <= 1;
-    //         // mem_read_req_o.addr  <= mm_read_req_i.addr;
-    //         mm_read_busy              <= !mem_read_resp_i.valid;
-    //         mm_read_resp_o.valid <= mem_read_resp_i.valid;
-    //         mm_read_resp_o.data  <= mem_read_resp_i.data;
-    //     end
-
-    //     if (mm_write_req_i.valid) begin
-    //         mem_write_req_o.valid <= 1;
-    //         mem_write_req_o.addr  <= mm_write_req_i.addr;
-    //         mem_write_req_o.data  <= mm_write_req_i.data;
-    //         mm_write_resp_o.valid <= mem_write_resp_i.valid;
-    //     end
-    // end
-
 endmodule
