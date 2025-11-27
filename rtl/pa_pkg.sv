@@ -39,6 +39,10 @@ package pa_pkg;
     typedef struct packed {
         logic stall;
         logic flush;
+        logic [1:0] alu_mux_a_sel;
+        logic [1:0] alu_mux_b_sel;
+        logic [1:0] cmp_mux_a_sel;
+        logic [1:0] cmp_mux_b_sel;
     } cu_ex_t;
     typedef struct packed {
         logic stall;
@@ -59,9 +63,9 @@ package pa_pkg;
     typedef struct packed {
         logic [4:0]      rs1;       // Source register 1
         logic [4:0]      rs2;       // Source register 2
+        logic [4:0]      rd;        // Destination register
         logic [XLEN-1:0] data_rs1;  // Value of register 1
         logic [XLEN-1:0] data_rs2;  // Value of register 2
-        logic [4:0]      rd;        // Destination register
         logic            is_wb;     // Is it going to write to regfile
         logic            is_ld;     // Is it a load
         logic            is_st;     // Is it a store
@@ -73,14 +77,16 @@ package pa_pkg;
     } id_stage_t;
 
     typedef struct packed {
+        logic [4:0]      rs1;         // Source register 1
+        logic [4:0]      rs2;         // Source register 2
+        logic [4:0]      rd;          // Destination register
+        logic            is_wb;       // Is it going to write to regfile
         logic [XLEN-1:0] alu_result;
         logic            is_taken;    // Is branch taken
-        logic            is_wb;       // Is it going to write to regfile
         logic            is_ld;       // Is it a load
         logic            is_st;       // Is it a store
         logic            uses_rs2;    // Does the instruction use rs2
         logic [XLEN-1:0] data_rs2;    // Value of register 2
-        logic [4:0]      rd;          // Destination register
         logic            do_stall;    // Should previous instr be stalled
     } ex_stage_t;
 
@@ -113,11 +119,9 @@ package pa_pkg;
         logic [XLEN-1:0] data_rs2;  // Value of register 2
         logic            is_wb;     // Is it going to write to regfile
         logic            do_stall;  // Should previous instr be stalled
+        logic [4:0]      rs1;       // Source register 1
+        logic [4:0]      rs2;       // Source register 2
         logic [4:0]      rd;        // Destination register
-        // mm_read_req_t    read_req;
-        // mm_read_resp_t   read_resp;
-        // mm_write_req_t   write_req;
-        // mm_write_resp_t  write_resp;
     } mm_stage_t;
 
     typedef struct packed {

@@ -40,9 +40,13 @@ module core
 
     cu cu (
         .if_i(if_out),
+        .if_id_i(if_id),
         .id_i(id_out),
+        .id_ex_i(id_ex),
         .ex_i(ex_out),
+        .ex_mm_i(ex_mm),
         .mm_i(mm_out),
+        .mm_wb_i(mm_wb),
         .wb_i(wb_out),
         .if_o(cu_if),
         .id_o(cu_id),
@@ -74,7 +78,7 @@ module core
     if_stage if_stage (
         .clk_i (clk_i),
         .rst_i (rst_i),
-        .ctrl_i(cu_if),
+        .cu_i  (cu_if),
         .req_o (if_req),
         .resp_i(if_resp),
         .if_o  (if_out)
@@ -123,8 +127,11 @@ module core
     ex_stage ex_stage (
         .clk_i(clk_i),
         .rst_i(rst_i),
-        .id_i (id_ex),
-        .ex_o (ex_out)
+        .id_i(id_ex),
+        .cu_i(cu_ex),
+        .bypass_mm_data(ex_mm.alu_result),
+        .bypass_wb_data(mm_wb.data),
+        .ex_o(ex_out)
     );
 
     register #(

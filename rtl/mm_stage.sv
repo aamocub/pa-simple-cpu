@@ -22,6 +22,8 @@ module mm_stage
 
     always_comb begin : ctrl_signals
         mm_o.rd       = ex_i.rd;
+        mm_o.rs1      = ex_i.rs1;
+        mm_o.rs2      = ex_i.rs2;
         mm_o.is_wb    = ex_i.is_wb;
         mm_o.data_rs2 = ex_i.data_rs2;
     end
