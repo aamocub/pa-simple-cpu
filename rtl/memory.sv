@@ -33,7 +33,7 @@ module memory
     logic [31:0] mul = `RINST(riscv_pkg::FUNCT7_MUL, 5'd6, 5'd9, riscv_pkg::FUNCT3_MUL, 5'd31, riscv_pkg::OPCODE_ALU);
     logic [31:0] lw = `LINST(12'd0, 5'd0, riscv_pkg::FUNCT3_LW, 5'd29, riscv_pkg::OPCODE_LOAD);
     logic [31:0] sw = `SINST(soffset, 5'd28, 5'd0, riscv_pkg::FUNCT3_SW, riscv_pkg::OPCODE_STORE);
-    logic [31:0] instr_list[6] = {add, sub, addi, lw, sw, beq};
+    logic [31:0] instr_list[10] = {add, mul, sub, addi, sub, lw, sw, addi, mul, mul};
 
     logic [NUMWORDS-1:0][7:0] mem;  // memory array to store and read memory values
 
