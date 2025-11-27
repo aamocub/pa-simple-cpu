@@ -25,14 +25,18 @@ module core
     mm_stage_t mm_out, mm_wb;
     wb_stage_t wb_out, wb_id;
 
-    if_req_t  if_req;
+    if_req_t if_req;
     if_resp_t if_resp;
+    mm_read_req_t mm_read_req;
+    mm_read_resp_t mm_read_resp;
+    mm_write_req_t mm_write_req;
+    mm_write_resp_t mm_write_resp;
 
-    cu_if_t   cu_if;
-    cu_id_t   cu_id;
-    cu_ex_t   cu_ex;
-    cu_mm_t   cu_mm;
-    cu_wb_t   cu_wb;
+    cu_if_t cu_if;
+    cu_id_t cu_id;
+    cu_ex_t cu_ex;
+    cu_mm_t cu_mm;
+    cu_wb_t cu_wb;
 
     cu cu (
         .if_i(if_out),
@@ -52,10 +56,10 @@ module core
         .rst_i           (rst_i),
         .if_req_i        (if_req),
         .if_resp_o       (if_resp),
-        .mm_read_req_i   (),
-        .mm_read_resp_o  (),
-        .mm_write_req_i  (),
-        .mm_write_resp_o (),
+        .mm_read_req_i   (mm_read_req),
+        .mm_read_resp_o  (mm_read_resp),
+        .mm_write_req_i  (mm_write_req),
+        .mm_write_resp_o (mm_write_resp),
         .mem_write_req_o (write_req),
         .mem_write_resp_i(write_resp),
         .mem_read_req_o  (read_req),
@@ -142,8 +146,12 @@ module core
     mm_stage mm_stage (
         .clk_i(clk_i),
         .rst_i(rst_i),
-        .ex_i (ex_mm),
-        .mm_o (mm_out)
+        .ex_i(ex_mm),
+        .read_req_o(mm_read_req),
+        .read_resp_i(mm_read_resp),
+        .write_req_o(mm_write_req),
+        .write_resp_i(mm_write_resp),
+        .mm_o(mm_out)
     );
 
     register #(

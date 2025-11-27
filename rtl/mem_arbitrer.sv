@@ -30,6 +30,7 @@ module mem_arbitrer
     // verilog_format: off
     enum { IF_IDLE, IF_PENDING, IF_BUSY } if_state;
     enum { MM_IDLE, MM_PENDING, MM_BUSY } mm_state;
+    enum { WRITE_IDLE, WRITE_BUSY } write_state;
     // verilog_format: on
 
     function void send_if_req;
@@ -81,10 +82,9 @@ module mem_arbitrer
         end
     endfunction
 
-    always_comb begin : automata
-        if_resp_o.valid       = 0;
-        mm_read_resp_o.valid  = 0;
-        mm_write_resp_o.valid = 0;
+    always_comb begin : mem_read_process
+        if_resp_o.valid      = 0;
+        mm_read_resp_o.valid = 0;
         // verilog_format: off
         priority case ({ if_state, mm_state })
             { IF_IDLE, MM_IDLE } : begin
@@ -118,7 +118,7 @@ module mem_arbitrer
         // verilog_format: on
     end
 
-    always_ff @(posedge clk_i, posedge rst_i) begin : transitions
+    always_ff @(posedge clk_i, posedge rst_i) begin : mem_read_transitions
         if (rst_i) begin
             if_state <= IF_IDLE;
             mm_state <= MM_IDLE;
@@ -126,51 +126,116 @@ module mem_arbitrer
             // verilog_format: off
             priority case ({ if_state, mm_state })
                 { IF_IDLE, MM_IDLE } : begin
-                    if (if_req_i.valid) begin
+                    if (if_req_i.valid && mm_read_req_i.valid) begin
+                        if_state <= IF_BUSY;
+                        mm_pending <= mm_read_req_i;
+                        mm_state <= MM_PENDING;
+                    end else if (if_req_i.valid) begin
                         if_state <= IF_BUSY;
                     end else if (mm_read_req_i.valid) begin
-                        mm_state <= MM_BUSY;
-                    end
-                    if (mm_read_req_i.valid && if_req_i.valid) begin
-                        mm_state <= MM_PENDING;
-                        mm_pending <= mm_read_req_i;
+                        if_state <= IF_BUSY;
                     end
                 end
                 { IF_IDLE, MM_BUSY }: begin
-                    if (if_req_i.valid) begin
-                        if_state   <= IF_PENDING;
-                        if_pending <= if_req_i;
-                    end
                     if (mem_read_resp_i.valid) begin
                         mm_state <= MM_IDLE;
-                        if (if_req_i.valid) if_state <= IF_BUSY;
+                        if (if_req_i.valid && mm_read_req_i.valid) begin
+                            if_state <= IF_BUSY;
+                            mm_pending <= mm_read_req_i;
+                            mm_state <= MM_PENDING;
+                        end else if (if_req_i.valid) begin
+                            if_state <= IF_BUSY;
+                        end else if (mm_read_req_i.valid) begin
+                            if_state <= IF_BUSY;
+                        end
+                    end else begin
+                        if (if_req_i.valid) begin
+                            if_state   <= IF_PENDING;
+                            if_pending <= if_req_i;
+                        end
                     end
                 end
                 { IF_PENDING, MM_BUSY    }: begin
                     if (mem_read_resp_i.valid) begin
                         mm_state <= MM_IDLE;
                         if_state <= IF_BUSY;
+                        if (mm_read_req_i.valid) begin
+                            mm_state <= MM_PENDING;
+                            mm_pending <= mm_read_req_i;
+                        end
                     end
                 end
                 { IF_BUSY, MM_IDLE       }: begin
                     if (mem_read_resp_i.valid) begin
                         if_state <= IF_IDLE;
-                        if (if_req_i.valid) if_state <= IF_BUSY;
-                        else if (mm_read_req_i.valid) mm_state <= MM_BUSY;
-                    end
-                    if (mm_read_req_i.valid) begin
-                        mm_state   <= MM_PENDING;
-                        mm_pending <= mm_read_req_i;
+                        if (if_req_i.valid && mm_read_req_i.valid) begin
+                            if_state <= IF_BUSY;
+                            mm_pending <= mm_read_req_i;
+                            mm_state <= MM_PENDING;
+                        end else if (if_req_i.valid) begin
+                            if_state <= IF_BUSY;
+                        end else if (mm_read_req_i.valid) begin
+                            if_state <= IF_BUSY;
+                        end
+                    end else begin
+                        if (mm_read_req_i.valid) begin
+                            mm_state   <= MM_PENDING;
+                            mm_pending <= mm_read_req_i;
+                        end
                     end
                 end
                 { IF_BUSY, MM_PENDING    }: begin
                     if (mem_read_resp_i.valid) begin
                         if_state <= IF_IDLE;
                         mm_state <= MM_BUSY;
+                        if (if_req_i.valid) begin
+                            if_state <= IF_PENDING;
+                            if_pending <= if_req_i;
+                        end
                     end
                 end
             endcase
             // verilog_format: on
         end
+    end
+
+    always_ff @(posedge clk_i, posedge rst_i) begin : mem_write_transitions
+        if (rst_i) begin
+            write_state <= WRITE_IDLE;
+        end else begin
+            unique case (write_state)
+                WRITE_IDLE: write_state <= mm_write_req_i.valid ? WRITE_BUSY : write_state;
+                WRITE_BUSY: begin
+                    if (mem_write_resp_i.valid && mm_write_req_i.valid) begin
+                        write_state <= WRITE_BUSY;
+                    end else if (mem_write_resp_i.valid) begin
+                        write_state <= WRITE_IDLE;
+                    end else begin
+                        write_state <= write_state;
+                    end
+                end
+            endcase
+        end
+    end
+    always_comb begin : mem_write_process
+        mem_write_req_o.valid = 0;
+        unique case (write_state)
+            WRITE_IDLE: begin
+                mem_write_req_o.valid = mm_write_req_i.valid;
+                mem_write_req_o.addr  = mm_write_req_i.addr;
+                mem_write_req_o.data  = mm_write_req_i.data;
+            end
+            WRITE_BUSY: begin
+                mem_write_req_o.valid = 0;
+                mm_write_resp_o.valid = mem_write_resp_i.valid;
+                if (mem_write_resp_i.valid) begin
+                    if (mm_write_req_i.valid) begin
+                        mem_write_req_o.valid = mm_write_req_i.valid;
+                        mem_write_req_o.addr  = mm_write_req_i.addr;
+                        mem_write_req_o.data  = mm_write_req_i.data;
+                    end
+                end
+            end
+        endcase
     end
 endmodule
