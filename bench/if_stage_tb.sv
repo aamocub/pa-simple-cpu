@@ -16,7 +16,7 @@ module if_stage_tb
     if_stage if_stage (
         .clk_i (clk),
         .rst_i (rst),
-        .ctrl_i(ctrl),
+        .cu_i  (ctrl),
         .req_o (req),
         .resp_i(resp),
         .if_o  (ifout)
