@@ -11,14 +11,15 @@ module ex_stage
     output ex_stage_t            ex_o
 );
     always_comb begin : passthrough_signals
-        ex_o.is_wb    = id_i.is_wb;
-        ex_o.is_ld    = id_i.is_ld;
-        ex_o.is_st    = id_i.is_st;
-        ex_o.uses_rs2 = id_i.uses_rs2;
-        ex_o.data_rs2 = id_i.data_rs2;
-        ex_o.rd       = id_i.rd;
-        ex_o.rs1      = id_i.rs1;
-        ex_o.rs2      = id_i.rs2;
+        ex_o.is_wb     = id_i.is_wb;
+        ex_o.is_ld     = id_i.is_ld;
+        ex_o.is_st     = id_i.is_st;
+        ex_o.uses_rs2  = id_i.uses_rs2;
+        ex_o.data_rs2  = id_i.data_rs2;
+        ex_o.rd        = id_i.rd;
+        ex_o.rs1       = id_i.rs1;
+        ex_o.rs2       = id_i.rs2;
+        ex_o.mem_width = id_i.mem_width;
     end
 
     logic [XLEN-1:0] alu_a, alu_b;

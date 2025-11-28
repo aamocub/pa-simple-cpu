@@ -59,6 +59,7 @@ module id_stage
         decode_o.is_ld = 0;
         decode_o.is_st = 0;
         decode_o.uses_rs2 = 0;
+        decode_o.mem_width = WORD;
         case (fetch_i.instr.rtype.opcode)
             OPCODE_ALU: begin
                 // verilog_format: off
@@ -104,19 +105,41 @@ module id_stage
                 case (fetch_i.instr.rtype.funct3)
                     FUNCT3_LB: begin
                         decode_o.op = LB;
+                        decode_o.mem_width = BYTE;
                     end
-                    FUNCT3_LH:  decode_o.op = LH;
-                    FUNCT3_LW:  decode_o.op = LW;
-                    FUNCT3_LBU: decode_o.op = LBU;
-                    FUNCT3_LHU: decode_o.op = LHU;
+                    FUNCT3_LH: begin
+                        decode_o.op = LH;
+                        decode_o.mem_width = HALF;
+                    end
+                    FUNCT3_LW: begin
+                        decode_o.op = LW;
+                        decode_o.mem_width = WORD;
+                    end
+                    FUNCT3_LBU: begin
+                        decode_o.op = LBU;
+                        decode_o.mem_width = BYTE;
+                    end
+                    FUNCT3_LHU: begin
+                        decode_o.op = LHU;
+                        decode_o.mem_width = HALF;
+                    end
                 endcase
                 decode_o.is_ld = 1;
             end
             OPCODE_STORE: begin
                 case (fetch_i.instr.rtype.funct3)
-                    FUNCT3_SB: decode_o.op = SB;
-                    FUNCT3_SH: decode_o.op = SH;
-                    FUNCT3_SW: decode_o.op = SW;
+                    FUNCT3_SB: begin
+                        decode_o.op = SB;
+                        decode_o.mem_width = BYTE;
+                    end
+                    FUNCT3_SH: begin
+                        decode_o.op = SH;
+                        decode_o.mem_width = HALF;
+                    end
+                    FUNCT3_SW: begin
+                        decode_o.op = SW;
+                        decode_o.mem_width = WORD;
+                    end
                 endcase
                 decode_o.is_st = 1;
                 decode_o.uses_rs2 = 1;

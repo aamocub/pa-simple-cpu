@@ -115,7 +115,7 @@ module core
         .rst_i    (rst_i),
         .en_i     (!cu_ex.stall),
         .flush_i  (cu_ex.flush),
-        .default_i('{default: '0, op: ADDI}),
+        .default_i('{default: '0, op: ADDI, mem_width: WORD}),
         .d_i      (id_out),
         .q_o      (id_ex)
     );
@@ -141,7 +141,7 @@ module core
         .rst_i    (rst_i),
         .en_i     (!cu_mm.stall),
         .flush_i  (cu_mm.flush),
-        .default_i('{default: '0}),
+        .default_i('{default: '0, mem_width: WORD}),
         .d_i      (ex_out),
         .q_o      (ex_mm)
     );
