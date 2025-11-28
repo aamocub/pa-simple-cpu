@@ -21,6 +21,7 @@ package pa_pkg;
         XORI, ORI, ANDI, SLLI, SRLI, SRAI, ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND, ECALL, EBREAK, MUL, MULH,
         MULHSU, MULHU, DIV, DIVU, REM, REMU, ILLEGAL
     } instr_op_t;
+    typedef enum logic [1:0] {BYTE, HALF, WORD} mem_width_t;
     // verilog_format: on
 
 
@@ -61,19 +62,20 @@ package pa_pkg;
     } if_stage_t;
 
     typedef struct packed {
-        logic [4:0]      rs1;       // Source register 1
-        logic [4:0]      rs2;       // Source register 2
-        logic [4:0]      rd;        // Destination register
-        logic [XLEN-1:0] data_rs1;  // Value of register 1
-        logic [XLEN-1:0] data_rs2;  // Value of register 2
-        logic            is_wb;     // Is it going to write to regfile
-        logic            is_ld;     // Is it a load
-        logic            is_st;     // Is it a store
-        logic            is_br;     // Is it a jump/branch
-        logic            uses_rs2;  // Does the instruction use rs2
-        logic [XLEN-1:0] imm;       // Immediate
-        logic [XLEN-1:0] pc;        // Current PC
-        instr_op_t       op;        // Operation to perform
+        logic [4:0]      rs1;        // Source register 1
+        logic [4:0]      rs2;        // Source register 2
+        logic [4:0]      rd;         // Destination register
+        logic [XLEN-1:0] data_rs1;   // Value of register 1
+        logic [XLEN-1:0] data_rs2;   // Value of register 2
+        logic            is_wb;      // Is it going to write to regfile
+        logic            is_ld;      // Is it a load
+        logic            is_st;      // Is it a store
+        logic            is_br;      // Is it a jump/branch
+        logic            uses_rs2;   // Does the instruction use rs2
+        logic [XLEN-1:0] imm;        // Immediate
+        logic [XLEN-1:0] pc;         // Current PC
+        mem_width_t      mem_width;  // Width of memory access
+        instr_op_t       op;         // Operation to perform
     } id_stage_t;
 
     typedef struct packed {
@@ -87,6 +89,7 @@ package pa_pkg;
         logic            is_st;       // Is it a store
         logic            uses_rs2;    // Does the instruction use rs2
         logic [XLEN-1:0] data_rs2;    // Value of register 2
+        mem_width_t      mem_width;   // Width of memory access
         logic            do_stall;    // Should previous instr be stalled
     } ex_stage_t;
 

@@ -102,7 +102,9 @@ module id_stage
             end
             OPCODE_LOAD: begin
                 case (fetch_i.instr.rtype.funct3)
-                    FUNCT3_LB:  decode_o.op = LB;
+                    FUNCT3_LB: begin
+                        decode_o.op = LB;
+                    end
                     FUNCT3_LH:  decode_o.op = LH;
                     FUNCT3_LW:  decode_o.op = LW;
                     FUNCT3_LBU: decode_o.op = LBU;

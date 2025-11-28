@@ -48,7 +48,7 @@ module cu
             id_o.flush = 1;
             ex_o.flush = 1;
             if_o.addr  = ex_mm_i.alu_result;
-        end else if (ex_mm_i.do_stall) begin  // ALU stall
+        end else if (ex_i.do_stall) begin  // ALU stall
             if_o.stall = 1;
             id_o.stall = 1;
             ex_o.stall = 1;
