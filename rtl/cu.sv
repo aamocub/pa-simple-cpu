@@ -63,7 +63,7 @@ module cu
             if_o.stall = 1;
             id_o.stall = 1;
             ex_o.stall = 1;  // TODO: It should be possible for EX to continue multiplying when stalled
-            // TODO: mm_o.stall = 1; ?
+            mm_o.stall = 1;
         end
     end
 
