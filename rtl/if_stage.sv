@@ -74,7 +74,7 @@ module if_stage
                 IF2: begin
                     req_o.valid = 0;
                     if (resp_i.valid) begin
-                        instr = resp_i.data;
+                        instr = {<<8{resp_i.data}};
                         req_o.valid = 1;
                         req_o.addr = next_pc;
                     end
