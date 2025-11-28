@@ -117,11 +117,11 @@ module id_stage
                     end
                     FUNCT3_LBU: begin
                         decode_o.op = LBU;
-                        decode_o.mem_width = BYTE;
+                        decode_o.mem_width = UBYTE;
                     end
                     FUNCT3_LHU: begin
                         decode_o.op = LHU;
-                        decode_o.mem_width = HALF;
+                        decode_o.mem_width = UHALF;
                     end
                 endcase
                 decode_o.is_ld = 1;
