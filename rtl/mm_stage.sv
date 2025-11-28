@@ -75,6 +75,7 @@ module mm_stage
                     // write_req_o.valid = 0;
                     // read_req_o.valid = 0;
                     if (read_resp_i.valid) begin
+                        mm_o.do_stall = 0;
                         mm_o.data = read_resp_i.data;
                         unique case (ex_i.mem_width)
                             BYTE:  mm_o.data = {{24{read_resp_i.data[31]}}, read_resp_i.data[31:24]};
