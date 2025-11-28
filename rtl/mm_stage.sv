@@ -76,6 +76,13 @@ module mm_stage
                     // read_req_o.valid = 0;
                     if (read_resp_i.valid) begin
                         mm_o.data = read_resp_i.data;
+                        unique case (ex_i.mem_width)
+                            BYTE:  mm_o.data = {{24{read_resp_i.data[31]}}, read_resp_i.data[31:24]};
+                            UBYTE: mm_o.data = {24'b0, read_resp_i.data[31:24]};
+                            HALF:  mm_o.data = {{16{read_resp_i.data[31]}}, read_resp_i.data[31:16]};
+                            UHALF: mm_o.data = {16'b0, read_resp_i.data[31:16]};
+                            WORD:  mm_o.data = {<<8{read_resp_i.data}};
+                        endcase
                     end
                 end
             endcase
