@@ -21,7 +21,7 @@ package pa_pkg;
         XORI, ORI, ANDI, SLLI, SRLI, SRAI, ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND, ECALL, EBREAK, MUL, MULH,
         MULHSU, MULHU, DIV, DIVU, REM, REMU, ILLEGAL
     } instr_op_t;
-    typedef enum logic [1:0] {BYTE, HALF, WORD} mem_width_t;
+    typedef enum logic [2:0] {BYTE, UBYTE, HALF, UHALF, WORD} mem_width_t;
     // verilog_format: on
 
 
