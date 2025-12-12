@@ -65,6 +65,24 @@ module cu
             ex_o.stall = 1;  // TODO: It should be possible for EX to continue multiplying when stalled
             mm_o.stall = 1;
         end
+
+        // Exceptions
+        if (|wb_i.excep_vec) begin
+            if (wb_i.excep_vec.ill_instr) begin
+                if_o.except_valid = 1;
+                if_o.except_addr  = PC_EXCEPTION_ADDR;
+            end else if (wb_i.excep_vec.div_by_zero) begin
+                if_o.except_valid = 1;
+                if_o.except_addr  = PC_EXCEPTION_ADDR;
+            end
+            if_o.flush = 1;
+            id_o.flush = 1;
+            ex_o.flush = 1;
+            mm_o.flush = 1;
+            wb_o.flush = 1;
+        end else begin
+            if_o.except_valid = 0;
+        end
     end
 
 endmodule

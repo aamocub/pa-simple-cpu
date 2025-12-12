@@ -10,6 +10,12 @@ module ex_stage
     input  logic      [XLEN-1:0] bypass_wb_data,
     output ex_stage_t            ex_o
 );
+    logic div_by_zero;
+    always_comb begin : exceptions
+        ex_o.excep_vec             = id_i.excep_vec;
+        ex_o.excep_vec.div_by_zero = div_by_zero;
+    end
+
     always_comb begin : passthrough_signals
         ex_o.is_wb     = id_i.is_wb;
         ex_o.is_ld     = id_i.is_ld;
@@ -67,13 +73,14 @@ module ex_stage
     );
 
     alu alu (
-        .clk_i   (clk_i),
-        .rst_i   (rst_i),
-        .a_i     (alu_a),
-        .b_i     (alu_b),
-        .opcode_i(id_i.op),
-        .out_o   (ex_o.alu_result),
-        .stall_o (ex_o.do_stall)
+        .clk_i     (clk_i),
+        .rst_i     (rst_i),
+        .a_i       (alu_a),
+        .b_i       (alu_b),
+        .opcode_i  (id_i.op),
+        .out_o     (ex_o.alu_result),
+        .stall_o   (ex_o.do_stall),
+        .div_zero_o(div_by_zero)
     );
 
 endmodule

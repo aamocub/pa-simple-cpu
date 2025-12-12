@@ -20,6 +20,9 @@ module mm_stage
     mm_read_req_t current_read;
     mm_write_req_t current_write;
 
+    always_comb begin : exceptions
+        mm_o.excep_vec = ex_i.excep_vec;
+    end
     always_comb begin : passthrough_signals
         mm_o.rd       = ex_i.rd;
         mm_o.rs1      = ex_i.rs1;
