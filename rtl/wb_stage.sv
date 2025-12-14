@@ -9,12 +9,13 @@ module wb_stage
 );
 
     always_comb begin : exceptions
-        wb_o.excep_vec = mm_i.excep_vec;
+        wb_o.evec = mm_i.evec;
     end
 
     always_comb begin : passthrough_signals
         wb_o.is_wb = mm_i.is_wb;
         wb_o.rd    = mm_i.rd;
+        wb_o.pc    = mm_i.pc;
         wb_o.data  = mm_i.data;
     end
 

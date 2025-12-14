@@ -33,7 +33,7 @@ module if_stage
     end
 
     always_comb begin : if_out
-        if_o.excep_vec = '0;  // No exceptions (yet) in IF stage
+        if_o.evec = '0;  // No exceptions (yet) in IF stage
         if (cu_i.flush) begin
             if_o.pc = 0;
             if_o.instr = NOP_INSTR;

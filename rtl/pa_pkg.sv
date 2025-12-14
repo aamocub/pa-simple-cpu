@@ -63,8 +63,11 @@ package pa_pkg;
         logic [PHY_ADDR_LEN-1:0] except_addr;   // Where to jump for the exception
     } cu_if_t;
     typedef struct packed {
-        logic stall;  // Stall stage
-        logic flush;  // Flush stage
+        logic            stall;  // Stall stage
+        logic            flush;  // Flush stage
+        // Exception PC register
+        logic [XLEN-1:0] epc;    // PC that raised the exception
+        logic            ewe;    // Write enable
     } cu_id_t;
     typedef struct packed {
         logic       stall;          // Stall stage
@@ -85,9 +88,9 @@ package pa_pkg;
 
     /* ---------------------------------------------- Stage definitions --------------------------------------------- */
     typedef struct packed {
-        instruction_t    instr;      // Instruction
-        logic [XLEN-1:0] pc;         // Current PC
-        exception_t      excep_vec;  // Exception vector
+        instruction_t    instr;  // Instruction
+        logic [XLEN-1:0] pc;     // Current PC
+        exception_t      evec;   // Exception vector
     } if_stage_t;
 
     typedef struct packed {
@@ -105,7 +108,7 @@ package pa_pkg;
         logic [XLEN-1:0] pc;         // Current PC
         mem_width_t      mem_width;  // Width of memory access
         instr_op_t       op;         // Operation to perform
-        exception_t      excep_vec;  // Exception vector
+        exception_t      evec;       // Exception vector
     } id_stage_t;
 
     typedef struct packed {
@@ -117,29 +120,32 @@ package pa_pkg;
         logic            is_taken;    // Is branch taken
         logic            is_ld;       // Is it a load
         logic            is_st;       // Is it a store
+        logic [XLEN-1:0] pc;          // Current PC
         logic            uses_rs2;    // Does the instruction use rs2
         logic [XLEN-1:0] data_rs2;    // Value of register 2
         mem_width_t      mem_width;   // Width of memory access
         logic            do_stall;    // Should previous instr be stalled
-        exception_t      excep_vec;   // Exception vector
+        exception_t      evec;        // Exception vector
     } ex_stage_t;
 
     typedef struct packed {
         logic [XLEN-1:0] data;
-        logic [XLEN-1:0] data_rs2;   // Value of register 2
-        logic            is_wb;      // Is it going to write to regfile
-        logic            do_stall;   // Should previous instr be stalled
-        logic [4:0]      rs1;        // Source register 1
-        logic [4:0]      rs2;        // Source register 2
-        logic [4:0]      rd;         // Destination register
-        exception_t      excep_vec;  // Exception vector
+        logic [XLEN-1:0] data_rs2;  // Value of register 2
+        logic [XLEN-1:0] pc;        // Current PC
+        logic            is_wb;     // Is it going to write to regfile
+        logic            do_stall;  // Should previous instr be stalled
+        logic [4:0]      rs1;       // Source register 1
+        logic [4:0]      rs2;       // Source register 2
+        logic [4:0]      rd;        // Destination register
+        exception_t      evec;      // Exception vector
     } mm_stage_t;
 
     typedef struct packed {
         logic            is_wb;
+        logic [XLEN-1:0] pc;     // Current PC
         logic [4:0]      rd;
         logic [XLEN-1:0] data;
-        exception_t      excep_vec;  // Exception vector
+        exception_t      evec;   // Exception vector
     } wb_stage_t;  // from WB to ID stage
 
     // Memory and Memory Arbitrer structs

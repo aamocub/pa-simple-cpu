@@ -23,7 +23,7 @@ module cu
     logic mm_rs1_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs1 && !ex_rs1_hazard;
     logic mm_rs2_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs2 && !ex_rs2_hazard;
 
-    logic is_exception = |wb_i.excep_vec;
+    logic is_exception = |wb_i.evec;
     logic is_taken = ex_mm_i.is_taken;
 
     always_comb begin : IF_stage
@@ -38,6 +38,8 @@ module cu
     always_comb begin : ID_stage
         id_o.stall = ex_i.do_stall | mm_i.do_stall;
         id_o.flush = is_taken | is_exception;
+        id_o.epc   = wb_i.pc;
+        id_o.ewe   = is_exception;
     end
 
     always_comb begin : EX_stage

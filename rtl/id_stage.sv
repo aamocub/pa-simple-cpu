@@ -35,8 +35,8 @@ module id_stage
 
     logic ill_instr;
     always_comb begin : id_exceptions
-        decode_o.excep_vec = fetch_i.excep_vec;
-        decode_o.excep_vec.ill_instr = ill_instr;
+        decode_o.evec = fetch_i.evec;
+        decode_o.evec.ill_instr = ill_instr;
     end
 
     always_comb begin : id_out

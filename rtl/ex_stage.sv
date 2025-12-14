@@ -12,8 +12,8 @@ module ex_stage
 );
     logic div_by_zero;
     always_comb begin : exceptions
-        ex_o.excep_vec             = id_i.excep_vec;
-        ex_o.excep_vec.div_by_zero = div_by_zero;
+        ex_o.evec             = id_i.evec;
+        ex_o.evec.div_by_zero = div_by_zero;
     end
 
     always_comb begin : passthrough_signals
@@ -25,6 +25,7 @@ module ex_stage
         ex_o.rd        = id_i.rd;
         ex_o.rs1       = id_i.rs1;
         ex_o.rs2       = id_i.rs2;
+        ex_o.pc        = id_i.pc;
         ex_o.mem_width = id_i.mem_width;
     end
 
