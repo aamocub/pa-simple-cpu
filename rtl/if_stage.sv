@@ -55,9 +55,10 @@ module if_stage
         end else if (state == RST || state == IF1) begin
             next_pc = pc;
         end else begin
-            case (cu_i.taken)
+            case (cu_i.pcsel)
                 0: next_pc = pc + 4;
                 1: next_pc = cu_i.addr;
+                2: next_pc = PC_EXCEPTION_ADDR;
                 default: next_pc = pc + 4;
             endcase
         end
