@@ -44,6 +44,18 @@ package pa_pkg;
     localparam PC_RESET_ADDR = 32'h0000;
     localparam RF_NUMREGS = 32;
 
+    /* ------------------------------------------------ History File ------------------------------------------------ */
+    localparam HF_LEN = 10;
+    typedef struct packed {
+        logic                    valid;   // Valid bit : entry is occupied
+        logic                    ready;   // Ready bit : entry has the result
+        logic [PHY_ADDR_LEN-1:0] addr;    // Address in case of LOAD or STORE
+        logic [PHY_ADDR_LEN-1:0] pc;      // PC
+        exception_t              evec;    // Exception vector
+        logic [XLEN-1:0]         rd;      // Destination
+        logic [XLEN-1:0]         result;  // Result
+    } hf_entry_t;
+
     /* --------------------------------------------- Decode definitions --------------------------------------------- */
     // verilog_format: off
     typedef enum {

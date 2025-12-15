@@ -1,3 +1,5 @@
+`include "histfile_if.sv"
+
 module id_stage
     import riscv_pkg::*;
     import pa_pkg::*;
