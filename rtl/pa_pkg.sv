@@ -32,7 +32,6 @@ package pa_pkg;
     } mm_write_req_t;
     typedef struct packed {logic valid;} mm_write_resp_t;
 
-
     /* ------------------------------------------------- Exceptions ------------------------------------------------- */
     localparam PC_EXCEPTION_ADDR = 32'h8000;
     typedef struct packed {
