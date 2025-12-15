@@ -1,4 +1,8 @@
-`include "histfile_if.sv"
+`include "hf_push_if.sv"
+`include "hf_commit_if.sv"
+
+/// TODO:
+/// Recover logic in case of exception
 
 module histfile
     import riscv_pkg::*;
@@ -9,7 +13,8 @@ module histfile
     input logic clk_i,
     input logic rst_i,
 
-    histfile_if id_if,
+    hf_push_if   push_if,
+    hf_commit_if commit_if,
 
     output logic full_o,
     output logic empty_o
@@ -32,10 +37,17 @@ module histfile
             foreach (hf[i]) hf[i] <= 0;
         end else begin
             // push new entry to list
-            if (id_if.valid && !full_o) begin
-                hf[tail] <= id_if.entry;
-                id_if.position <= tail;
+            if (push_if.valid && !full_o) begin
+                hf[tail] <= push_if.entry;
+                push_if.position <= tail;
                 tail <= ((tail + 1) % LEN);
+            end
+            // commit head
+            if (hf[head].ready && hf[head].valid) begin
+                hf[head].valid <= 0;
+                commit_if.valid <= 1;
+                commit_if.entry <= hf[head];
+                head <= ((head + 1) % LEN);
             end
         end
     end
