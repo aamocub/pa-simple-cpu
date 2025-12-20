@@ -3,8 +3,8 @@ package pa_pkg;
 
     /* --------------------------------------------- Memory definitions --------------------------------------------- */
     // verilog_format: off
-    localparam MEM_ACCESS_DELAY = 1;  // How many cycles does it take the memory to access data
-    localparam PHY_ADDR_LEN     = 32; // Bit width of physical address
+    localparam integer MEM_ACCESS_DELAY = 1;  // How many cycles does it take the memory to access data
+    localparam integer PHY_ADDR_LEN     = 32; // Bit width of physical address
     typedef enum logic [2:0] { BYTE, UBYTE, HALF, UHALF, WORD } mem_width_t; // Size/width of memory access
     // verilog_format: on
 
@@ -34,7 +34,7 @@ package pa_pkg;
 
 
     /* ------------------------------------------------- Exceptions ------------------------------------------------- */
-    localparam PC_EXCEPTION_ADDR = 32'h8000;
+    localparam integer PC_EXCEPTION_ADDR = 32'h8000;
     typedef struct packed {
         logic ill_instr;
         logic div_by_zero;
