@@ -38,6 +38,16 @@ module core
     cu_mm_t cu_mm;
     cu_wb_t cu_wb;
 
+    cache_intf cache_port ();
+    arbitrer_intf arb_port ();
+
+    cache #() cache (
+        .clk_i(clk_i),
+        .rst_i(rst_i),
+        .stage_io(cache_port.CACHE),
+        .mem_io(arb_port.CACHE)
+    );
+
     cu cu (
         .if_i(if_out),
         .if_id_i(if_id),

@@ -6,11 +6,9 @@ package pa_pkg;
 
     /* Memory parameters*/
     localparam MEM_ACCESS_DELAY = 1;  // How many cycles does it take the memory to access data
+    localparam PHY_ADDR_LEN = 32;  // Bit width of physical address
 
     /* Core definitions */
-
-    localparam PHY_ADDR_LEN = 32;  // Bit width of physical address
-    // localparam PC_RESET_ADDR = 32'h1000;
     localparam PC_RESET_ADDR = 32'h0000;
     localparam PC_EXCEPTION_ADDR = 32'h8000;
     localparam RF_NUMREGS = 32;
@@ -24,6 +22,35 @@ package pa_pkg;
     typedef enum logic [2:0] {BYTE, UBYTE, HALF, UHALF, WORD} mem_width_t;
     // verilog_format: on
 
+    /* Cache definitions */
+    localparam CACHE_LINE_SIZE = 128;  // Cache line of 128 bits
+    typedef enum logic {
+        READ,
+        WRITE
+    } access_t;
+    typedef struct packed {
+        access_t kind;
+        mem_width_t width;
+        logic valid;
+        logic [PHY_ADDR_LEN-1:0] addr;
+        logic [XLEN-1:0] data;
+    } cc_req_t;
+    typedef struct packed {
+        logic valid;
+        logic [XLEN-1:0] data;
+    } cc_resp_t;
+
+    /* Memory arbitrer definitions */
+    typedef struct packed {
+        access_t                 kind;
+        logic                    valid;
+        logic [PHY_ADDR_LEN-1:0] addr;
+        logic [XLEN-1:0]         data;
+    } arb_req_t;
+    typedef struct packed {
+        logic            valid;
+        logic [XLEN-1:0] data;
+    } arb_resp_t;
 
     /* Control unit types */
 
@@ -134,11 +161,10 @@ package pa_pkg;
     } wb_stage_t;  // from WB to ID stage
 
     // Memory and Memory Arbitrer structs
-    typedef logic [3:0] access_t;
     typedef struct packed {
+        access_t                 kind;
         logic                    valid;
         logic [PHY_ADDR_LEN-1:0] addr;
-        access_t                 byte_en;
     } mem_read_req_t;
     typedef struct packed {
         logic            valid;
@@ -148,7 +174,6 @@ package pa_pkg;
         logic                    valid;
         logic [PHY_ADDR_LEN-1:0] addr;
         logic [XLEN-1:0]         data;
-        access_t                 byte_en;
     } mem_write_req_t;
     typedef struct packed {logic valid;} mem_write_resp_t;
 
