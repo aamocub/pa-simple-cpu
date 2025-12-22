@@ -81,6 +81,7 @@ module cache
                                 endcase
                             end
                             WRITE: begin
+                                line[idx].dirty <= 1;
                                 case (stage_io.req.width)
                                     WORD: word <= stage_io.req.data;
                                     HALF, UHALF: half <= stage_io.req.data[(XLEN/2)-1:0];
