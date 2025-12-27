@@ -5,23 +5,17 @@ module mem_arbitrer_tb
     import pa_pkg::*;
     import riscv_pkg::*;
 ();
-
+    /*
     parameter integer CLK_PERIOD = 20;
 
-    reg              clk;
-    reg              rst;
+    reg       clk;
+    reg       rst;
 
-    if_req_t         if_req_i;
-    if_resp_t        if_resp_o;
-    mm_read_req_t    mm_read_req_i;
-    mm_read_resp_t   mm_read_resp_o;
-    mm_write_req_t   mm_write_req_i;
-    mm_write_resp_t  mm_write_resp_o;
+    if_req_t  if_req_i;
+    if_resp_t if_resp_o;
 
-    mem_read_req_t   readreq;
-    mem_read_resp_t  readresp;
-    mem_write_req_t  writereq;
-    mem_write_resp_t writeresp;
+    memory_intf cc_io ();
+    memory_intf mem_io ();
 
     always #(CLK_PERIOD / 2) clk <= ~clk;
 
@@ -30,23 +24,14 @@ module mem_arbitrer_tb
         .rst_i(rst),
         .if_req_i(if_req_i),
         .if_resp_o(if_resp_o),
-        .mm_read_req_i(mm_read_req_i),
-        .mm_read_resp_o(mm_read_resp_o),
-        .mm_write_req_i(mm_write_req_i),
-        .mm_write_resp_o(mm_write_resp_o),
-        .mem_read_req_o(readreq),
-        .mem_read_resp_i(readresp),
-        .mem_write_req_o(writereq),
-        .mem_write_resp_i(writeresp)
+        .cache_io(cc_io.SV),
+        .mem_io(mem_io.CL)
     );
 
-    memory #() memory (
-        .clk_i  (clk),
-        .rst_i  (rst),
-        .read_i (readreq),
-        .read_o (readresp),
-        .write_i(writereq),
-        .write_o(writeresp)
+    memory memory (
+        .clk_i (clk),
+        .rst_i (rst),
+        .mem_io(mem_io.SV)
     );
 
     initial begin
@@ -57,13 +42,13 @@ module mem_arbitrer_tb
         #CLK_PERIOD rst = 0;
         if_req_i.valid = 1;
         if_req_i.addr = 2;
-        mm_read_req_i.valid = 1;
-        mm_read_req_i.addr = 4;
-        mm_write_req_i.valid = 1;
-        mm_write_req_i.addr = 5;
-        mm_write_req_i.data = 99;
+        cc_io.read_req.valid = 1;
+        cc_io.read_req.addr = 4;
+        cc_io.write_req.valid = 1;
+        cc_io.write_req.addr = 5;
+        cc_io.write_req.data = 99;
         #(CLK_PERIOD * 20);
         $finish();
     end
-
+*/
 endmodule

@@ -2,14 +2,12 @@ module mm_stage
     import riscv_pkg::*;
     import pa_pkg::*;
 (
-    input  logic           clk_i,
-    input  logic           rst_i,
-    input  ex_stage_t      ex_i,
-    output mm_read_req_t   read_req_o,
-    input  mm_read_resp_t  read_resp_i,
-    output mm_write_req_t  write_req_o,
-    input  mm_write_resp_t write_resp_i,
-    output mm_stage_t      mm_o
+    input  logic      clk_i,
+    input  logic      rst_i,
+    input  ex_stage_t ex_i,
+    output mm_stage_t mm_o,
+
+    cache_intf cache_io
 );
 
     enum {
@@ -45,44 +43,44 @@ module mm_stage
                     end
                 end
                 RESP: begin
-                    state <= (read_resp_i.valid | write_resp_i.valid) ? REQ : state;
+                    state <= cache_io.resp.valid ? REQ : state;
                 end
             endcase
         end
     end
 
     always_comb begin
-        read_req_o    = '{default: 0};
-        write_req_o   = '{default: 0};
-        mm_o.do_stall = 0;
-        mm_o.data     = ex_i.alu_result;
+        cache_io.req.valid = 0;
+        mm_o.do_stall      = 0;
+        mm_o.data          = ex_i.alu_result;
         if (!rst_i) begin
             unique case (state)
                 REQ: begin
                     if (ex_i.is_ld) begin
-                        read_req_o.valid = 1;
-                        read_req_o.addr = ex_i.alu_result;
+                        cache_io.req.valid = 1;
+                        cache_io.req.kind = READ;
+                        cache_io.req.addr = ex_i.alu_result;
                         mm_o.do_stall = 1;
                     end else if (ex_i.is_st) begin
-                        write_req_o.valid = 1;
-                        write_req_o.addr = ex_i.alu_result;
-                        write_req_o.data = ex_i.data_rs2;
+                        cache_io.req.valid = 1;
+                        cache_io.req.kind = WRITE;
+                        cache_io.req.addr = ex_i.alu_result;
+                        cache_io.req.data = ex_i.data_rs2;
                         mm_o.do_stall = 1;
                     end
                 end
                 RESP: begin
                     mm_o.do_stall = 1;
-                    // write_req_o.valid = 0;
-                    // read_req_o.valid = 0;
-                    if (read_resp_i.valid) begin
+                    // cache_io.req.valid = 0;
+                    if (cache_io.resp.valid) begin
                         mm_o.do_stall = 0;
-                        mm_o.data = read_resp_i.data;
+                        mm_o.data = cache_io.resp.data;
                         unique case (ex_i.mem_width)
-                            BYTE:  mm_o.data = {{24{read_resp_i.data[31]}}, read_resp_i.data[31:24]};
-                            UBYTE: mm_o.data = {24'b0, read_resp_i.data[31:24]};
-                            HALF:  mm_o.data = {{16{read_resp_i.data[31]}}, read_resp_i.data[31:16]};
-                            UHALF: mm_o.data = {16'b0, read_resp_i.data[31:16]};
-                            WORD:  mm_o.data = {<<8{read_resp_i.data}};
+                            BYTE:  mm_o.data = {{24{cache_io.resp.data[31]}}, cache_io.resp.data[31:24]};
+                            UBYTE: mm_o.data = {24'b0, cache_io.resp.data[31:24]};
+                            HALF:  mm_o.data = {{16{cache_io.resp.data[31]}}, cache_io.resp.data[31:16]};
+                            UHALF: mm_o.data = {16'b0, cache_io.resp.data[31:16]};
+                            WORD:  mm_o.data = {cache_io.resp.data};
                         endcase
                     end
                 end

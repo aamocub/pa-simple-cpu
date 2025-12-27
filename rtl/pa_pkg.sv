@@ -7,6 +7,7 @@ package pa_pkg;
     /* Memory parameters*/
     localparam MEM_ACCESS_DELAY = 1;  // How many cycles does it take the memory to access data
     localparam PHY_ADDR_LEN = 32;  // Bit width of physical address
+    localparam MEM_LINE_LEN = 128;  // Memory line of 128 bits
 
     /* Core definitions */
     localparam PC_RESET_ADDR = 32'h0000;
@@ -23,34 +24,40 @@ package pa_pkg;
     // verilog_format: on
 
     /* Cache definitions */
-    localparam CACHE_LINE_SIZE = 128;  // Cache line of 128 bits
+    localparam CACHE_LINE_LEN = 128;  // Cache line of 128 bits
     typedef enum logic {
         READ,
         WRITE
     } access_t;
     typedef struct packed {
-        access_t kind;
-        mem_width_t width;
-        logic valid;
-        logic [PHY_ADDR_LEN-1:0] addr;
-        logic [XLEN-1:0] data;
-    } cc_req_t;
-    typedef struct packed {
-        logic valid;
-        logic [XLEN-1:0] data;
-    } cc_resp_t;
-
-    /* Memory arbitrer definitions */
-    typedef struct packed {
         access_t                 kind;
+        mem_width_t              width;
         logic                    valid;
         logic [PHY_ADDR_LEN-1:0] addr;
         logic [XLEN-1:0]         data;
-    } arb_req_t;
+    } cc_req_t;
     typedef struct packed {
         logic            valid;
         logic [XLEN-1:0] data;
-    } arb_resp_t;
+    } cc_resp_t;
+
+    /* Memory definitions */
+    typedef struct packed {
+        logic                    valid;
+        logic [PHY_ADDR_LEN-1:0] addr;
+    } mem_read_req_t;
+    typedef struct packed {
+        logic                    valid;
+        logic [MEM_LINE_LEN-1:0] data;
+    } mem_read_resp_t;
+    typedef struct packed {
+        logic                    valid;
+        logic [PHY_ADDR_LEN-1:0] addr;
+        logic [MEM_LINE_LEN-1:0] data;
+    } mem_write_req_t;
+    typedef struct packed {
+        logic valid;  //
+    } mem_write_resp_t;
 
     /* Control unit types */
 
@@ -120,15 +127,6 @@ package pa_pkg;
         logic            do_stall;    // Should previous instr be stalled
     } ex_stage_t;
 
-    /* Memory arbitrer */
-    typedef struct packed {
-        logic                    valid;
-        logic [PHY_ADDR_LEN-1:0] addr;
-    } if_req_t;
-    typedef struct packed {
-        logic            valid;
-        logic [XLEN-1:0] data;
-    } if_resp_t;
     typedef struct packed {
         logic                    valid;
         logic [PHY_ADDR_LEN-1:0] addr;
@@ -159,22 +157,5 @@ package pa_pkg;
         logic [4:0]      rd;
         logic [XLEN-1:0] data;
     } wb_stage_t;  // from WB to ID stage
-
-    // Memory and Memory Arbitrer structs
-    typedef struct packed {
-        access_t                 kind;
-        logic                    valid;
-        logic [PHY_ADDR_LEN-1:0] addr;
-    } mem_read_req_t;
-    typedef struct packed {
-        logic            valid;
-        logic [XLEN-1:0] data;
-    } mem_read_resp_t;
-    typedef struct packed {
-        logic                    valid;
-        logic [PHY_ADDR_LEN-1:0] addr;
-        logic [XLEN-1:0]         data;
-    } mem_write_req_t;
-    typedef struct packed {logic valid;} mem_write_resp_t;
 
 endpackage

@@ -6,14 +6,14 @@ module cache
     import riscv_pkg::*;
     import pa_pkg::*;
 #(
-    parameter integer unsigned LINE_SIZE = CACHE_LINE_SIZE,
-    localparam N = (LINE_SIZE / 8),
+    parameter integer unsigned LINE_LEN = CACHE_LINE_LEN,
+    localparam N = (LINE_LEN / 8),
     localparam M = $clog2(N)
 ) (
     input logic clk_i,
     input logic rst_i,
     cache_intf stage_io,
-    arbitrer_intf mem_io
+    memory_intf arb_io
 );
 
     typedef enum {
@@ -23,33 +23,33 @@ module cache
     typedef struct packed {
         logic valid;
         logic dirty;
-        logic [PHY_ADDR_LEN-$clog2(LINE_SIZE):0] tag;
-        logic [LINE_SIZE-1:0] data;
+        logic [PHY_ADDR_LEN-$clog2(LINE_LEN):0] tag;
+        logic [LINE_LEN-1:0] data;
     } line_t;
 
     state_t state;
     line_t line[4];
     logic is_req_valid;
     logic is_req_in_cache;
-    logic [XLEN-1:0] word;
-    logic [(XLEN/2)-1:0] half;
-    logic [(XLEN/4)-1:0] bite;
 
-    // verilog_format: off
-    alias tag = stage_io.req.addr[PHY_ADDR_LEN-1:N]; 
-    alias idx = stage_io.req.addr[N-1:M];
-    alias offset = stage_io.req.addr[M-1:0];
-    // verilog_format: on
+    wire [PHY_ADDR_LEN-N-1:0] tag;
+    wire [N-M-1:0] idx;
+    wire [M-1:0] offset;
+    assign tag = stage_io.req.addr[PHY_ADDR_LEN-1:N];
+    assign idx = stage_io.req.addr[N-1:M];
+    assign offset = stage_io.req.addr[M-1:0] * 8;
 
-    assign is_req_valid = stage_io.req.valid;
     assign is_req_in_cache = stage_io.req.valid && line[idx].valid && tag == line[idx].tag;
-    assign word = line[idx].data[offset*8+:32];
-    assign half = line[idx].data[offset*8+:16];
-    assign bite = line[idx].data[offset*8+:8];
+
+    // logic [XLEN-1:0] word_data;
+    // logic [(XLEN/2)-1:0] half_data;
+    // logic [(XLEN/4)-1:0] byte_data;
+    // assign word_data = line[idx].data[offset+:32];
+    // assign half_data = line[idx].data[offset+:16];
+    // assign byte_data = line[idx].data[offset+:8];
 
     always_ff @(posedge clk_i, posedge rst_i) begin : transitions
         if (rst_i) begin
-            foreach (line[i]) line[i] <= '0;
             state <= IDLE;
         end else begin
             case (state)
@@ -65,27 +65,27 @@ module cache
 
     always_ff @(posedge clk_i, posedge rst_i) begin
         if (rst_i) begin
-
+            foreach (line[i]) line[i] <= '0;
         end else begin
             stage_io.resp <= '0;
             case (state)
                 IDLE: begin
-                    if (is_req_valid && is_req_in_cache) begin
+                    if (is_req_in_cache) begin
                         stage_io.resp.valid <= 1;
                         case (stage_io.req.kind)
                             READ: begin
                                 case (stage_io.req.width)
-                                    WORD: stage_io.resp.data <= word;
-                                    HALF, UHALF: stage_io.resp.data <= half;
-                                    BYTE, UBYTE: stage_io.resp.data <= bite;
+                                    WORD:        stage_io.resp.data <= line[idx].data[offset+:XLEN];
+                                    HALF, UHALF: stage_io.resp.data <= line[idx].data[offset+:XLEN/2];
+                                    BYTE, UBYTE: stage_io.resp.data <= line[idx].data[offset+:XLEN/4];
                                 endcase
                             end
                             WRITE: begin
                                 line[idx].dirty <= 1;
                                 case (stage_io.req.width)
-                                    WORD: word <= stage_io.req.data;
-                                    HALF, UHALF: half <= stage_io.req.data[(XLEN/2)-1:0];
-                                    BYTE, UBYTE: bite <= stage_io.req.data[(XLEN/4)-1:0];
+                                    WORD:        line[idx].data[offset+:XLEN] <= stage_io.req.data;
+                                    HALF, UHALF: line[idx].data[offset+:XLEN/2] <= stage_io.req.data[(XLEN/2)-1:0];
+                                    BYTE, UBYTE: line[idx].data[offset+:XLEN/4] <= stage_io.req.data[(XLEN/4)-1:0];
                                 endcase
                             end
                         endcase

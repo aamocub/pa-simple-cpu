@@ -2,12 +2,12 @@ module if_stage
     import riscv_pkg::*;
     import pa_pkg::*;
 (
-    input  logic      clk_i,   // Clock signal
-    input  logic      rst_i,   // Reset signal
-    input  cu_if_t    cu_i,    // Control data being sent by the control unit
-    output if_req_t   req_o,   // Request new instruction to memory
-    input  if_resp_t  resp_i,  // Response from memory with new instruction
-    output if_stage_t if_o     // Output data from the IF stage
+    input  logic      clk_i,  // Clock signal
+    input  logic      rst_i,  // Reset signal
+    input  cu_if_t    cu_i,   // Control data being sent by the control unit
+    output if_stage_t if_o,   // Output data from the IF stage
+
+    cache_intf cache_io
 );
     // verilog_format: off
     enum { RST, IF1, IF2 } state;
@@ -60,23 +60,24 @@ module if_stage
         end
     end
     always_comb begin : fetch_pc_from_mem
+        cache_io.req.kind = READ;
         if (rst_i) begin
-            req_o.valid = 0;
+            cache_io.req.valid = 0;
             instr = NOP_INSTR;
         end else begin
             instr = instr;
             unique case (state)
                 RST: ;
                 IF1: begin
-                    req_o.valid = 1;
-                    req_o.addr  = next_pc;
+                    cache_io.req.valid = 1;
+                    cache_io.req.addr  = next_pc;
                 end
                 IF2: begin
-                    req_o.valid = 0;
-                    if (resp_i.valid) begin
-                        instr = {<<8{resp_i.data}};
-                        req_o.valid = 1;
-                        req_o.addr = next_pc;
+                    cache_io.req.valid = 0;
+                    if (cache_io.resp.valid) begin
+                        instr = cache_io.resp.data;
+                        cache_io.req.valid = 1;
+                        cache_io.req.addr = next_pc;
                     end
                 end
             endcase

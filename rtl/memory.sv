@@ -6,6 +6,10 @@
 `define BINST(imm, rs2, rs1, f3, opcode) {imm[12], imm[10:5], rs2, rs1, f3, imm[4:1], imm[11], opcode}
 `define LINST(imm, rs1, f3, rd, opcode) {imm, rs1, f3, rd, opcode}
 
+/*
+ * All accesses to memory are done in blocks of MEM_LINE_LEN bits (i.e., 128 bits).
+ */
+
 module memory
     import riscv_pkg::*;
     import pa_pkg::*;
@@ -13,15 +17,13 @@ module memory
     // localparam int NUMWORDS = 2 << 12,
     localparam int NUMWORDS = 64,
     localparam int DELAY_SIZE = (MEM_ACCESS_DELAY == 1) ? 1 : $clog2(MEM_ACCESS_DELAY),
+    localparam int MEM_SIZE = $clog2(MEM_LINE_LEN),
     parameter DEBUG = 0
 ) (
     input logic clk_i,
     input logic rst_i,
 
-    input  mem_read_req_t   read_i,
-    output mem_read_resp_t  read_o,
-    input  mem_write_req_t  write_i,
-    output mem_write_resp_t write_o
+    memory_intf mem_io
 );
     logic [12:1] joffset = -12'd6;  // interpreted as a multiple of 2 bytes
     logic [11:0] soffset = 12'd0;  // interpreted as a multiple of 2 bytes
@@ -48,11 +50,14 @@ module memory
 
     logic [DELAY_SIZE-1:0] wr_delay;  // write delay counter register
     logic [PHY_ADDR_LEN-1:0] wr_addr;  // write address register
-    logic [XLEN-1:0] wr_data;  // write data register
+    logic [MEM_LINE_LEN-1:0] wr_data;  // write data register
+
+    // Shuffle 32-bit elements in little endian
+    `define SHUFFLE_LE(x) {<<32{{<<8{x}}}}
 
     always_ff @(posedge clk_i, posedge rst_i) begin
-        read_o.valid  <= 0;
-        write_o.valid <= 0;
+        mem_io.read_resp.valid  <= 0;
+        mem_io.write_resp.valid <= 0;
 
         if (rst_i) begin
             rd_delay <= 0;
@@ -62,23 +67,20 @@ module memory
             end
         end else begin
             if (wr_delay == MEM_ACCESS_DELAY) begin  // TODO: colocar MEM_ACCESS_DELAY-1 de nuevo
-                mem[wr_addr+:4] <= {<<8{wr_data}};  // little endian
-                // mem[wr_addr+:4] <= wr_data;  // big endian
-                write_o.valid   <= 1;
-                wr_delay        <= 0;
+                mem[wr_addr+:MEM_LINE_LEN/8] <= `SHUFFLE_LE(wr_data);
+                mem_io.write_resp.valid      <= 1;
+                wr_delay                     <= 0;
             end else if (wr_delay > 0) begin
                 wr_delay <= wr_delay + 1;
-            end else if (write_i.valid) begin
-                wr_data  <= write_i.data;
-                wr_addr  <= write_i.addr;
+            end else if (mem_io.write_req.valid) begin
+                wr_data  <= mem_io.write_req.data;
+                wr_addr  <= mem_io.write_req.addr;
                 wr_delay <= wr_delay + 1;
             end
 
-            if (read_i.valid) begin  // TODO: quitar esta basura
-                // rd_addr <= read_i.addr;
-                read_o.data  <= {<<8{mem[read_i.addr+:4]}};
-                // read_o.data <= { mem[read_i.addr+3], mem[read_i.addr+2], mem[read_i.addr+1], mem[read_i.addr+0] };  // big endian
-                read_o.valid <= 1;
+            if (mem_io.read_req.valid) begin  // TODO: reemplazar esta versión sin MEM_ACCESS_DELAY por la de abajo
+                mem_io.read_resp.data  <= `SHUFFLE_LE(mem[mem_io.read_req.addr+:MEM_LINE_LEN/8]);
+                mem_io.read_resp.valid <= 1;
             end
 
             // if (rd_delay == MEM_ACCESS_DELAY - 1) begin
@@ -88,7 +90,7 @@ module memory
             //     rd_delay     <= 0;
             // end else if (rd_delay > 0) begin
             //     rd_delay <= rd_delay + 1;
-            // end else if (read_i.valid) begin  // TODO: preocuparse de accesos que sean HALF, BYTE y WORD
+            // end else if (read_i.valid) begin
             //     rd_addr  <= read_i.addr;
             //     rd_delay <= rd_delay + 1;
             // end
