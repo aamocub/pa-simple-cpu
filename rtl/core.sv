@@ -68,7 +68,7 @@ module core
         .rst_i    (rst_i),
         .icache_io(icache_arb_port.SV),
         .dcache_io(dcache_arb_port.SV),
-        .mem_io   (mem_io.CL)
+        .mem_io   (mem_io)
     );
 
     // ----------------------------------------------------------------------------------------------------------------
