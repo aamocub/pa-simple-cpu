@@ -5,8 +5,8 @@
 */
 
 module core
-    import pa_pkg::*;
     import riscv_pkg::*;
+    import pa_pkg::*;
 #(
     parameter DEBUG = 0
 ) (
@@ -18,6 +18,7 @@ module core
     output mem_write_req_t  write_req,
     input  mem_write_resp_t write_resp
 );
+
 
     if_stage_t if_out, if_id;
     id_stage_t id_out, id_ex;
