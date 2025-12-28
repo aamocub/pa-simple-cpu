@@ -1,0 +1,6 @@
+{
+        "indexGlobs": ["./rtl/**/*.sv", "./bench/*.sv", "./rtl/*.sv"],
+        "excludeDirs": ["obj_dir"],
+        "flags": "-y rtl --allow-hierarchical-const --allow-toplevel-iface-ports",
+        "wcpCommand": "surfer --wcp-initiate {}"
+}

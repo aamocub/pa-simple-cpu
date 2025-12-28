@@ -5,19 +5,21 @@ module top
     input clk_i,
     input rst_i
 );
-    memory_intf mem_io ();
+    memory_intf #(.DATA_WIDTH(128)) mem_a_io ();
+    memory_intf #(.DATA_WIDTH(128)) mem_b_io ();
 
     core #(
         .DEBUG(0)
     ) core (
         .clk_i (clk_i),
         .rst_i (rst_i),
-        .mem_io(mem_io.ARB)
+        .mem_io(mem_io.CL)
     );
 
     memory memory (
-        .clk_i (clk_i),
-        .rst_i (rst_i),
-        .mem_io(mem_io.MEM)
+        .clk_i(clk_i),
+        .rst_i(rst_i),
+        .mem_a_io(mem_a_io.SV),
+        .mem_b_io(mem_b_io.SV)
     );
 endmodule

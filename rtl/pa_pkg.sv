@@ -19,7 +19,9 @@ package pa_pkg;
     // Number of registers in regfile
     localparam integer unsigned RF_NUMREGS = 32;
 
-    /* --------------------- Memory types, enums and structs -------------------- */
+    /* ---------------------------- Core definitions ---------------------------- */
+
+    /* --------------------------- Memory definitions --------------------------- */
     // Memory access width ({U}BYTE, {U}HALF, WORD)
     typedef enum logic [2:0] {
         BYTE,
@@ -49,7 +51,7 @@ package pa_pkg;
     // Cache line length in bits (should be set to 128)
     localparam integer unsigned CACHE_LINE_LEN = 128;
 
-    /* --------------------- Cache types, enums and structs --------------------- */
+    /* ---------------------------- Cache definitions --------------------------- */
     typedef enum logic {
         READ,
         WRITE
@@ -66,7 +68,7 @@ package pa_pkg;
         logic [XLEN-1:0] data;
     } cc_resp_t;
 
-    /* ------------------ Control unit types, enums and structs ----------------- */
+    /* ------------------------ Control unit definitions ------------------------ */
     // Control signals to IF stage
     typedef struct packed {
         logic taken;
@@ -99,7 +101,7 @@ package pa_pkg;
         logic flush;
     } cu_wb_t;
 
-    /* --------------------- Core types, enums, and structs --------------------- */
+    /* ---------------------------- Stage definitions --------------------------- */
     // IF stage output
     typedef struct packed {
         instruction_t    instr;  // Instruction

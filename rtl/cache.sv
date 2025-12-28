@@ -7,19 +7,20 @@ module cache
     import pa_pkg::*;
 #(
     parameter integer unsigned LINE_LEN = CACHE_LINE_LEN,
-    localparam NUM_SETS = 4,
-    localparam M = $clog2(LINE_LEN / 8),
-    localparam N = $clog2(NUM_SETS) + M
+    localparam integer unsigned NUM_SETS = 4,
+    localparam integer unsigned M = $clog2(LINE_LEN / 8),
+    localparam integer unsigned N = $clog2(NUM_SETS) + M
 ) (
     input logic clk_i,
     input logic rst_i,
-    cache_intf stage_io,
-    memory_intf arb_io
+    memory_intf.SV stage_io,
+    memory_intf.CL mem_io
 );
 
     typedef enum {
         IDLE,
-        MISS
+        MISS,
+        WAIT
     } state_t;
     typedef struct packed {
         logic valid;
@@ -34,24 +35,27 @@ module cache
 
     wire [PHY_ADDR_LEN-N-1:0] tag;
     wire [N-M-1:0] idx;
-    wire [M*8-1:0] offset;
-    assign tag = stage_io.req.addr[PHY_ADDR_LEN-1:N];
-    assign idx = stage_io.req.addr[N-1:M];
-    assign offset = stage_io.req.addr[M-1:0] * 8;
+    wire [M-1:0] offset;
+    assign tag = stage_io.req_addr[PHY_ADDR_LEN-1:N];
+    assign idx = stage_io.req_addr[N-1:M];
+    assign offset = stage_io.req_addr[M-1:0];
 
-    assign is_req_in_cache = stage_io.req.valid && line[idx].valid && tag == line[idx].tag;
+    assign is_req_in_cache = stage_io.req_valid && line[idx].valid && tag == line[idx].tag;
 
     always_ff @(posedge clk_i, posedge rst_i) begin : transitions
         if (rst_i) begin
             state <= IDLE;
         end else begin
-            case (state)
+            unique case (state)
                 IDLE: begin
-                    state <= (stage_io.req.valid && !is_req_in_cache) ? MISS : state;
+                    state <= (stage_io.req_valid && !is_req_in_cache) ? MISS : state;
                 end
                 MISS: begin
+                    state <= WAIT;
                 end
-                default: ;
+                WAIT: begin
+                    state <= mem_io.resp_valid ? IDLE : state;
+                end
             endcase
         end
     end
@@ -60,31 +64,55 @@ module cache
         if (rst_i) begin
             foreach (line[i]) line[i] <= '0;
         end else begin
-            stage_io.resp.valid <= 0;
-            case (state)
+            stage_io.resp_valid <= 0;
+            mem_io.req_valid <= '0;
+            mem_io.req_addr <= '0;
+            mem_io.req_data <= '0;
+            mem_io.req_write_en <= '0;
+            unique case (state)
                 IDLE: begin
                     if (is_req_in_cache) begin
-                        stage_io.resp.valid <= 1;
-                        case (stage_io.req.kind)
-                            READ: begin
-                                case (stage_io.req.width)
-                                    WORD:        stage_io.resp.data <= line[idx].data[offset+:XLEN];
-                                    HALF, UHALF: stage_io.resp.data <= line[idx].data[offset+:XLEN/2];
-                                    BYTE, UBYTE: stage_io.resp.data <= line[idx].data[offset+:XLEN/4];
+                        stage_io.resp_valid <= 1;
+                        unique case (stage_io.req_write_en)
+                            0: begin  // READ
+                                unique case (stage_io.req_type)
+                                    WORD: stage_io.resp_data <= line[idx].data[offset*8+:XLEN];
+                                    HALF, UHALF:
+                                    stage_io.resp_data <= {16'b0, line[idx].data[offset*8+:16]};
+                                    BYTE, UBYTE:
+                                    stage_io.resp_data <= {24'b0, line[idx].data[offset*8+:8]};
                                 endcase
                             end
-                            WRITE: begin
+                            1: begin  // WRITE
                                 line[idx].dirty <= 1;
-                                case (stage_io.req.width)
-                                    WORD:        line[idx].data[offset+:XLEN] <= stage_io.req.data;
-                                    HALF, UHALF: line[idx].data[offset+:XLEN/2] <= stage_io.req.data[(XLEN/2)-1:0];
-                                    BYTE, UBYTE: line[idx].data[offset+:XLEN/4] <= stage_io.req.data[(XLEN/4)-1:0];
+                                unique case (stage_io.req_type)
+                                    WORD: line[idx].data[offset*8+:XLEN] <= stage_io.req_data;
+                                    HALF, UHALF:
+                                    line[idx].data[offset*8+:16] <= stage_io.req_data[15:0];
+                                    BYTE, UBYTE:
+                                    line[idx].data[offset*8+:8] <= stage_io.req_data[7:0];
                                 endcase
                             end
                         endcase
                     end
                 end
                 MISS: begin
+                    mem_io.req_valid <= 1;
+                    if (line[idx].valid && line[idx].dirty) begin
+                        // writeback
+                    end else begin
+                        mem_io.req_addr <= {tag, idx, {M{1'b0}}};
+                        line[idx].tag   <= stage_io.req_addr[PHY_ADDR_LEN-1:N];
+                    end
+                end
+                WAIT: begin
+                    if (mem_io.resp_valid) begin
+                        line[idx].valid <= 1;
+                        line[idx].dirty <= 0;
+                        line[idx].data <= mem_io.resp_data;
+                        stage_io.resp_data <= mem_io.resp_data[offset*8+:XLEN];
+                        stage_io.resp_valid <= 1;
+                    end
                 end
             endcase
         end

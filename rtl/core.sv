@@ -12,7 +12,8 @@ module core
 ) (
     input logic clk_i,
     input logic rst_i,
-    memory_intf mem_io
+    memory_intf.CL mem_a_io,
+    memory_intf.CL mem_b_io
 );
 
     if_stage_t if_out, if_id;
@@ -27,23 +28,23 @@ module core
     cu_mm_t cu_mm;
     cu_wb_t cu_wb;
 
-    cache_intf icache_port ();
-    cache_intf dcache_port ();
-    memory_intf icache_arb_port ();
-    memory_intf dcache_arb_port ();
+    memory_intf icache_port ();
+    memory_intf dcache_port ();
+    memory_intf #(.DATA_WIDTH(CACHE_LINE_LEN)) icache_arb_port ();
+    memory_intf #(.DATA_WIDTH(CACHE_LINE_LEN)) dcache_arb_port ();
 
     cache icache (
         .clk_i   (clk_i),
         .rst_i   (rst_i),
         .stage_io(icache_port.SV),
-        .arb_io  (icache_arb_port.CL)
+        .mem_io  (mem_a_io)
     );
 
     cache dcache (
         .clk_i   (clk_i),
         .rst_i   (rst_i),
         .stage_io(dcache_port.SV),
-        .arb_io  (dcache_arb_port.CL)
+        .mem_io  (mem_b_io)
     );
 
     cu cu (
@@ -63,13 +64,13 @@ module core
         .wb_o   (cu_wb)
     );
 
-    mem_arbitrer mem_arbitrer (
-        .clk_i    (clk_i),
-        .rst_i    (rst_i),
-        .icache_io(icache_arb_port.SV),
-        .dcache_io(dcache_arb_port.SV),
-        .mem_io   (mem_io)
-    );
+    // mem_arbitrer mem_arbitrer (
+    //     .clk_i    (clk_i),
+    //     .rst_i    (rst_i),
+    //     .icache_io(icache_arb_port.SV),
+    //     .dcache_io(dcache_arb_port.SV),
+    //     .mem_io   (mem_io)
+    // );
 
     // ----------------------------------------------------------------------------------------------------------------
     // IF Stage
@@ -77,11 +78,11 @@ module core
 
 
     if_stage if_stage (
-        .clk_i   (clk_i),
-        .rst_i   (rst_i),
-        .cu_i    (cu_if),
-        .if_o    (if_out),
-        .cache_io(icache_port.CL)
+        .clk_i (clk_i),
+        .rst_i (rst_i),
+        .cu_i  (cu_if),
+        .if_o  (if_out),
+        .mem_io(icache_port.CL)
     );
 
     register #(
@@ -151,11 +152,11 @@ module core
     // ----------------------------------------------------------------------------------------------------------------
 
     mm_stage mm_stage (
-        .clk_i   (clk_i),
-        .rst_i   (rst_i),
-        .ex_i    (ex_mm),
-        .mm_o    (mm_out),
-        .cache_io(dcache_port.CL)
+        .clk_i (clk_i),
+        .rst_i (rst_i),
+        .ex_i  (ex_mm),
+        .mm_o  (mm_out),
+        .mem_io(dcache_port.CL)
     );
 
     register #(
