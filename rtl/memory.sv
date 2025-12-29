@@ -7,7 +7,7 @@ module memory
     import pa_pkg::*;
 #(
     // localparam int NUMWORDS = 2 << 12,
-    parameter integer unsigned NUMWORDS = 64,
+    parameter integer unsigned NUMWORDS = 2 << 12,
     localparam integer unsigned DELAY = 4,
     localparam integer unsigned MEM_LINE_B = MEM_LINE_LEN / 8
 ) (
