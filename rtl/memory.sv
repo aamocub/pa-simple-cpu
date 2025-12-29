@@ -48,7 +48,6 @@ module memory
         end else begin
             mem_a_io.resp_valid <= '0;
             if (a_valid && a_wren) begin
-                mem_a_io.resp_valid <= 1;
                 mem[a_addr+:MEM_LINE_B] <= {>>{a_data}};
             end else if (a_valid) begin
                 mem_a_io.resp_data  <= {>>{mem[a_addr+:MEM_LINE_B]}};
@@ -61,7 +60,6 @@ module memory
         end else begin
             mem_b_io.resp_valid <= '0;
             if (b_valid && b_wren) begin
-                mem_b_io.resp_valid <= 1;
                 mem[b_addr+:MEM_LINE_B] <= {>>{b_data}};
             end else if (b_valid) begin
                 mem_b_io.resp_data  <= {>>{mem[b_addr+:MEM_LINE_B]}};
