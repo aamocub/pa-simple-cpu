@@ -65,10 +65,10 @@ module isa_tb
         $dumpfile("isa_tb.fst");
         $dumpvars(0, isa_tb);
         for (int j = 0; j < 64 / 4; j = j + 1) begin
-            memory.mem[4*j+:4] = j;
+            memory.mem[4*j+:4] = {>>{j}};
         end
         for (int i = 0; i < $size(instr_list); i = i + 1) begin
-            memory.mem[PC_RESET_ADDR+4*i+:4] = instr_list[i];
+            memory.mem[PC_RESET_ADDR+4*i+:4] = {>>{instr_list[i]}};
         end
         clk_i = 1;
         rst_i = 1;

@@ -1,6 +1,3 @@
-// Shuffle 32-bit elements in little endian
-`define SHUFFLE_LE(x) {<<32{{<<8{x}}}}
-
 /**
 * All accesses to memory are done in blocks of MEM_LINE_LEN bits (i.e., 128 bits).
 */
@@ -12,7 +9,6 @@ module memory
     // localparam int NUMWORDS = 2 << 12,
     parameter integer unsigned NUMWORDS = 64,
     localparam integer unsigned DELAY = 4,
-    localparam integer unsigned MEM_SIZE = $clog2(MEM_LINE_LEN),
     localparam integer unsigned MEM_LINE_B = MEM_LINE_LEN / 8
 ) (
     input logic clk_i,
@@ -52,10 +48,10 @@ module memory
         end else begin
             mem_a_io.resp_valid <= '0;
             if (a_valid && a_wren) begin
-                mem[a_addr+:MEM_LINE_B] <= `SHUFFLE_LE(a_data);
                 mem_a_io.resp_valid <= 1;
+                mem[a_addr+:MEM_LINE_B] <= {>>{a_data}};
             end else if (a_valid) begin
-                mem_a_io.resp_data  <= mem[a_addr+:MEM_LINE_B];
+                mem_a_io.resp_data  <= {>>{mem[a_addr+:MEM_LINE_B]}};
                 mem_a_io.resp_valid <= 1;
             end
         end
@@ -65,10 +61,10 @@ module memory
         end else begin
             mem_b_io.resp_valid <= '0;
             if (b_valid && b_wren) begin
-                mem[b_addr+:MEM_LINE_B] <= `SHUFFLE_LE(b_data);
                 mem_b_io.resp_valid <= 1;
+                mem[b_addr+:MEM_LINE_B] <= {>>{b_data}};
             end else if (b_valid) begin
-                mem_b_io.resp_data  <= mem[b_addr+:MEM_LINE_B];
+                mem_b_io.resp_data  <= {>>{mem[b_addr+:MEM_LINE_B]}};
                 mem_b_io.resp_valid <= 1;
             end
         end

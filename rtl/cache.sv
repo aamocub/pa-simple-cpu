@@ -76,21 +76,17 @@ module cache
                         unique case (stage_io.req_write_en)
                             0: begin  // READ
                                 unique case (stage_io.req_type)
-                                    WORD: stage_io.resp_data <= line[idx].data[offset*8+:XLEN];
-                                    HALF, UHALF:
-                                    stage_io.resp_data <= {16'b0, line[idx].data[offset*8+:16]};
-                                    BYTE, UBYTE:
-                                    stage_io.resp_data <= {24'b0, line[idx].data[offset*8+:8]};
+                                    WORD:        stage_io.resp_data <= line[idx].data[offset*8+:32];
+                                    HALF, UHALF: stage_io.resp_data <= {16'b0, line[idx].data[offset*8+:16]};
+                                    BYTE, UBYTE: stage_io.resp_data <= {24'b0, line[idx].data[offset*8+:8]};
                                 endcase
                             end
                             1: begin  // WRITE
                                 line[idx].dirty <= 1;
                                 unique case (stage_io.req_type)
-                                    WORD: line[idx].data[offset*8+:XLEN] <= stage_io.req_data;
-                                    HALF, UHALF:
-                                    line[idx].data[offset*8+:16] <= stage_io.req_data[15:0];
-                                    BYTE, UBYTE:
-                                    line[idx].data[offset*8+:8] <= stage_io.req_data[7:0];
+                                    WORD:        line[idx].data[offset*8+:32] <= stage_io.req_data;
+                                    HALF, UHALF: line[idx].data[offset*8+:16] <= stage_io.req_data[15:0];
+                                    BYTE, UBYTE: line[idx].data[offset*8+:8] <= stage_io.req_data[7:0];
                                 endcase
                             end
                         endcase
@@ -100,6 +96,9 @@ module cache
                     mem_io.req_valid <= 1;
                     if (line[idx].valid && line[idx].dirty) begin
                         // writeback
+                        mem_io.req_addr     <= {line[idx].tag, idx, {M{1'b0}}};
+                        mem_io.req_write_en <= 1;
+                        mem_io.req_data     <= line[idx].data;
                     end else begin
                         mem_io.req_addr <= {tag, idx, {M{1'b0}}};
                         line[idx].tag   <= stage_io.req_addr[PHY_ADDR_LEN-1:N];
