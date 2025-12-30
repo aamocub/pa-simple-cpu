@@ -15,7 +15,7 @@ module cache_tb
     logic [31:0] lw2 = `LINST(12'h204, 5'd0, riscv_pkg::FUNCT3_LW, 5'd29, riscv_pkg::OPCODE_LOAD);
     logic [31:0] lw3 = `LINST(12'h208, 5'd0, riscv_pkg::FUNCT3_LW, 5'd29, riscv_pkg::OPCODE_LOAD);
     logic [31:0] lw4 = `LINST(12'h20C, 5'd0, riscv_pkg::FUNCT3_LW, 5'd29, riscv_pkg::OPCODE_LOAD);
-    logic [31:0] lw5 = `LINST(12'h100, 5'd0, riscv_pkg::FUNCT3_LW, 5'd29, riscv_pkg::OPCODE_LOAD);
+    logic [31:0] lw5 = `LINST(12'h0, 5'd0, riscv_pkg::FUNCT3_LW, 5'd29, riscv_pkg::OPCODE_LOAD);
     logic [31:0] sw = `SINST(soffset, 5'd28, 5'd0, riscv_pkg::FUNCT3_SW, riscv_pkg::OPCODE_STORE);
     logic [31:0] instr_list[3] = {lw1, sw, lw5};
     /*
