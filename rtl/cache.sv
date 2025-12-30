@@ -131,6 +131,7 @@ module cache
                         end else if (line[idx].valid && line[idx].dirty) begin
                             pending_read.valid <= !stage_io.req_write_en;
                             pending_read.addr  <= stage_io.req_addr;
+                            pending_read.kind  <= stage_io.req_type;
                         end
                     end
                 end
