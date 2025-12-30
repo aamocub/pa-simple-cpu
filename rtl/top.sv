@@ -11,9 +11,10 @@ module top
     core #(
         .DEBUG(0)
     ) core (
-        .clk_i (clk_i),
-        .rst_i (rst_i),
-        .mem_io(mem_io.CL)
+        .clk_i(clk_i),
+        .rst_i(rst_i),
+        .mem_a_io(mem_a_io.CL),
+        .mem_b_io(mem_b_io.CL)
     );
 
     memory memory (
