@@ -44,6 +44,7 @@ module cu
         wb_o.flush = 0;
 
         if_o.taken = ex_mm_i.is_taken;
+        if_o.addr = 0;
         if (ex_mm_i.is_taken) begin  // Branch
             id_o.flush = 1;
             ex_o.flush = 1;
