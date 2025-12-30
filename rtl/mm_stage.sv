@@ -27,8 +27,18 @@ module mm_stage
             state <= REQ;
         end else begin
             unique case (state)
-                REQ:  state <= (ex_i.is_ld | ex_i.is_st) ? RESP : state;
-                RESP: state <= mem_io.resp_valid ? REQ : state;
+                REQ: begin
+                    if (mem_io.resp_valid) begin
+                        state <= REQ;
+                    end else if (ex_i.is_ld || ex_i.is_st) begin
+                        state <= RESP;
+                    end else begin
+                        state <= state;
+                    end
+                end
+                RESP: begin
+                    state <= mem_io.resp_valid ? REQ : state;
+                end
             endcase
         end
     end
@@ -51,6 +61,16 @@ module mm_stage
                         mm_o.do_stall = 1;
                         mem_io.req_valid = 1;
                         mem_io.req_write_en = 1;
+                    end
+                    if (mem_io.resp_valid) begin
+                        mm_o.do_stall = 0;
+                        unique case (ex_i.mem_width)
+                            BYTE: mm_o.data = {{24{mem_io.resp_data[31]}}, mem_io.resp_data[31:24]};
+                            UBYTE: mm_o.data = {24'b0, mem_io.resp_data[31:24]};
+                            HALF: mm_o.data = {{16{mem_io.resp_data[31]}}, mem_io.resp_data[31:16]};
+                            UHALF: mm_o.data = {16'b0, mem_io.resp_data[31:16]};
+                            WORD: mm_o.data = {mem_io.resp_data};
+                        endcase
                     end
                 end
                 RESP: begin
