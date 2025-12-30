@@ -143,6 +143,7 @@ module cache
                         mem_io.req_addr     <= {line[idx].tag, idx, {M{1'b0}}};
                         mem_io.req_write_en <= 1;
                         mem_io.req_data     <= line[idx].data;
+                        line[idx].tag       <= stage_io.req_addr[PHY_ADDR_LEN-1:N];
                     end else begin
                         mem_io.req_addr <= {tag, idx, {M{1'b0}}};
                         line[idx].tag   <= stage_io.req_addr[PHY_ADDR_LEN-1:N];
