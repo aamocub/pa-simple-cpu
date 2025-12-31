@@ -30,7 +30,7 @@ module mm_stage
     always_ff @(posedge clk_i, posedge rst_i) begin : transitions
         if (rst_i) begin
             state <= REQ;
-        end else begin
+        end else if (!(|ex_i.evec)) begin
             unique case (state)
                 REQ: begin
                     if (mem_io.resp_valid) begin
@@ -56,7 +56,7 @@ module mm_stage
         mem_io.req_data     = ex_i.data_rs2;
         mm_o.do_stall       = 0;
         mm_o.data           = ex_i.alu_result;
-        if (!rst_i) begin
+        if (!rst_i && !(|ex_i.evec)) begin
             unique case (state)
                 REQ: begin
                     if (ex_i.is_ld) begin
