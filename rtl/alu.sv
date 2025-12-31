@@ -10,7 +10,8 @@ module alu
     input  logic      [XLEN-1:0] b_i,
     input  instr_op_t            opcode_i,
     output logic      [XLEN-1:0] out_o,
-    output logic                 stall_o
+    output logic                 stall_o,
+    output logic                 div_zero_o
 );
 
     logic [           XLEN*2-1:0] mul_tmp;  // mul intermediate result
@@ -34,6 +35,7 @@ module alu
     end
 
     always_comb begin
+        div_zero_o = 0;
         stall_o = 0;  // Do not stall by default
         case (opcode_i)
             NOP: out_o = '0;
@@ -79,11 +81,22 @@ module alu
             end
 
             // Division / Remainder
-            // TODO: Exceptions on div by 0
-            DIV:  out_o = (b_i == 0) ? 'x : $signed(a_i) / $signed(b_i);
-            DIVU: out_o = (b_i == 0) ? 'x : a_i / b_i;
-            REM:  out_o = (b_i == 0) ? 'x : $signed(a_i) % $signed(b_i);
-            REMU: out_o = (b_i == 0) ? 'x : a_i % b_i;
+            DIV: begin
+                div_zero_o = (b_i == 0) ? 1 : 0;
+                out_o = (b_i == 0) ? 'x : $signed(a_i) / $signed(b_i);
+            end
+            DIVU: begin
+                div_zero_o = (b_i == 0) ? 1 : 0;
+                out_o = (b_i == 0) ? 'x : a_i / b_i;
+            end
+            REM: begin
+                div_zero_o = (b_i == 0) ? 1 : 0;
+                out_o = (b_i == 0) ? 'x : $signed(a_i) % $signed(b_i);
+            end
+            REMU: begin
+                div_zero_o = (b_i == 0) ? 1 : 0;
+                out_o = (b_i == 0) ? 'x : a_i % b_i;
+            end
 
             // Branches
             BEQ, BNE, BLT, BGE, BLTU, BGEU: out_o = a_i + b_i;

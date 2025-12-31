@@ -8,9 +8,14 @@ module wb_stage
     output wb_stage_t wb_o
 );
 
-    always_comb begin
+    always_comb begin : exceptions
+        wb_o.evec = mm_i.evec;
+    end
+
+    always_comb begin : passthrough_signals
         wb_o.is_wb = mm_i.is_wb;
         wb_o.rd    = mm_i.rd;
+        wb_o.pc    = mm_i.pc;
         wb_o.data  = mm_i.data;
     end
 

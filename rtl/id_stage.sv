@@ -35,7 +35,13 @@ module id_stage
     wire [4:0] rs2 = fetch_i.instr.rtype.rs2;
     wire is_wb = (fetch_i.instr.rtype.opcode != OPCODE_STORE && fetch_i.instr.rtype.opcode != OPCODE_BRANCH) ? 1 : 0;
 
-    always_comb begin
+    logic ill_instr;
+    always_comb begin : id_exceptions
+        decode_o.evec = fetch_i.evec;
+        decode_o.evec.ill_instr = ill_instr;
+    end
+
+    always_comb begin : id_out
         decode_o.rs1 = rs1;
         decode_o.rs2 = rs2;
         decode_o.rd = rd;
@@ -57,10 +63,11 @@ module id_stage
 
     // Instruction decoding
     always_comb begin
-        decode_o.is_br = 0;
-        decode_o.is_ld = 0;
-        decode_o.is_st = 0;
-        decode_o.uses_rs2 = 0;
+        ill_instr          = 0;
+        decode_o.is_br     = 0;
+        decode_o.is_ld     = 0;
+        decode_o.is_st     = 0;
+        decode_o.uses_rs2  = 0;
         decode_o.mem_width = WORD;
         decode_o.op = NOP;
         case (fetch_i.instr.rtype.opcode)
@@ -85,6 +92,7 @@ module id_stage
                     {FUNCT7_DIVU,   FUNCT3_DIVU}:   decode_o.op = DIVU;
                     {FUNCT7_REM,    FUNCT3_REM}:    decode_o.op = REM;
                     {FUNCT7_REMU,   FUNCT3_REMU}:   decode_o.op = REMU;
+                    default:                        ill_instr = 1;
                 endcase
                 // verilog_format: on
                 decode_o.uses_rs2 = 1;
@@ -102,6 +110,7 @@ module id_stage
                         decode_o.op = (fetch_i.instr.rtype.funct7 == FUNCT7_SRLI) ? SRLI :
                                       (fetch_i.instr.rtype.funct7 == FUNCT7_SRAI) ? SRAI : ILLEGAL;
                     end
+                    default:      ill_instr = 1;
                 endcase
             end
             OPCODE_LOAD: begin
@@ -126,6 +135,7 @@ module id_stage
                         decode_o.op = LHU;
                         decode_o.mem_width = UHALF;
                     end
+                    default: ill_instr = 1;
                 endcase
                 decode_o.is_ld = 1;
             end
@@ -143,6 +153,7 @@ module id_stage
                         decode_o.op = SW;
                         decode_o.mem_width = WORD;
                     end
+                    default: ill_instr = 1;
                 endcase
                 decode_o.is_st = 1;
                 decode_o.uses_rs2 = 1;
@@ -155,6 +166,7 @@ module id_stage
                     FUNCT3_BGE:  decode_o.op = BGE;
                     FUNCT3_BLTU: decode_o.op = BLTU;
                     FUNCT3_BGEU: decode_o.op = BGEU;
+                    default:     ill_instr = 1;
                 endcase
                 decode_o.is_br = 1;
             end
@@ -174,9 +186,10 @@ module id_stage
                 case (fetch_i.instr.itype.imm)
                     IMM_ECALL:  decode_o.op = ECALL;
                     IMM_EBREAK: decode_o.op = EBREAK;
+                    default:    ill_instr = 1;
                 endcase
             end
-            // TODO: Throw exception on default
+            default:      ill_instr = 1;
         endcase
     end
 

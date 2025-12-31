@@ -15,7 +15,7 @@ module if_stage
     } state;
 
     logic [PHY_ADDR_LEN-1:0] pc, next_pc;
-    instruction_t instr, next_instr;
+    instruction_t instr;
 
 
     always_ff @(posedge clk_i, posedge rst_i) begin : transitions_block
@@ -33,6 +33,7 @@ module if_stage
     end
 
     always_comb begin : if_out
+        if_o.evec = '0;  // No exceptions (yet) in IF stage
         if (cu_i.flush) begin
             if_o.pc = 0;
             if_o.instr = NOP_INSTR;
@@ -51,18 +52,19 @@ module if_stage
         next_pc = pc;
         if (rst_i) begin
             next_pc = PC_RESET_ADDR;
+        end else if (cu_i.except_valid) begin
+            next_pc = cu_i.except_addr;
         end else if (cu_i.stall) begin
             next_pc = pc;
         end else if (state == RST || state == IF1) begin
             next_pc = pc;
         end else begin
-            if (mem_io.resp_valid) begin
-                case (cu_i.taken)
-                    0: next_pc = pc + 4;
-                    1: next_pc = cu_i.addr;
-                    default: next_pc = pc + 4;
-                endcase
-            end
+            case (cu_i.pcsel)
+                0: next_pc = mem_io.resp_valid ? pc + 4 : pc;
+                1: next_pc = cu_i.addr;
+                2: next_pc = PC_EXCEPTION_ADDR;
+                default: next_pc = pc + 4;
+            endcase
         end
     end
     always_comb begin : fetch_pc_from_mem

@@ -18,54 +18,48 @@ module cu
     output cu_mm_t mm_o,
     output cu_wb_t wb_o
 );
-    logic ex_rs1_hazard;
-    logic ex_rs2_hazard;
-    logic mm_rs1_hazard;
-    logic mm_rs2_hazard;
+    logic ex_rs1_hazard = ex_mm_i.is_wb && ex_mm_i.rd != 0 && ex_mm_i.rd == id_ex_i.rs1;
+    logic ex_rs2_hazard = ex_mm_i.is_wb && ex_mm_i.rd != 0 && ex_mm_i.rd == id_ex_i.rs2;
+    logic mm_rs1_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs1 && !ex_rs1_hazard;
+    logic mm_rs2_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs2 && !ex_rs2_hazard;
 
-    always_comb begin
-        ex_rs1_hazard = ex_mm_i.is_wb && ex_mm_i.rd != 0 && ex_mm_i.rd == id_ex_i.rs1;
-        ex_rs2_hazard = ex_mm_i.is_wb && ex_mm_i.rd != 0 && ex_mm_i.rd == id_ex_i.rs2;
-        mm_rs1_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs1 && !ex_rs1_hazard;
-        mm_rs2_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs2 && !ex_rs2_hazard;
+    logic is_exception = |wb_i.evec;
+    logic is_taken = ex_mm_i.is_taken;
 
-        // Do not stall by default
-        if_o.stall = 0;
-        id_o.stall = 0;
-        ex_o.stall = 0;
-        mm_o.stall = 0;
-        wb_o.stall = 0;
+    always_comb begin : IF_stage
+        if_o.stall = ex_i.do_stall | mm_i.do_stall;
+        if_o.flush = is_exception;
 
-        // Do not flush by default
-        if_o.flush = 0;
-        id_o.flush = 0;
-        ex_o.flush = 0;
-        mm_o.flush = 0;
-        wb_o.flush = 0;
+        // PC selection logic
+        if_o.pcsel = is_exception ? 2 : is_taken ? 1 : 0;
+        if_o.addr  = is_taken ? ex_mm_i.alu_result : 0;
+    end
 
-        if_o.taken = ex_mm_i.is_taken;
-        if_o.addr = 0;
-        if (ex_mm_i.is_taken) begin  // Branch
-            id_o.flush = 1;
-            ex_o.flush = 1;
-            if_o.addr  = ex_mm_i.alu_result;
-        end else if (ex_i.do_stall) begin  // ALU stall
-            if_o.stall = 1;
-            id_o.stall = 1;
-            ex_o.stall = 1;
-        end
+    always_comb begin : ID_stage
+        id_o.stall = ex_i.do_stall | mm_i.do_stall;
+        id_o.flush = is_taken | is_exception;
+        id_o.epc   = wb_i.pc;
+        id_o.ewe   = is_exception;
+    end
 
+    always_comb begin : EX_stage
+        ex_o.stall = ex_i.do_stall | mm_i.do_stall;
+        ex_o.flush = is_taken | is_exception;
+
+        // ALU input mux select
         ex_o.alu_mux_a_sel = id_ex_i.is_br ? 1 : ex_rs1_hazard ? 2 : mm_rs1_hazard ? 3 : 0;
         ex_o.alu_mux_b_sel = id_ex_i.uses_rs2 ? 0 : ex_rs2_hazard ? 2 : mm_rs2_hazard ? 3 : 0;
         ex_o.cmp_mux_a_sel = ex_rs1_hazard ? 1 : mm_rs1_hazard ? 2 : 0;
         ex_o.cmp_mux_b_sel = ex_rs2_hazard ? 1 : mm_rs2_hazard ? 2 : 0;
-
-        if (mm_i.do_stall) begin
-            if_o.stall = 1;
-            id_o.stall = 1;
-            ex_o.stall = 1;  // TODO: It should be possible for EX to continue multiplying when stalled
-            mm_o.stall = 1;
-        end
     end
 
+    always_comb begin : MM_stage
+        mm_o.stall = mm_i.do_stall;
+        mm_o.flush = is_exception;
+    end
+
+    always_comb begin : WB_stage
+        wb_o.stall = 0;
+        wb_o.flush = is_exception;
+    end
 endmodule

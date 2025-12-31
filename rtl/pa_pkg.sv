@@ -1,7 +1,12 @@
-// This package includes all parameters, types, enums and others that are required by the processor itself.
-
 package pa_pkg;
     import riscv_pkg::*;
+
+    /* ------------------------------- Exceptions ------------------------------- */
+    localparam integer unsigned PC_EXCEPTION_ADDR = 32'h8000;
+    typedef struct packed {
+        logic ill_instr;
+        logic div_by_zero;
+    } exception_t;
 
     /* ---------------------------- Memory parameters --------------------------- */
     // How many cycles does it take the memory to access data
@@ -14,8 +19,6 @@ package pa_pkg;
     /* ----------------------------- Core parameters ---------------------------- */
     // PC reset address
     localparam integer unsigned PC_RESET_ADDR = 32'h0000;
-    // PC exception address
-    localparam integer unsigned PC_EXCEPTION_ADDR = 32'h8000;
     // Number of registers in regfile
     localparam integer unsigned RF_NUMREGS = 32;
 
@@ -71,34 +74,39 @@ package pa_pkg;
     /* ------------------------ Control unit definitions ------------------------ */
     // Control signals to IF stage
     typedef struct packed {
-        logic taken;
-        logic [PHY_ADDR_LEN-1:0] addr;
-        logic stall;
-        logic flush;
+        logic [1:0]              pcsel;         // PC select
+        logic [PHY_ADDR_LEN-1:0] addr;          // Address to jump to
+        logic                    stall;         // Stall stage
+        logic                    flush;         // Flush stage
+        logic                    except_valid;  // Is there a valid exception
+        logic [PHY_ADDR_LEN-1:0] except_addr;   // Where to jump for the exception
     } cu_if_t;
     // Control signals to ID stage
     typedef struct packed {
-        logic stall;
-        logic flush;
+        logic            stall;  // Stall stage
+        logic            flush;  // Flush stage
+        // Exception PC register
+        logic [XLEN-1:0] epc;    // PC that raised the exception
+        logic            ewe;    // Write enable
     } cu_id_t;
     // Control signals to EX stage
     typedef struct packed {
-        logic stall;
-        logic flush;
-        logic [1:0] alu_mux_a_sel;
-        logic [1:0] alu_mux_b_sel;
-        logic [1:0] cmp_mux_a_sel;
-        logic [1:0] cmp_mux_b_sel;
+        logic       stall;          // Stall stage
+        logic       flush;          // Flush stage
+        logic [1:0] alu_mux_a_sel;  // ALU reg A mux select
+        logic [1:0] alu_mux_b_sel;  // ALU reg B Mux select
+        logic [1:0] cmp_mux_a_sel;  // CMP reg A Mux select
+        logic [1:0] cmp_mux_b_sel;  // CMP reg B Mux select
     } cu_ex_t;
     // Control signals to MM stage
     typedef struct packed {
-        logic stall;
-        logic flush;
+        logic stall;  // Stall stage
+        logic flush;  // Flush stage
     } cu_mm_t;
     // Control signals to WB stage
     typedef struct packed {
-        logic stall;
-        logic flush;
+        logic stall;  // Stall stage
+        logic flush;  // Flush stage
     } cu_wb_t;
 
     /* ---------------------------- Stage definitions --------------------------- */
@@ -106,6 +114,7 @@ package pa_pkg;
     typedef struct packed {
         instruction_t    instr;  // Instruction
         logic [XLEN-1:0] pc;     // Current PC
+        exception_t      evec;   // Exception vector
     } if_stage_t;
 
     // Instruction codes
@@ -140,6 +149,7 @@ package pa_pkg;
         logic [XLEN-1:0] pc;         // Current PC
         mem_width_t      mem_width;  // Width of memory access
         instr_op_t       op;         // Operation to perform
+        exception_t      evec;       // Exception vector
     } id_stage_t;
 
     // EX stage output
@@ -152,10 +162,12 @@ package pa_pkg;
         logic            is_taken;    // Is branch taken
         logic            is_ld;       // Is it a load
         logic            is_st;       // Is it a store
+        logic [XLEN-1:0] pc;          // Current PC
         logic            uses_rs2;    // Does the instruction use rs2
         logic [XLEN-1:0] data_rs2;    // Value of register 2
         mem_width_t      mem_width;   // Width of memory access
         logic            do_stall;    // Should previous instr be stalled
+        exception_t      evec;        // Exception vector
     } ex_stage_t;
 
     // MM memory interface
@@ -178,18 +190,22 @@ package pa_pkg;
     typedef struct packed {
         logic [XLEN-1:0] data;
         logic [XLEN-1:0] data_rs2;  // Value of register 2
+        logic [XLEN-1:0] pc;        // Current PC
         logic            is_wb;     // Is it going to write to regfile
         logic            do_stall;  // Should previous instr be stalled
         logic [4:0]      rs1;       // Source register 1
         logic [4:0]      rs2;       // Source register 2
         logic [4:0]      rd;        // Destination register
+        exception_t      evec;      // Exception vector
     } mm_stage_t;
 
     // WB stage output
     typedef struct packed {
         logic            is_wb;
+        logic [XLEN-1:0] pc;     // Current PC
         logic [4:0]      rd;
         logic [XLEN-1:0] data;
+        exception_t      evec;   // Exception vector
     } wb_stage_t;  // from WB to ID stage
 
 endpackage

@@ -14,10 +14,15 @@ module mm_stage
         RESP  // Response from memory
     } state;
 
+    always_comb begin : exceptions
+        mm_o.evec = ex_i.evec;
+    end
+
     always_comb begin : passthrough_signals
         mm_o.rd       = ex_i.rd;
         mm_o.rs1      = ex_i.rs1;
         mm_o.rs2      = ex_i.rs2;
+        mm_o.pc       = ex_i.pc;
         mm_o.is_wb    = ex_i.is_wb;
         mm_o.data_rs2 = ex_i.data_rs2;
     end
@@ -25,7 +30,7 @@ module mm_stage
     always_ff @(posedge clk_i, posedge rst_i) begin : transitions
         if (rst_i) begin
             state <= REQ;
-        end else begin
+        end else if (!(|ex_i.evec)) begin
             unique case (state)
                 REQ: begin
                     if (mem_io.resp_valid) begin
@@ -51,7 +56,7 @@ module mm_stage
         mem_io.req_data     = ex_i.data_rs2;
         mm_o.do_stall       = 0;
         mm_o.data           = ex_i.alu_result;
-        if (!rst_i) begin
+        if (!rst_i && !(|ex_i.evec)) begin
             unique case (state)
                 REQ: begin
                     if (ex_i.is_ld) begin
