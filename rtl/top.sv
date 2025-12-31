@@ -5,28 +5,22 @@ module top
     input clk_i,
     input rst_i
 );
-    pa_pkg::mem_read_req_t   readreq;
-    pa_pkg::mem_read_resp_t  readresp;
-    pa_pkg::mem_write_req_t  writereq;
-    pa_pkg::mem_write_resp_t writeresp;
+    memory_intf #(.DATA_WIDTH(128)) mem_a_io ();
+    memory_intf #(.DATA_WIDTH(128)) mem_b_io ();
 
     core #(
         .DEBUG(0)
     ) core (
         .clk_i(clk_i),
         .rst_i(rst_i),
-        .read_req(readreq),
-        .read_resp(readresp),
-        .write_req(writereq),
-        .write_resp(writeresp)
+        .mem_a_io(mem_a_io.CL),
+        .mem_b_io(mem_b_io.CL)
     );
 
-    memory #() memory (
-        .clk_i  (clk_i),
-        .rst_i  (rst_i),
-        .read_i (readreq),
-        .read_o (readresp),
-        .write_i(writereq),
-        .write_o(writeresp)
+    memory memory (
+        .clk_i(clk_i),
+        .rst_i(rst_i),
+        .mem_a_io(mem_a_io.SV),
+        .mem_b_io(mem_b_io.SV)
     );
 endmodule

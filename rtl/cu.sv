@@ -44,6 +44,7 @@ module cu
         wb_o.flush = 0;
 
         if_o.taken = ex_mm_i.is_taken;
+        if_o.addr = 0;
         if (ex_mm_i.is_taken) begin  // Branch
             id_o.flush = 1;
             ex_o.flush = 1;
@@ -55,7 +56,7 @@ module cu
         end
 
         ex_o.alu_mux_a_sel = id_ex_i.is_br ? 1 : ex_rs1_hazard ? 2 : mm_rs1_hazard ? 3 : 0;
-        ex_o.alu_mux_b_sel = id_ex_i.uses_rs2 ? 1 : ex_rs2_hazard ? 2 : mm_rs2_hazard ? 3 : 0;
+        ex_o.alu_mux_b_sel = id_ex_i.uses_rs2 ? 0 : ex_rs2_hazard ? 2 : mm_rs2_hazard ? 3 : 0;
         ex_o.cmp_mux_a_sel = ex_rs1_hazard ? 1 : mm_rs1_hazard ? 2 : 0;
         ex_o.cmp_mux_b_sel = ex_rs2_hazard ? 1 : mm_rs2_hazard ? 2 : 0;
 

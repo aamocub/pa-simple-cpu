@@ -11,6 +11,10 @@ type of access.
 
 ## TODO Prioritario
 - [ ] Caches!!!
+        - [ ] Cambiar memoria para implementar interfaz de 128 bits
+        - [ ] Cambiar arbitrer para implementar interfaz de 128 bits
+        - [ ] MM stage tiene que enviar el tipo de acceso (WORD,BYTE,HALF,...) a la cache en sus peticiones
+        - [ ] Implementar MISS para la cache
 - [ ] Multiciclo (historyfile) + excepciones
 - [ ] True multiplicacion
 
