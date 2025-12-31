@@ -53,8 +53,8 @@ module regfile #(
             // rdata_a_o <= 0;
             // rdata_b_o <= 0;
             for (i = 0; i < NUMREGS; i = i + 1) begin
-                // bank[i] <= 32'b0;
-                bank[i] <= i;
+                bank[i] <= 32'b0;
+                // bank[i] <= i;
             end
         end else begin
             // if write enable, write data to bank[waddr_i] register

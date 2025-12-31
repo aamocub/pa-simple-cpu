@@ -1,0 +1,42 @@
+
+rv32ui-p-auipc:     formato del fichero elf32-littleriscv
+
+
+Desensamblado de la sección .text:
+
+00000000 <_start>:
+   0:	00200193          	li	gp,2
+   4:	00000013          	nop
+   8:	00002517          	auipc	a0,0x2
+   c:	71c50513          	addi	a0,a0,1820 # 2724 <_end+0x1724>
+  10:	004005ef          	jal	a1,14 <_start+0x14>
+  14:	40b50533          	sub	a0,a0,a1
+  18:	000023b7          	lui	t2,0x2
+  1c:	71038393          	addi	t2,t2,1808 # 2710 <_end+0x1710>
+  20:	02751463          	bne	a0,t2,48 <fail>
+
+00000024 <test_3>:
+  24:	00300193          	li	gp,3
+  28:	ffffe517          	auipc	a0,0xffffe
+  2c:	8fc50513          	addi	a0,a0,-1796 # ffffd924 <_end+0xffffc924>
+  30:	004005ef          	jal	a1,34 <test_3+0x10>
+  34:	40b50533          	sub	a0,a0,a1
+  38:	ffffe3b7          	lui	t2,0xffffe
+  3c:	8f038393          	addi	t2,t2,-1808 # ffffd8f0 <_end+0xffffc8f0>
+  40:	00751463          	bne	a0,t2,48 <fail>
+  44:	00301e63          	bne	zero,gp,60 <pass>
+
+00000048 <fail>:
+  48:	00018063          	beqz	gp,48 <fail>
+  4c:	00119193          	slli	gp,gp,0x1
+  50:	0011e193          	ori	gp,gp,1
+  54:	05d00893          	li	a7,93
+  58:	00018513          	mv	a0,gp
+  5c:	00000073          	ecall
+
+00000060 <pass>:
+  60:	00100193          	li	gp,1
+  64:	05d00893          	li	a7,93
+  68:	00000513          	li	a0,0
+  6c:	00000073          	ecall
+  70:	00000013          	nop
