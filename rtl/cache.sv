@@ -13,7 +13,6 @@ module cache
 
     localparam integer unsigned NUM_SETS = 4;
     localparam integer unsigned M = $clog2(LINE_LEN / 8);
-    localparam integer unsigned N = $clog2(NUM_SETS) + M;
 
     typedef struct packed {
         logic                  valid, write;
@@ -23,12 +22,10 @@ module cache
     } req_t;
 
     // verilog_format: off
-    enum { IDLE, MISS, POSTMISS, WRITEBACK, WRITE } state;
+    enum { IDLE, MISS, SEND_SAVE, WRITEBACK, WRITE } state;
     // verilog_format: on
 
     req_t pending_req, next_req;
-    wire [ADDR_WIDTH-N-1:0] tag = pending_req.addr[ADDR_WIDTH-1:N];
-    wire [N-M-1:0] idx = pending_req.addr[N-1:M];
     wire [M-1:0] offset = pending_req.addr[M-1:0];
 
     logic [ADDR_WIDTH-1:0] addr_to_cache;
@@ -78,7 +75,7 @@ module cache
                 end
                 MISS: begin
                     if (mem_io.resp_valid) begin
-                        state <= pending_req.write ? WRITE : core_io.req_valid ? POSTMISS : IDLE;
+                        state <= pending_req.write ? WRITE : core_io.req_valid ? SEND_SAVE : IDLE;
                         if (pending_req.write) begin
                             state <= WRITE;
                         end else if (core_io.req_valid) begin
@@ -87,14 +84,19 @@ module cache
                             next_req.addr <= core_io.req_addr;
                             next_req.data <= core_io.req_data;
                             next_req.kind <= core_io.req_type;
-                            state <= POSTMISS;
+                            state <= SEND_SAVE;
                         end else begin
                             state <= IDLE;
                         end
                     end
                 end
-                POSTMISS: begin
+                SEND_SAVE: begin
                     if (!is_hit) begin
+                        pending_req.valid <= 1;
+                        pending_req.write <= core_io.req_write_en;
+                        pending_req.addr <= core_io.req_addr;
+                        pending_req.data <= core_io.req_data;
+                        pending_req.kind <= core_io.req_type;
                         state <= is_dirty ? WRITEBACK : MISS;
                     end else if (core_io.req_valid) begin
                         next_req.valid <= 1;
@@ -102,7 +104,7 @@ module cache
                         next_req.addr <= core_io.req_addr;
                         next_req.data <= core_io.req_data;
                         next_req.kind <= core_io.req_type;
-                        state <= POSTMISS;
+                        state <= SEND_SAVE;
                     end else begin
                         state <= IDLE;
                     end
@@ -164,14 +166,13 @@ module cache
                         core_io.resp_valid = 1;
                         unique case (pending_req.kind)
                             WORD: core_io.resp_data = mem_io.resp_data[offset*8+:32];
-                            HALF, UHALF:
-                            core_io.resp_data = {16'b0, mem_io.resp_data[offset*8+:16]};
+                            HALF, UHALF: core_io.resp_data = {16'b0, mem_io.resp_data[offset*8+:16]};
                             BYTE, UBYTE: core_io.resp_data = {24'b0, mem_io.resp_data[offset*8+:8]};
                         endcase
                     end
                 end
             end
-            POSTMISS: begin
+            SEND_SAVE: begin
                 addr_to_cache = next_req.addr;
                 if (is_hit) begin
                     core_io.resp_valid = 1;
