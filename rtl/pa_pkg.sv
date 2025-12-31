@@ -2,7 +2,7 @@ package pa_pkg;
     import riscv_pkg::*;
 
     /* ------------------------------- Exceptions ------------------------------- */
-    localparam PC_EXCEPTION_ADDR = 32'h8000;
+    localparam integer unsigned PC_EXCEPTION_ADDR = 32'h8000;
     typedef struct packed {
         logic ill_instr;
         logic div_by_zero;
@@ -19,8 +19,6 @@ package pa_pkg;
     /* ----------------------------- Core parameters ---------------------------- */
     // PC reset address
     localparam integer unsigned PC_RESET_ADDR = 32'h0000;
-    // PC exception address
-    localparam integer unsigned PC_EXCEPTION_ADDR = 32'h8000;
     // Number of registers in regfile
     localparam integer unsigned RF_NUMREGS = 32;
 
