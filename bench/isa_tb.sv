@@ -30,10 +30,8 @@ module isa_tb
     logic [31:0] instr_list[5] = {add1, add2, add3, add3, add3};
     */
 
-    pa_pkg::mem_read_req_t readreq;
-    pa_pkg::mem_read_resp_t readresp;
-    pa_pkg::mem_write_req_t writereq;
-    pa_pkg::mem_write_resp_t writeresp;
+    memory_intf #(.DATA_WIDTH(128)) mem_a_io ();
+    memory_intf #(.DATA_WIDTH(128)) mem_b_io ();
 
     logic clk_i;
     logic rst_i;
@@ -43,23 +41,19 @@ module isa_tb
     core #(
         .DEBUG(0)
     ) core (
-        .clk_i     (clk_i),
-        .rst_i     (rst_i),
-        .read_req  (readreq),
-        .read_resp (readresp),
-        .write_req (writereq),
-        .write_resp(writeresp)
+        .clk_i(clk_i),
+        .rst_i(rst_i),
+        .mem_a_io(mem_a_io.CL),
+        .mem_b_io(mem_b_io.CL)
     );
 
     memory #(
-        .DEBUG(1)
+        .NUMWORDS(64)
     ) memory (
-        .clk_i  (clk_i),
-        .rst_i  (rst_i),
-        .read_i (readreq),
-        .read_o (readresp),
-        .write_i(writereq),
-        .write_o(writeresp)
+        .clk_i(clk_i),
+        .rst_i(rst_i),
+        .mem_a_io(mem_a_io.SV),
+        .mem_b_io(mem_b_io.SV)
     );
 
     initial begin
@@ -77,7 +71,7 @@ module isa_tb
         clk_i = 1;
         rst_i = 1;
         #(CLK_PERIOD) rst_i = 0;
-        #(CLK_PERIOD * 20);
+        #(CLK_PERIOD * 100);
         $finish();
     end
 

@@ -10,17 +10,19 @@ module id_stage
 );
 
     // TODO: change sign extension based on if the instruction uses sign or unsigned numbers
-    logic [31:0] i_imm = {{20{fetch_i.instr[31]}}, fetch_i.instr.itype.imm};
-    logic [31:0] s_imm = {{20{fetch_i.instr[31]}}, fetch_i.instr.stype.imm_1, fetch_i.instr.stype.imm_2};
-    logic [31:0] b_imm = {
+    wire [31:0] i_imm = {{20{fetch_i.instr[31]}}, fetch_i.instr.itype.imm};
+    wire [31:0] s_imm = {
+        {20{fetch_i.instr[31]}}, fetch_i.instr.stype.imm_1, fetch_i.instr.stype.imm_2
+    };
+    wire [31:0] b_imm = {
         {20{fetch_i.instr.btype.imm_1}},
         fetch_i.instr.btype.imm_2,
         fetch_i.instr.btype.imm_3,
         fetch_i.instr.btype.imm_4,
         1'b0
     };
-    logic [31:0] u_imm = {fetch_i.instr.utype.imm, 12'b0};
-    logic [31:0] j_imm = {
+    wire [31:0] u_imm = {fetch_i.instr.utype.imm, 12'b0};
+    wire [31:0] j_imm = {
         {12{fetch_i.instr.jtype.imm_1}},
         fetch_i.instr.jtype.imm_2,
         fetch_i.instr.jtype.imm_3,
@@ -28,10 +30,10 @@ module id_stage
         1'b0
     };
 
-    logic [4:0] rd = fetch_i.instr.rtype.rd;
-    logic [4:0] rs1 = fetch_i.instr.rtype.rs1;
-    logic [4:0] rs2 = fetch_i.instr.rtype.rs2;
-    logic is_wb = (fetch_i.instr.rtype.opcode != OPCODE_STORE && fetch_i.instr.rtype.opcode != OPCODE_BRANCH) ? 1 : 0;
+    wire [4:0] rd = fetch_i.instr.rtype.rd;
+    wire [4:0] rs1 = fetch_i.instr.rtype.rs1;
+    wire [4:0] rs2 = fetch_i.instr.rtype.rs2;
+    wire is_wb = (fetch_i.instr.rtype.opcode != OPCODE_STORE && fetch_i.instr.rtype.opcode != OPCODE_BRANCH) ? 1 : 0;
 
     logic ill_instr;
     always_comb begin : id_exceptions
@@ -67,6 +69,7 @@ module id_stage
         decode_o.is_st     = 0;
         decode_o.uses_rs2  = 0;
         decode_o.mem_width = WORD;
+        decode_o.op = NOP;
         case (fetch_i.instr.rtype.opcode)
             OPCODE_ALU: begin
                 // verilog_format: off

@@ -9,17 +9,15 @@ module if_stage_tb
     logic clk;
     logic rst;
     pa_pkg::cu_if_t ctrl = '{default: 0};
-    pa_pkg::if_req_t req;
-    pa_pkg::if_resp_t resp;
     pa_pkg::if_stage_t ifout;
+    cache_intf icache ();
 
     if_stage if_stage (
-        .clk_i (clk),
-        .rst_i (rst),
-        .cu_i  (ctrl),
-        .req_o (req),
-        .resp_i(resp),
-        .if_o  (ifout)
+        .clk_i   (clk),
+        .rst_i   (rst),
+        .cu_i    (ctrl),
+        .if_o    (ifout),
+        .cache_io(icache.CL)
     );
 
 
@@ -36,8 +34,8 @@ module if_stage_tb
 
         #(CLK_PERIOD * 5);
 
-        resp.valid = 1;
-        resp.data  = NOP_INSTR;
+        icache.resp.valid = 1;
+        icache.resp.data  = NOP_INSTR;
 
         #(CLK_PERIOD * 10);
 

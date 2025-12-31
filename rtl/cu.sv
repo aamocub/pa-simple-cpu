@@ -48,8 +48,7 @@ module cu
 
         // ALU input mux select
         ex_o.alu_mux_a_sel = id_ex_i.is_br ? 1 : ex_rs1_hazard ? 2 : mm_rs1_hazard ? 3 : 0;
-        ex_o.alu_mux_b_sel = id_ex_i.uses_rs2 ? 1 : ex_rs2_hazard ? 2 : mm_rs2_hazard ? 3 : 0;
-        // CMP input mux select
+        ex_o.alu_mux_b_sel = id_ex_i.uses_rs2 ? 0 : ex_rs2_hazard ? 2 : mm_rs2_hazard ? 3 : 0;
         ex_o.cmp_mux_a_sel = ex_rs1_hazard ? 1 : mm_rs1_hazard ? 2 : 0;
         ex_o.cmp_mux_b_sel = ex_rs2_hazard ? 1 : mm_rs2_hazard ? 2 : 0;
     end

@@ -1,58 +1,80 @@
 package pa_pkg;
     import riscv_pkg::*;
 
-    /* --------------------------------------------- Memory definitions --------------------------------------------- */
-    // verilog_format: off
-    localparam MEM_ACCESS_DELAY = 1;  // How many cycles does it take the memory to access data
-    localparam PHY_ADDR_LEN     = 32; // Bit width of physical address
-    typedef enum logic [2:0] { BYTE, UBYTE, HALF, UHALF, WORD } mem_width_t; // Size/width of memory access
-    // verilog_format: on
-
-    /* ----------------------------------------- Memory arbitrer definitions ---------------------------------------- */
-    typedef struct packed {
-        logic                    valid;
-        logic [PHY_ADDR_LEN-1:0] addr;
-    } if_req_t;
-    typedef struct packed {
-        logic            valid;
-        logic [XLEN-1:0] data;
-    } if_resp_t;
-    typedef struct packed {
-        logic                    valid;
-        logic [PHY_ADDR_LEN-1:0] addr;
-    } mm_read_req_t;
-    typedef struct packed {
-        logic            valid;
-        logic [XLEN-1:0] data;
-    } mm_read_resp_t;
-    typedef struct packed {
-        logic                    valid;
-        logic [PHY_ADDR_LEN-1:0] addr;
-        logic [XLEN-1:0]         data;
-    } mm_write_req_t;
-    typedef struct packed {logic valid;} mm_write_resp_t;
-
-    /* ------------------------------------------------- Exceptions ------------------------------------------------- */
+    /* ------------------------------- Exceptions ------------------------------- */
     localparam PC_EXCEPTION_ADDR = 32'h8000;
     typedef struct packed {
         logic ill_instr;
         logic div_by_zero;
     } exception_t;
 
-    /* ---------------------------------------------- Core definitions ---------------------------------------------- */
-    localparam PC_RESET_ADDR = 32'h0000;
-    localparam RF_NUMREGS = 32;
+    /* ---------------------------- Memory parameters --------------------------- */
+    // How many cycles does it take the memory to access data
+    localparam integer unsigned MEM_ACCESS_DELAY = 1;
+    // Bit width of physical address
+    localparam integer unsigned PHY_ADDR_LEN = 32;
+    // Memory line of 128 bits
+    localparam integer unsigned MEM_LINE_LEN = 128;
 
-    /* --------------------------------------------- Decode definitions --------------------------------------------- */
-    // verilog_format: off
-    typedef enum {
-        NOP, LUI, AUIPC, JAL, JALR, BEQ, BNE, BLT, BGE, BLTU, BGEU, LB, LH, LW, LBU, LHU, SB, SH, SW, ADDI, SLTI, SLTIU,
-        XORI, ORI, ANDI, SLLI, SRLI, SRAI, ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND, ECALL, EBREAK, MUL, MULH,
-        MULHSU, MULHU, DIV, DIVU, REM, REMU, ILLEGAL
-    } instr_op_t;
-    // verilog_format: on
+    /* ----------------------------- Core parameters ---------------------------- */
+    // PC reset address
+    localparam integer unsigned PC_RESET_ADDR = 32'h0000;
+    // PC exception address
+    localparam integer unsigned PC_EXCEPTION_ADDR = 32'h8000;
+    // Number of registers in regfile
+    localparam integer unsigned RF_NUMREGS = 32;
 
-    /* --------------------------------------------- Control definitions -------------------------------------------- */
+    /* ---------------------------- Core definitions ---------------------------- */
+
+    /* --------------------------- Memory definitions --------------------------- */
+    // Memory access width ({U}BYTE, {U}HALF, WORD)
+    typedef enum logic [2:0] {
+        BYTE,
+        UBYTE,
+        HALF,
+        UHALF,
+        WORD
+    } mem_width_t;
+    typedef struct packed {
+        logic                    valid;
+        logic [PHY_ADDR_LEN-1:0] addr;
+    } mem_read_req_t;
+    typedef struct packed {
+        logic                    valid;
+        logic [MEM_LINE_LEN-1:0] data;
+    } mem_read_resp_t;
+    typedef struct packed {
+        logic                    valid;
+        logic [PHY_ADDR_LEN-1:0] addr;
+        logic [MEM_LINE_LEN-1:0] data;
+    } mem_write_req_t;
+    typedef struct packed {
+        logic valid;  //
+    } mem_write_resp_t;
+
+    /* ---------------------------- Cache parameters ---------------------------- */
+    // Cache line length in bits (should be set to 128)
+    localparam integer unsigned CACHE_LINE_LEN = 128;
+
+    /* ---------------------------- Cache definitions --------------------------- */
+    typedef enum logic {
+        READ,
+        WRITE
+    } access_t;
+    typedef struct packed {
+        access_t                 kind;
+        mem_width_t              width;
+        logic                    valid;
+        logic [PHY_ADDR_LEN-1:0] addr;
+        logic [XLEN-1:0]         data;
+    } cc_req_t;
+    typedef struct packed {
+        logic            valid;
+        logic [XLEN-1:0] data;
+    } cc_resp_t;
+
+    /* ------------------------ Control unit definitions ------------------------ */
+    // Control signals to IF stage
     typedef struct packed {
         logic [1:0]              pcsel;         // PC select
         logic [PHY_ADDR_LEN-1:0] addr;          // Address to jump to
@@ -61,6 +83,7 @@ package pa_pkg;
         logic                    except_valid;  // Is there a valid exception
         logic [PHY_ADDR_LEN-1:0] except_addr;   // Where to jump for the exception
     } cu_if_t;
+    // Control signals to ID stage
     typedef struct packed {
         logic            stall;  // Stall stage
         logic            flush;  // Flush stage
@@ -68,6 +91,7 @@ package pa_pkg;
         logic [XLEN-1:0] epc;    // PC that raised the exception
         logic            ewe;    // Write enable
     } cu_id_t;
+    // Control signals to EX stage
     typedef struct packed {
         logic       stall;          // Stall stage
         logic       flush;          // Flush stage
@@ -76,22 +100,42 @@ package pa_pkg;
         logic [1:0] cmp_mux_a_sel;  // CMP reg A Mux select
         logic [1:0] cmp_mux_b_sel;  // CMP reg B Mux select
     } cu_ex_t;
+    // Control signals to MM stage
     typedef struct packed {
         logic stall;  // Stall stage
         logic flush;  // Flush stage
     } cu_mm_t;
+    // Control signals to WB stage
     typedef struct packed {
         logic stall;  // Stall stage
         logic flush;  // Flush stage
     } cu_wb_t;
 
-    /* ---------------------------------------------- Stage definitions --------------------------------------------- */
+    /* ---------------------------- Stage definitions --------------------------- */
+    // IF stage output
     typedef struct packed {
         instruction_t    instr;  // Instruction
         logic [XLEN-1:0] pc;     // Current PC
         exception_t      evec;   // Exception vector
     } if_stage_t;
 
+    // Instruction codes
+    // verilog_format: off
+    typedef enum {
+        NOP,
+        LUI, AUIPC, JAL, JALR,
+        BEQ, BNE, BLT, BGE, BLTU, BGEU,
+        LB, LH, LW, LBU, LHU, SB, SH, SW,
+        ADDI, SLTI, SLTIU, XORI, ORI, ANDI, SLLI, SRLI, SRAI,
+        ADD, SUB, SLL, SLT, SLTU, XOR, SRL, SRA, OR, AND,
+        ECALL, EBREAK,
+        MUL, MULH, MULHSU, MULHU,
+        DIV, DIVU, REM, REMU,
+        ILLEGAL
+    } instr_op_t;
+    // verilog_format: on
+
+    // ID stage ouput
     typedef struct packed {
         logic [4:0]      rs1;        // Source register 1
         logic [4:0]      rs2;        // Source register 2
@@ -110,6 +154,7 @@ package pa_pkg;
         exception_t      evec;       // Exception vector
     } id_stage_t;
 
+    // EX stage output
     typedef struct packed {
         logic [4:0]      rs1;         // Source register 1
         logic [4:0]      rs2;         // Source register 2
@@ -127,6 +172,23 @@ package pa_pkg;
         exception_t      evec;        // Exception vector
     } ex_stage_t;
 
+    // MM memory interface
+    typedef struct packed {
+        logic                    valid;
+        logic [PHY_ADDR_LEN-1:0] addr;
+    } mm_read_req_t;
+    typedef struct packed {
+        logic            valid;
+        logic [XLEN-1:0] data;
+    } mm_read_resp_t;
+    typedef struct packed {
+        logic                    valid;
+        logic [PHY_ADDR_LEN-1:0] addr;
+        logic [XLEN-1:0]         data;
+    } mm_write_req_t;
+    typedef struct packed {logic valid;} mm_write_resp_t;
+
+    // MM stage output
     typedef struct packed {
         logic [XLEN-1:0] data;
         logic [XLEN-1:0] data_rs2;  // Value of register 2
@@ -139,6 +201,7 @@ package pa_pkg;
         exception_t      evec;      // Exception vector
     } mm_stage_t;
 
+    // WB stage output
     typedef struct packed {
         logic            is_wb;
         logic [XLEN-1:0] pc;     // Current PC
@@ -146,24 +209,5 @@ package pa_pkg;
         logic [XLEN-1:0] data;
         exception_t      evec;   // Exception vector
     } wb_stage_t;  // from WB to ID stage
-
-    // Memory and Memory Arbitrer structs
-    typedef logic [3:0] access_t;
-    typedef struct packed {
-        logic                    valid;
-        logic [PHY_ADDR_LEN-1:0] addr;
-        access_t                 byte_en;
-    } mem_read_req_t;
-    typedef struct packed {
-        logic            valid;
-        logic [XLEN-1:0] data;
-    } mem_read_resp_t;
-    typedef struct packed {
-        logic                    valid;
-        logic [PHY_ADDR_LEN-1:0] addr;
-        logic [XLEN-1:0]         data;
-        access_t                 byte_en;
-    } mem_write_req_t;
-    typedef struct packed {logic valid;} mem_write_resp_t;
 
 endpackage
