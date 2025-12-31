@@ -37,9 +37,9 @@ module cache
     logic is_hit, is_dirty;
 
     cache_data #(
-        .LINE_LEN  (LINE_LEN  /* default CACHE_LINE_LEN */),
-        .NUM_SETS  (NUM_SETS  /* default 4 */),
-        .ADDR_WIDTH(ADDR_WIDTH  /* default PHY_ADDR_LEN */)
+        .LINE_LEN  (LINE_LEN),
+        .NUM_SETS  (NUM_SETS),
+        .ADDR_WIDTH(ADDR_WIDTH)
     ) cache_data (
         .clk_i       (clk_i),
         .rst_i       (rst_i),
@@ -166,7 +166,8 @@ module cache
                         core_io.resp_valid = 1;
                         unique case (pending_req.kind)
                             WORD: core_io.resp_data = mem_io.resp_data[offset*8+:32];
-                            HALF, UHALF: core_io.resp_data = {16'b0, mem_io.resp_data[offset*8+:16]};
+                            HALF, UHALF:
+                            core_io.resp_data = {16'b0, mem_io.resp_data[offset*8+:16]};
                             BYTE, UBYTE: core_io.resp_data = {24'b0, mem_io.resp_data[offset*8+:8]};
                         endcase
                     end
