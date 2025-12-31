@@ -34,17 +34,17 @@ module core
     memory_intf #(.DATA_WIDTH(CACHE_LINE_LEN)) dcache_arb_port ();
 
     cache icache (
-        .clk_i   (clk_i),
-        .rst_i   (rst_i),
-        .stage_io(icache_port.SV),
-        .mem_io  (mem_a_io)
+        .clk_i  (clk_i),
+        .rst_i  (rst_i),
+        .core_io(icache_port.SV),
+        .mem_io (mem_a_io)
     );
 
     cache dcache (
-        .clk_i   (clk_i),
-        .rst_i   (rst_i),
-        .stage_io(dcache_port.SV),
-        .mem_io  (mem_b_io)
+        .clk_i  (clk_i),
+        .rst_i  (rst_i),
+        .core_io(dcache_port.SV),
+        .mem_io (mem_b_io)
     );
 
     cu cu (
