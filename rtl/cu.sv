@@ -18,6 +18,7 @@ module cu
     output cu_mm_t mm_o,
     output cu_wb_t wb_o
 );
+    // Hay algo mal con los bypasses y logica de deteccion de dependencias entre instrucciones.
     logic ex_rs1_hazard = ex_mm_i.is_wb && ex_mm_i.rd != 0 && ex_mm_i.rd == id_ex_i.rs1;
     logic ex_rs2_hazard = ex_mm_i.is_wb && ex_mm_i.rd != 0 && ex_mm_i.rd == id_ex_i.rs2;
     logic mm_rs1_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs1 && !ex_rs1_hazard;
