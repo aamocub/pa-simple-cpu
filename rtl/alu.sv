@@ -37,12 +37,16 @@ module alu
     always_comb begin
         div_zero_o = 0;
         stall_o = 0;  // Do not stall by default
-        case (opcode_i)
+        out_o = '0;
+        unique case (opcode_i)
             NOP: out_o = '0;
 
             // Add / Sub
             ADD, ADDI: out_o = a_i + b_i;
             SUB:       out_o = a_i - b_i;
+
+            LUI, AUIPC: out_o = a_i + b_i;
+            ECALL, EBREAK, ILLEGAL: out_o = '0;
 
             // Logic
             XOR, XORI: out_o = a_i ^ b_i;
@@ -107,7 +111,7 @@ module alu
             // Load / Store
             LB, LH, LW, LBU, LHU, SB, SH, SW: out_o = a_i + b_i;
 
-            default: out_o = 'x;
+            // default: out_o = 'x;
         endcase
     end
 

@@ -43,9 +43,9 @@ module ex_stage
     always_comb begin : mux_alu_b
         case (cu_i.alu_mux_b_sel)
             0: alu_b = id_i.imm;
-            1: alu_b = id_i.data_rs2;
-            2: alu_b = bypass_mm_data;
-            3: alu_b = bypass_wb_data;
+            1: alu_b = bypass_mm_data;
+            2: alu_b = bypass_wb_data;
+            3: alu_b = id_i.data_rs2;
             default: alu_b = id_i.imm;
         endcase
     end

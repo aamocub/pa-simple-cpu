@@ -9,7 +9,6 @@ module top_tb ();
             fd
         )) begin
             int err = $fgets(line, fd);
-            $display("%t tb: read instr (%0h) from file", $time, line.atohex());
             top.memory.mem[PC_RESET_ADDR+4*next_word+:4] = line.atohex();
             next_word = next_word + 1;
         end
@@ -21,7 +20,9 @@ module top_tb ();
 
     always #(CLK_PERIOD / 2) clk = ~clk;
 
-    top #() top (
+    top #(
+        .MEMLEN(4096)
+    ) top (
         .clk_i(clk),
         .rst_i(rst)
     );
@@ -47,11 +48,12 @@ module top_tb ();
         $display("%t tb: system halted", $time);
 
         if (top.core.id_stage.regfile.bank[17] == 93) begin
-            int err = top.core.id_stage.regfile.bank[10];
+            static int testnum = top.core.id_stage.regfile.bank[3] >> 1;
+            static int err = top.core.id_stage.regfile.bank[10];
             if (err == 0) begin
                 $display("%t tb: RESULT -> SUCCESS", $time);
             end else begin
-                $display("%t tb: RESULT -> FAILURE (%0d)", $time, err);
+                $display("%t tb: RESULT -> FAILURE (%0d)", $time, testnum);
             end
         end
         $finish();
