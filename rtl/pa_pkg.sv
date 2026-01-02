@@ -10,7 +10,7 @@ package pa_pkg;
 
     /* ---------------------------- Memory parameters --------------------------- */
     // How many cycles does it take the memory to access data
-    localparam integer unsigned MEM_ACCESS_DELAY = 1;
+    localparam integer unsigned MEM_ACCESS_DELAY = 2;
     // Bit width of physical address
     localparam integer unsigned PHY_ADDR_LEN = 32;
     // Memory line of 128 bits

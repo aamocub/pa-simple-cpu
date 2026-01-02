@@ -1,93 +1,118 @@
 module if_stage
     import riscv_pkg::*;
     import pa_pkg::*;
-(
-    input  logic          clk_i,  // Clock signal
-    input  logic          rst_i,  // Reset signal
-    input  cu_if_t        cu_i,   // Control data being sent by the control unit
-    output if_stage_t     if_o,   // Output data from the IF stage
-           memory_intf.CL mem_io  // Memory interface
+#(
+    parameter integer unsigned ADDR_WIDTH = PHY_ADDR_LEN
+) (
+    input logic clk_i,
+    input logic rst_i,
+    input cu_if_t cu_i,
+    memory_intf.CL mem_io,
+    output if_stage_t if_o
 );
-    enum {
-        RST,
-        IF1,
-        IF2
-    } state;
-
-    logic [PHY_ADDR_LEN-1:0] pc, next_pc;
+    //verilog_format: off
+    enum { RST, FETCH, WAIT, JUMP } state, next_state;
+    //verilog_format: on
+    logic [ADDR_WIDTH-1:0] pc, next_pc, pend_addr;
     instruction_t instr;
+    logic from_jump;
 
+    always_comb begin
+        if_o.pc    = pc;
+        if_o.instr = instr;
+    end
 
-    always_ff @(posedge clk_i, posedge rst_i) begin : transitions_block
+    always_ff @(posedge clk_i, posedge rst_i) begin
+        pc <= next_pc;
         if (rst_i) begin
-            pc <= next_pc;
             state <= RST;
         end else begin
-            pc <= next_pc;
+            from_jump <= 0;
             unique case (state)
-                RST: state <= IF1;
-                IF1: state <= IF2;
-                IF2: state <= IF2;
-            endcase
-        end
-    end
-
-    always_comb begin : if_out
-        if_o.evec = '0;  // No exceptions (yet) in IF stage
-        if (cu_i.flush) begin
-            if_o.pc = 0;
-            if_o.instr = NOP_INSTR;
-        end else if (cu_i.stall) begin
-            if_o.pc = pc;
-            if_o.instr = instr;
-        end else begin
-            if_o.pc = pc;
-            if_o.instr = instr;
-            if (!mem_io.resp_valid) begin
-                if_o.instr = NOP_INSTR;
-            end
-        end
-    end
-    always_comb begin : generate_new_pc
-        next_pc = pc;
-        if (rst_i) begin
-            next_pc = PC_RESET_ADDR;
-        end else if (cu_i.except_valid) begin
-            next_pc = cu_i.except_addr;
-        end else if (cu_i.stall) begin
-            next_pc = pc;
-        end else if (state == RST || state == IF1) begin
-            next_pc = pc;
-        end else begin
-            case (cu_i.pcsel)
-                0: next_pc = mem_io.resp_valid ? pc + 4 : pc;
-                1: next_pc = cu_i.addr;
-                2: next_pc = PC_EXCEPTION_ADDR;
-                default: next_pc = pc + 4;
-            endcase
-        end
-    end
-    always_comb begin : fetch_pc_from_mem
-        mem_io.req_write_en = 0;
-        mem_io.req_valid = 0;
-        mem_io.req_type = WORD;
-        mem_io.req_addr = next_pc;
-        if (rst_i) begin
-            instr = NOP_INSTR;
-        end else begin
-            instr = instr;
-            unique case (state)
-                RST: ;
-                IF1: begin
-                    mem_io.req_valid = 1;
+                RST: begin
+                    state <= FETCH;
                 end
-                IF2: begin
+                FETCH: begin
+                    state <= mem_io.resp_valid ? FETCH : WAIT;
+                end
+                WAIT: begin
+                    if (cu_i.pcsel != 0) begin
+                        pend_addr <= next_pc;
+                        state <= JUMP;
+                    end else if (mem_io.resp_valid) begin
+                        state <= FETCH;
+                    end else begin
+                        state <= WAIT;
+                    end
+                end
+                JUMP: begin
+                    from_jump <= 1;
                     if (mem_io.resp_valid) begin
-                        instr = mem_io.resp_data;
-                        mem_io.req_valid = 1;
+                        state <= FETCH;
+                    end else begin
+                        state <= JUMP;
                     end
                 end
             endcase
+        end
+    end
+    always_comb begin
+        mem_io.req_write_en = 0;
+        mem_io.req_valid = 0;
+        mem_io.req_type = WORD;
+        mem_io.req_addr = pc;
+        instr = NOP_INSTR;
+        unique case (state)
+            RST: begin
+            end
+            FETCH: begin
+                mem_io.req_valid = 1;
+                if (from_jump) mem_io.req_addr = pend_addr;
+                unique case (cu_i.pcsel)
+                    0: mem_io.req_addr = pc;
+                    1, 2: mem_io.req_addr = next_pc;
+                endcase
+                if (mem_io.resp_valid) instr = mem_io.resp_data;
+            end
+            WAIT: begin
+                if (mem_io.resp_valid) instr = mem_io.resp_data;
+            end
+            JUMP: begin
+            end
+        endcase
+    end
+    always_comb begin
+        if (rst_i) begin
+            next_pc = PC_RESET_ADDR;
+        end else begin
+            if (cu_i.stall) begin
+                next_pc = pc;
+            end else begin
+                next_pc = pc;
+                unique case (state)
+                    RST: begin
+                    end
+                    FETCH: begin
+                        unique case (cu_i.pcsel)
+                            0: next_pc = mem_io.resp_valid ? pc + 4 : pc;
+                            1: next_pc = cu_i.addr;
+                            2: next_pc = PC_EXCEPTION_ADDR;
+                        endcase
+                    end
+                    WAIT: begin
+                        unique case (cu_i.pcsel)
+                            0: next_pc = mem_io.resp_valid ? pc + 4 : pc;
+                            1: next_pc = cu_i.addr;
+                            2: next_pc = PC_EXCEPTION_ADDR;
+                        endcase
+                    end
+                    JUMP: begin
+                        if (mem_io.resp_valid) begin
+                            next_pc = pend_addr;
+                        end
+                    end
+                endcase
+            end
         end
     end
 

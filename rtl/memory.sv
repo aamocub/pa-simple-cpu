@@ -8,7 +8,7 @@ module memory
 #(
     // localparam int NUMWORDS = 2 << 12,
     parameter integer unsigned NUMWORDS = 4096,
-    localparam integer unsigned DELAY = 4,
+    localparam integer unsigned DELAY = MEM_ACCESS_DELAY,
     localparam integer unsigned MEM_LINE_B = MEM_LINE_LEN / 8
 ) (
     input logic clk_i,

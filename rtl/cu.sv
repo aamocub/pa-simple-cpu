@@ -18,18 +18,17 @@ module cu
     output cu_mm_t mm_o,
     output cu_wb_t wb_o
 );
-    // Hay algo mal con los bypasses y logica de deteccion de dependencias entre instrucciones.
-    logic ex_rs1_hazard = ex_mm_i.is_wb && ex_mm_i.rd != 0 && ex_mm_i.rd == id_ex_i.rs1;
-    logic ex_rs2_hazard = ex_mm_i.is_wb && ex_mm_i.rd != 0 && ex_mm_i.rd == id_ex_i.rs2;
-    logic mm_rs1_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs1 && !ex_rs1_hazard;
-    logic mm_rs2_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs2 && !ex_rs2_hazard;
+    wire ex_rs1_hazard = ex_mm_i.is_wb && ex_mm_i.rd != 0 && ex_mm_i.rd == id_ex_i.rs1;
+    wire ex_rs2_hazard = ex_mm_i.is_wb && ex_mm_i.rd != 0 && ex_mm_i.rd == id_ex_i.rs2;
+    wire mm_rs1_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs1 && !ex_rs1_hazard;
+    wire mm_rs2_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs2 && !ex_rs2_hazard;
 
-    logic is_exception = |wb_i.evec;
-    logic is_taken = ex_mm_i.is_taken;
+    wire is_exception = |wb_i.evec;
+    wire is_taken = ex_mm_i.is_taken;
 
     always_comb begin : IF_stage
         if_o.stall = ex_i.do_stall | mm_i.do_stall;
-        if_o.flush = is_exception;
+        if_o.flush = is_exception | is_taken;
 
         // PC selection logic
         if_o.pcsel = is_exception ? 2 : is_taken ? 1 : 0;
@@ -48,15 +47,35 @@ module cu
         ex_o.flush = is_taken | is_exception;
 
         // ALU input mux select
-        ex_o.alu_mux_a_sel = id_ex_i.is_br ? 1 : ex_rs1_hazard ? 2 : mm_rs1_hazard ? 3 : 0;
-        ex_o.alu_mux_b_sel = id_ex_i.uses_rs2 ? 0 : ex_rs2_hazard ? 2 : mm_rs2_hazard ? 3 : 0;
-        ex_o.cmp_mux_a_sel = ex_rs1_hazard ? 1 : mm_rs1_hazard ? 2 : 0;
-        ex_o.cmp_mux_b_sel = ex_rs2_hazard ? 1 : mm_rs2_hazard ? 2 : 0;
+        // verilog_format: off
+        ex_o.alu_mux_a_sel = id_ex_i.is_br ? 1 : // pc
+                             ex_rs1_hazard ? 2 : // rd from EX/MM
+                             mm_rs1_hazard ? 3 : // rd from MM/WB
+                                             0;  // rs1 from decode
+
+        ex_o.alu_mux_b_sel = id_ex_i.uses_rs2 && ex_rs2_hazard ? 1 : // rd from EX/MM
+                             id_ex_i.uses_rs2 && mm_rs2_hazard ? 2 : // rd from MM/WB
+                                              id_ex_i.uses_rs2 ? 3 : // rs2 from decode
+                                                                 0;  // immediate
+
+        ex_o.cmp_mux_a_sel = ex_rs1_hazard ? 1 : // rd from EX/MM
+                             mm_rs1_hazard ? 2 : // rd from MM/WB
+                                             0;  // rs1 from decode
+
+        ex_o.cmp_mux_b_sel = ex_rs2_hazard ? 1 : // rd from EX/MM
+                             mm_rs2_hazard ? 2 : // rd from MM/WB
+                                             0;  // rs2 from decode
+
+        // ex_o.alu_mux_a_sel = id_ex_i.is_br ? 1 : ex_rs1_hazard ? 2 : mm_rs1_hazard ? 3 : 0;
+        // ex_o.alu_mux_b_sel = ex_rs2_hazard ? 2 : mm_rs2_hazard ? 3 : id_ex_i.uses_rs2 ? 1 : 0;
+        // ex_o.cmp_mux_a_sel = ex_rs1_hazard ? 1 : mm_rs1_hazard ? 2 : 0;
+        // ex_o.cmp_mux_b_sel = ex_rs2_hazard ? 1 : mm_rs2_hazard ? 2 : 0;
+        // verilog_format: on
     end
 
     always_comb begin : MM_stage
         mm_o.stall = mm_i.do_stall;
-        mm_o.flush = is_exception;
+        mm_o.flush = is_taken | is_exception;
     end
 
     always_comb begin : WB_stage

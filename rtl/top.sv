@@ -1,7 +1,9 @@
 module top
     import riscv_pkg::*;
     import pa_pkg::*;
-(
+#(
+    parameter integer unsigned MEMLEN = 4096
+) (
     input clk_i,
     input rst_i
 );
@@ -17,7 +19,9 @@ module top
         .mem_b_io(mem_b_io.CL)
     );
 
-    memory memory (
+    memory #(
+        .NUMWORDS(MEMLEN)
+    ) memory (
         .clk_i(clk_i),
         .rst_i(rst_i),
         .mem_a_io(mem_a_io.SV),

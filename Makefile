@@ -24,7 +24,7 @@ TESTDIR := tests
 TESTLIST = $(patsubst $(TESTDIR)/rv32ui-p-%,%,$(wildcard $(TESTDIR)/rv32ui-p-*))
 
 define check_tb
-	@if [ -z "$(TB)"]; \
+	@if [[ -z "$(TB)" ]]; \
 	then \
 		echo "Error: TB is not set. Please set TB to one of the following: $(TBLIST)"; \
 	elif ! echo "$(TBLIST)" | grep -wq "$(TB)"; then \
@@ -34,7 +34,7 @@ define check_tb
 endef
 
 define check_tests
-	@if [ -z "$(TEST)"]; \
+	@if [[ -z "$(TEST)" ]]; \
 	then \
 		echo "Error: TEST is not set. Please set TEST to one of the following: $(TESTLIST)"; \
 	elif ! echo "$(TESTLIST)" | grep -wq "$(TEST)"; then \
@@ -44,7 +44,7 @@ define check_tests
 endef
 
 define check_file_exists
-	@if [ ! -f $(BUILDDIR)/$(TB)_tb.$(1) ] \
+	@if [[ ! -f $(BUILDDIR)/$(TB)_tb.$(1) ]] \
 	then \
 		echo "Error: $(BUILDDIR)/$(TB)_tb.$(1) not found. Ensure you have run 'make compile TB=$(TB)' first." ; \
 		exit 1; \
@@ -76,6 +76,8 @@ wave: run
 test: compile
 	$(call check_tests)
 	@cd $(BUILDDIR) && ./V$(TB)_tb +load=$(PWD)/$(TESTDIR)/rv32ui-p-$(TEST).hex
+
+test-wave: test
 	@cd $(BUILDDIR) && >/dev/null $(WAVE_VIEWER) $(TB)_tb.fst
 
 clean:
