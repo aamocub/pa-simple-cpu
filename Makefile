@@ -45,7 +45,7 @@ define check_tests
 endef
 
 define check_file_exists
-	@if [[ ! -f $(BUILDDIR)/$(TB)_tb.$(1) ]] \
+	@if [[ ! -f $(BUILDDIR)/$(TB)_tb.$(1) ]]; \
 	then \
 		echo "Error: $(BUILDDIR)/$(TB)_tb.$(1) not found. Ensure you have run 'make compile TB=$(TB)' first." ; \
 		exit 1; \
