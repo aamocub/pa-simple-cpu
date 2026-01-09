@@ -1,3 +1,4 @@
+SHELL := /bin/bash
 SIM := verilator
 SIM_ARGS ?= --quiet \
 	    --report-unoptflat \
