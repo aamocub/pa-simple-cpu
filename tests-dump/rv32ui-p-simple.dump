@@ -1,0 +1,11 @@
+
+rv32ui-p-simple:     formato del fichero elf32-littleriscv
+
+
+Desensamblado de la sección .text:
+
+00000000 <_start>:
+   0:	00100193          	li	gp,1
+   4:	05d00893          	li	a7,93
+   8:	00000513          	li	a0,0
+   c:	00000073          	ecall

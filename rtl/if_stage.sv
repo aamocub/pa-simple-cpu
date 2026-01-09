@@ -10,13 +10,12 @@ module if_stage
 );
     enum {
         RST,
-        IF1,
-        IF2
+        IF1,  // fetch
+        IF2   // wait for response
     } state;
 
     logic [PHY_ADDR_LEN-1:0] pc, next_pc;
     instruction_t instr;
-
 
     always_ff @(posedge clk_i, posedge rst_i) begin : transitions_block
         if (rst_i) begin

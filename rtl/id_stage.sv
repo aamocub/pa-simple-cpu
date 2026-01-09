@@ -69,7 +69,7 @@ module id_stage
         decode_o.is_st     = 0;
         decode_o.uses_rs2  = 0;
         decode_o.mem_width = WORD;
-        decode_o.op = NOP;
+        decode_o.op        = NOP;
         case (fetch_i.instr.rtype.opcode)
             OPCODE_ALU: begin
                 // verilog_format: off
@@ -156,7 +156,7 @@ module id_stage
                     default: ill_instr = 1;
                 endcase
                 decode_o.is_st = 1;
-                decode_o.uses_rs2 = 1;
+                // decode_o.uses_rs2 = 1;
             end
             OPCODE_BRANCH: begin
                 case (fetch_i.instr.rtype.funct3)
@@ -180,16 +180,18 @@ module id_stage
                 decode_o.op = JALR;
                 decode_o.is_br = 1;
             end
-            OPCODE_LUI:   decode_o.op = LUI;
-            OPCODE_AUIPC: decode_o.op = AUIPC;
+            OPCODE_LUI: decode_o.op = LUI;
+            OPCODE_AUIPC:
+            decode_o.op = AUIPC;  // TODO: I don't think this instr. is implemented properly
             OPCODE_ECALL: begin
+                ill_instr = 1; // NOTE: Because we currently do not do anything with ecall, just treat it as an illegal instruction
                 case (fetch_i.instr.itype.imm)
                     IMM_ECALL:  decode_o.op = ECALL;
                     IMM_EBREAK: decode_o.op = EBREAK;
                     default:    ill_instr = 1;
                 endcase
             end
-            default:      ill_instr = 1;
+            default: ill_instr = 1;
         endcase
     end
 
