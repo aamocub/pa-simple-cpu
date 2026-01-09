@@ -28,7 +28,7 @@ module cu
 
     always_comb begin : IF_stage
         if_o.stall = ex_i.do_stall | mm_i.do_stall;
-        if_o.flush = is_exception;
+        if_o.flush = is_exception | is_taken;
 
         // PC selection logic
         if_o.pcsel = is_exception ? 2 : is_taken ? 1 : 0;
@@ -75,7 +75,7 @@ module cu
 
     always_comb begin : MM_stage
         mm_o.stall = mm_i.do_stall;
-        mm_o.flush = is_exception;
+        mm_o.flush = is_taken | is_exception;
     end
 
     always_comb begin : WB_stage
