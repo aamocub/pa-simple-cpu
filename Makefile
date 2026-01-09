@@ -66,7 +66,7 @@ compile:
 
 run: compile
 	$(call check_tb)
-	$(call check_file_exists,)
+	$(call check_file_exists,fst)
 	@cd $(BUILDDIR) && ./V$(TB)_tb +verilator+quiet
 
 wave: run
