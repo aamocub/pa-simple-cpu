@@ -16,7 +16,7 @@ module memory
     memory_intf.SV mem_a_io,
     memory_intf.SV mem_b_io
 );
-    logic [NUMWORDS-1:0][7:0] mem;  // memory array to store and read memory values
+    logic [NUMWORDS*4-1:0][7:0] mem;  // memory array to store and read memory values
 
     wire a_valid, b_valid;
     wire a_wren, b_wren;
