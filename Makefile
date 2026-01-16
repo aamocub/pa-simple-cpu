@@ -1,21 +1,20 @@
-SHELL := /bin/bash
 SIM := verilator
 SIM_ARGS ?= --quiet \
-	    --report-unoptflat \
-	    -Wall -Wno-fatal \
-	    --timing \
-	    --binary \
-	    -j 0 \
-	    --trace-fst \
-	    --trace-structs \
-	    --autoflush \
-	    --assert \
-	    -I./rtl \
-	    -I./bench \
-	    -CFLAGS \
-	    -DVL_DEBUG \
-	    -Wno-UNUSEDPARAM \
-	    -Wno-UNUSEDSIGNAL
+		--report-unoptflat \
+		-Wall -Wno-fatal \
+		--timing \
+		--binary \
+		-j 0 \
+		--trace-fst \
+		--trace-structs \
+		--autoflush \
+		--assert \
+		-I./rtl \
+		-I./bench \
+		-CFLAGS \
+		-DVL_DEBUG \
+		-Wno-UNUSEDPARAM \
+		-Wno-UNUSEDSIGNAL
 WAVE_VIEWER := surfer
 
 BUILDDIR := obj_dir
@@ -25,9 +24,9 @@ TESTDIR := tests
 TESTLIST = $(patsubst $(TESTDIR)/rv32ui-p-%.hex,%,$(wildcard $(TESTDIR)/rv32ui-p-*))
 
 define check_tb
-	@if [[ -z "$(TB)" ]]; \
-	then \
+	@if [ -z "$(TB)" ]; then \
 		echo "Error: TB is not set. Please set TB to one of the following: $(TBLIST)"; \
+		exit 1; \
 	elif ! echo "$(TBLIST)" | grep -wq "$(TB)"; then \
 		echo "Error: TB '$(TB)' is not a valid testbench. Please set TB to one of the following: $(TBLIST)"; \
 		exit 1; \
@@ -35,19 +34,17 @@ define check_tb
 endef
 
 define check_tests
-	@if [[ -z "$(TEST)" ]]; \
-	then \
+	@if [ -z "$(TEST)" ]; then \
 		echo "Error: TEST is not set. Please set TEST to one of the following: $(TESTLIST)"; \
 	elif ! echo "$(TESTLIST)" | grep -wq "$(TEST)"; then \
-		echo "Error: TEST '$(TEST)' is not a valid testbench. Please set TEST to one of the following: $(TESTLIST)"; \
+		echo "Error: TEST '$(TEST)' is not a valid test. Please set TEST to one of the following: $(TESTLIST)"; \
 		exit 1; \
 	fi
 endef
 
 define check_file_exists
-	@if [[ ! -f $(BUILDDIR)/$(TB)_tb.$(1) ]]; \
-	then \
-		echo "Error: $(BUILDDIR)/$(TB)_tb.$(1) not found. Ensure you have run 'make compile TB=$(TB)' first." ; \
+	@if [ ! -f $(BUILD_DIR)/$(TB)_tb.$(1) ]; then \
+		echo "Error: $(BUILD_DIR)/$(TB)_tb.$(1) not found. Ensure you have run 'make compile TB=$(TB)' first." ; \
 		exit 1; \
 	fi
 endef
@@ -56,7 +53,7 @@ MAKEFLAGS ?= --no-print-directory --silent
 
 all:
 	@for tb in $(TBLIST); do \
-		$(MAKE) compile TB=$$tb
+		$(MAKE) compile TB=$$tb; \
 	done
 
 compile:
@@ -66,7 +63,7 @@ compile:
 
 run: compile
 	$(call check_tb)
-	$(call check_file_exists,fst)
+	$(call check_file_exists,vvp)
 	@cd $(BUILDDIR) && ./V$(TB)_tb +verilator+quiet
 
 wave: run
