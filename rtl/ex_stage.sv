@@ -33,7 +33,7 @@ module ex_stage
     logic [XLEN-1:0] cmp_a, cmp_b;
     always_comb begin : mux_alu_a
         case (cu_i.alu_mux_a_sel)
-            0: alu_a = id_i.data_rs1;
+            0: alu_a = id_i.op == AUIPC ? id_i.pc : id_i.data_rs1;
             1: alu_a = id_i.pc;
             2: alu_a = bypass_mm_data;
             3: alu_a = bypass_wb_data;
