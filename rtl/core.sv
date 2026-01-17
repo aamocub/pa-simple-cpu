@@ -140,7 +140,7 @@ module core
         .rst_i(rst_i),
         .id_i(id_ex),
         .cu_i(cu_ex),
-        .bypass_mm_data(ex_mm.alu_result),
+        .bypass_mm_data(mm_out.data),
         .bypass_wb_data(mm_wb.data),
         .ex_o(ex_out)
     );
