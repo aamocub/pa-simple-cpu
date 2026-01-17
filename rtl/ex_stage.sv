@@ -21,7 +21,6 @@ module ex_stage
         ex_o.is_ld     = id_i.is_ld;
         ex_o.is_st     = id_i.is_st;
         ex_o.uses_rs2  = id_i.uses_rs2;
-        ex_o.data_rs2  = id_i.data_rs2;
         ex_o.rd        = id_i.rd;
         ex_o.rs1       = id_i.rs1;
         ex_o.rs2       = id_i.rs2;
@@ -64,6 +63,7 @@ module ex_stage
             2: cmp_b = bypass_wb_data;
             default: cmp_b = id_i.data_rs2;
         endcase
+        ex_o.data_rs2 = cmp_b;
     end
 
     cmp cmp (
