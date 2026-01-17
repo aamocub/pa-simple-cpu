@@ -11,9 +11,7 @@ module id_stage
 
     // TODO: change sign extension based on if the instruction uses sign or unsigned numbers
     wire [31:0] i_imm = {{20{fetch_i.instr[31]}}, fetch_i.instr.itype.imm};
-    wire [31:0] s_imm = {
-        {20{fetch_i.instr[31]}}, fetch_i.instr.stype.imm_1, fetch_i.instr.stype.imm_2
-    };
+    wire [31:0] s_imm = {{20{fetch_i.instr[31]}}, fetch_i.instr.stype.imm_1, fetch_i.instr.stype.imm_2};
     wire [31:0] b_imm = {
         {20{fetch_i.instr.btype.imm_1}},
         fetch_i.instr.btype.imm_2,
@@ -181,8 +179,7 @@ module id_stage
                 decode_o.is_br = 1;
             end
             OPCODE_LUI: decode_o.op = LUI;
-            OPCODE_AUIPC:
-            decode_o.op = AUIPC;  // TODO: I don't think this instr. is implemented properly
+            OPCODE_AUIPC: decode_o.op = AUIPC;
             OPCODE_ECALL: begin
                 ill_instr = 1; // NOTE: Because we currently do not do anything with ecall, just treat it as an illegal instruction
                 case (fetch_i.instr.itype.imm)
