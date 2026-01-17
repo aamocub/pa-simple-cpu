@@ -45,7 +45,8 @@ module alu
             ADD, ADDI: out_o = a_i + b_i;
             SUB:       out_o = a_i - b_i;
 
-            LUI, AUIPC: out_o = a_i + b_i;
+            LUI: out_o = b_i;
+            AUIPC: out_o = a_i + b_i;
             ECALL, EBREAK, ILLEGAL: out_o = '0;
 
             // Logic
