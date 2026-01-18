@@ -71,17 +71,17 @@ module alu
             end
             MULH: begin  // high XLEN bits (signed * signed)
                 mul_tmp = $signed(a_i) * $signed(b_i);
-                out_o   = mul_tmp[XLEN-1:0];
+                out_o   = mul_tmp[XLEN*2-1:XLEN];
                 if (mul_delay < MUL_DELAY - 1) stall_o = 1;
             end
             MULHSU: begin  // high XLEN bits (signed * unsigned)
                 mul_tmp = $signed(a_i) * $unsigned(b_i);
-                out_o   = mul_tmp[XLEN-1:0];
+                out_o   = mul_tmp[XLEN*2-1:XLEN];
                 if (mul_delay < MUL_DELAY - 1) stall_o = 1;
             end
             MULHU: begin  // high XLEN bits (unsigned * unsigned)
                 mul_tmp = $unsigned(a_i) * $unsigned(b_i);
-                out_o   = mul_tmp[XLEN-1:0];
+                out_o   = mul_tmp[XLEN*2-1:XLEN];
                 if (mul_delay < MUL_DELAY - 1) stall_o = 1;
             end
 
