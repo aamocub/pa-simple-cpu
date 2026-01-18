@@ -34,6 +34,7 @@ module cache
     logic [LINE_LEN-1:0] write_data_to_cache;
     mem_width_t width;
     logic [XLEN-1:0] data_from_cache;
+    logic [LINE_LEN-1:0] line_from_cache;
     logic is_hit, is_dirty;
 
     cache_data #(
@@ -50,7 +51,8 @@ module cache
         .kind_i      (width),
         .hit_o       (is_hit),
         .dirty_o     (is_dirty),
-        .data_o      (data_from_cache)
+        .data_o      (data_from_cache),
+        .line_data_o (line_from_cache)
     );
 
     always_ff @(posedge clk_i, posedge rst_i) begin
@@ -148,7 +150,7 @@ module cache
                             mem_io.req_valid = 1;
                             mem_io.req_addr = {core_io.req_addr[ADDR_WIDTH-1:M], {M{1'b0}}};
                             mem_io.req_write_en = 1;
-                            mem_io.req_data = data_from_cache;
+                            mem_io.req_data = line_from_cache;
                         end else begin : GET_LINE
                             mem_io.req_valid = 1;
                             mem_io.req_addr = {core_io.req_addr[ADDR_WIDTH-1:M], {M{1'b0}}};
@@ -166,8 +168,7 @@ module cache
                         core_io.resp_valid = 1;
                         unique case (pending_req.kind)
                             WORD: core_io.resp_data = mem_io.resp_data[offset*8+:32];
-                            HALF, UHALF:
-                            core_io.resp_data = {16'b0, mem_io.resp_data[offset*8+:16]};
+                            HALF, UHALF: core_io.resp_data = {16'b0, mem_io.resp_data[offset*8+:16]};
                             BYTE, UBYTE: core_io.resp_data = {24'b0, mem_io.resp_data[offset*8+:8]};
                         endcase
                     end
@@ -187,7 +188,7 @@ module cache
                         mem_io.req_valid = 1;
                         mem_io.req_addr = {next_req.addr[ADDR_WIDTH-1:M], {M{1'b0}}};
                         mem_io.req_write_en = 1;
-                        mem_io.req_data = data_from_cache;
+                        mem_io.req_data = line_from_cache;
                     end else begin
                         mem_io.req_valid = 1;
                         mem_io.req_addr = {next_req.addr[ADDR_WIDTH-1:M], {M{1'b0}}};

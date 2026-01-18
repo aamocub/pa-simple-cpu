@@ -20,7 +20,8 @@ module cache_data
 
     output logic hit_o,
     output logic dirty_o,
-    output logic [XLEN-1:0] data_o
+    output logic [XLEN-1:0] data_o,
+    output logic [LINE_LEN-1:0] line_data_o
 );
     typedef struct packed {
         logic valid, dirty;
@@ -47,6 +48,7 @@ module cache_data
             HALF, UHALF: data_o = {16'b0, lines[idx].data[offset*8+:16]};
             WORD: data_o = {lines[idx].data[offset*8+:32]};
         endcase
+        line_data_o = lines[idx].data;
     end
 
     always_ff @(posedge clk_i, posedge rst_i) begin
