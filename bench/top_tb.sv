@@ -27,6 +27,8 @@ module top_tb ();
         .rst_i(rst)
     );
 
+    initial #(CLK_PERIOD * 200) $finish();
+
     initial begin
         string filename;
 
@@ -44,7 +46,7 @@ module top_tb ();
         #(CLK_PERIOD) rst = 0;
         $display("%t tb: reset done", $time);
         wait (top.core.cu.is_exception);
-        // #(CLK_PERIOD * 1000);
+        // #(CLK_PERIOD * 200);
         $display("%t tb: system halted", $time);
 
         if (top.core.id_stage.regfile.bank[17] == 93) begin

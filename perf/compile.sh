@@ -1,7 +1,7 @@
 #!/bin/sh
 
 RV_PREFIX=riscv32-unknown-elf
-RV_GCCOPTS="-static -mcmodel=medany -fvisibility=hidden -nostdlib -nostartfiles"
+RV_GCCOPTS="-static -mcmodel=medany -fvisibility=hidden -ffreestanding -nostdlib -nostartfiles"
 RV_TESTS_SRCDIR=/opt/riscv-tests
 RV_GCCOPTS="$RV_GCCOPTS -I$RV_TESTS_SRCDIR/env/p -I$RV_TESTS_SRCDIR/isa/macros/scalar -T$RV_TESTS_SRCDIR/env/p/link.ld"
 RV_GCCOPTS="$RV_GCCOPTS -march=rv32im -mabi=ilp32"

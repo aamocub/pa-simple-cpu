@@ -1,3 +1,7 @@
+__asm__ (
+        "li sp, 0x800\n"
+        "mv s0,sp\n"
+);
 void _start(void) {
     int a[128][128], b[128][128], c[128][128];
     for (int i=0; i<128; i++) {
@@ -8,5 +12,5 @@ void _start(void) {
               }
          }
     }
-
+    __asm__ volatile ("ecall");
 }

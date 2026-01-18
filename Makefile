@@ -22,6 +22,8 @@ TBDIR := bench
 TBLIST = $(patsubst $(TBDIR)/%_tb.sv,%,$(wildcard $(TBDIR)/*_tb.sv))
 TESTDIR := tests
 TESTLIST = $(patsubst $(TESTDIR)/rv32ui-p-%.hex,%,$(wildcard $(TESTDIR)/rv32ui-p-*))
+PERFDIR := perf
+PERFLIST = $(patsubst $(PERFDIR)/perf-%.hex,%,$(wildcard $(PERFDIR)/perf-*))
 
 define check_tb
 	@if [ -z "$(TB)" ]; then \
@@ -38,6 +40,15 @@ define check_tests
 		echo "Error: TEST is not set. Please set TEST to one of the following: $(TESTLIST)"; \
 	elif ! echo "$(TESTLIST)" | grep -wq "$(TEST)"; then \
 		echo "Error: TEST '$(TEST)' is not a valid test. Please set TEST to one of the following: $(TESTLIST)"; \
+		exit 1; \
+	fi
+endef
+
+define check_perfs
+	@if [ -z "$(PERFS)" ]; then \
+		echo "Error: PERF is not set. Please set PERF to one of the following: $(PERFLIST)"; \
+	elif ! echo "$(PERFLIST)" | grep -wq "$(PERF)"; then \
+		echo "Error: PERF '$(PERF)' is not a valid test. Please set PERF to one of the following: $(PERFLIST)"; \
 		exit 1; \
 	fi
 endef
@@ -70,21 +81,33 @@ wave: run
 	$(call check_tb)
 	$(call check_file_exists,fst)
 	@cd $(BUILDDIR) && >/dev/null $(WAVE_VIEWER) $(TB)_tb.fst &
-	
+
 test-all:
 	@for f in $(TESTLIST); do \
 		printf "\tTESTING %s\n" $$f ; \
 		TB=top TEST=$$f $(MAKE) --no-print-directory --silent test ; \
 	done
-	
+
+perf-all:
+	@for f in $(PERFLIST); do \
+		printf "\tPERFING %s\n" $$f ; \
+		TB=top PERF=$$f $(MAKE) --no-print-directory --silent perfing ; \
+	done
+
 test: compile
 	$(call check_tests)
 	@cd $(BUILDDIR) && ./V$(TB)_tb +verilator+quiet +load=$(PWD)/$(TESTDIR)/rv32ui-p-$(TEST).hex
 
+perfing: compile
+	@cd $(BUILDDIR) && ./V$(TB)_tb +verilator+quiet +load=$(PWD)/$(PERFDIR)/perf-$(PERF).hex
+
 test-wave: test
+	@cd $(BUILDDIR) && >/dev/null $(WAVE_VIEWER) $(TB)_tb.fst
+
+perf-wave: perfing
 	@cd $(BUILDDIR) && >/dev/null $(WAVE_VIEWER) $(TB)_tb.fst
 
 clean:
 	rm -rf $(BUILDDIR)
 
-.PHONY: all compile run wave clean test test-all
+.PHONY: all compile run wave clean test test-all perfing perf-all
