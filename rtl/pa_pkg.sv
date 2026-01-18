@@ -66,23 +66,6 @@ package pa_pkg;
     // Cache line length in bits (should be set to 128)
     localparam integer unsigned CACHE_LINE_LEN = 128;
 
-    /* ---------------------------- Cache definitions --------------------------- */
-    typedef enum logic {
-        READ,
-        WRITE
-    } access_t;
-    typedef struct packed {
-        access_t                 kind;
-        mem_width_t              width;
-        logic                    valid;
-        logic [PHY_ADDR_LEN-1:0] addr;
-        logic [XLEN-1:0]         data;
-    } cc_req_t;
-    typedef struct packed {
-        logic            valid;
-        logic [XLEN-1:0] data;
-    } cc_resp_t;
-
     /* ------------------------ Control unit definitions ------------------------ */
     // Control signals to IF stage
     typedef struct packed {

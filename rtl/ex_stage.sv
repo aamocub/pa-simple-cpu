@@ -33,37 +33,33 @@ module ex_stage
     logic [XLEN-1:0] alu_a, alu_b;
     logic [XLEN-1:0] cmp_a, cmp_b;
     always_comb begin : mux_alu_a
-        case (cu_i.alu_mux_a_sel)
+        unique case (cu_i.alu_mux_a_sel)
             0: alu_a = id_i.op == AUIPC ? id_i.pc : id_i.data_rs1;
             1: alu_a = id_i.pc;
             2: alu_a = bypass_mm_data;
             3: alu_a = bypass_wb_data;
-            default: alu_a = id_i.data_rs1;
         endcase
     end
     always_comb begin : mux_alu_b
-        case (cu_i.alu_mux_b_sel)
+        unique case (cu_i.alu_mux_b_sel)
             0: alu_b = id_i.imm;
             1: alu_b = bypass_mm_data;
             2: alu_b = bypass_wb_data;
             3: alu_b = id_i.data_rs2;
-            default: alu_b = id_i.imm;
         endcase
     end
     always_comb begin : mux_cmp_a
-        case (cu_i.cmp_mux_a_sel)
+        unique case (cu_i.cmp_mux_a_sel)
             0: cmp_a = id_i.data_rs1;
             1: cmp_a = bypass_mm_data;
             2: cmp_a = bypass_wb_data;
-            default: cmp_a = id_i.data_rs1;
         endcase
     end
     always_comb begin : mux_cmp_b
-        case (cu_i.cmp_mux_b_sel)
+        unique case (cu_i.cmp_mux_b_sel)
             0: cmp_b = id_i.data_rs2;
             1: cmp_b = bypass_mm_data;
             2: cmp_b = bypass_wb_data;
-            default: cmp_b = id_i.data_rs2;
         endcase
         ex_o.data_rs2 = cmp_b;
     end

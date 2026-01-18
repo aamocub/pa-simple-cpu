@@ -1,0 +1,39 @@
+
+perf-buffsum.c.elf:     file format elf32-littleriscv
+
+
+Disassembly of section .text:
+
+00000000 <_start-0xc>:
+   0:	00001137          	lui	sp,0x1
+   4:	80010113          	addi	sp,sp,-2048 # 800 <_start+0x7f4>
+   8:	00010413          	mv	s0,sp
+
+0000000c <_start>:
+   c:	de010113          	addi	sp,sp,-544
+  10:	20112e23          	sw	ra,540(sp)
+  14:	20812c23          	sw	s0,536(sp)
+  18:	22010413          	addi	s0,sp,544
+  1c:	fe042623          	sw	zero,-20(s0)
+  20:	fe042423          	sw	zero,-24(s0)
+  24:	0300006f          	j	54 <_start+0x48>
+  28:	fe842703          	lw	a4,-24(s0)
+  2c:	de840793          	addi	a5,s0,-536
+  30:	00271713          	slli	a4,a4,0x2
+  34:	00f707b3          	add	a5,a4,a5
+  38:	0007a783          	lw	a5,0(a5)
+  3c:	fec42703          	lw	a4,-20(s0)
+  40:	00f707b3          	add	a5,a4,a5
+  44:	fef42623          	sw	a5,-20(s0)
+  48:	fe842783          	lw	a5,-24(s0)
+  4c:	00178793          	addi	a5,a5,1
+  50:	fef42423          	sw	a5,-24(s0)
+  54:	fe842703          	lw	a4,-24(s0)
+  58:	07f00793          	li	a5,127
+  5c:	fce7d6e3          	bge	a5,a4,28 <_start+0x1c>
+  60:	00000073          	ecall
+  64:	00000013          	nop
+  68:	21c12083          	lw	ra,540(sp)
+  6c:	21812403          	lw	s0,536(sp)
+  70:	22010113          	addi	sp,sp,544
+  74:	00008067          	ret
