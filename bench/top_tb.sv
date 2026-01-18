@@ -55,7 +55,7 @@ module top_tb ();
             if (err == 0) begin
                 $display("%t tb: RESULT -> SUCCESS", $time);
             end else begin
-                $display("%t tb: RESULT -> FAILURE (%0d)", $time, testnum);
+                $display("%t tb: RESULT -> FAILURE (test_%0d, err=%0d)", $time, testnum, err);
             end
         end
         $finish();
