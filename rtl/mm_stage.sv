@@ -70,21 +70,21 @@ module mm_stage
                     if (mem_io.resp_valid) begin
                         mm_o.do_stall = 0;
                         unique case (ex_i.mem_width)
-                            BYTE: mm_o.data = {{24{mem_io.resp_data[31]}}, mem_io.resp_data[31:24]};
-                            UBYTE: mm_o.data = {24'b0, mem_io.resp_data[31:24]};
-                            HALF: mm_o.data = {{16{mem_io.resp_data[31]}}, mem_io.resp_data[31:16]};
-                            UHALF: mm_o.data = {16'b0, mem_io.resp_data[31:16]};
-                            WORD: mm_o.data = {mem_io.resp_data};
+                            BYTE:  mm_o.data = {{24{mem_io.resp_data[7]}}, mem_io.resp_data[7:0]};
+                            UBYTE: mm_o.data = {24'b0, mem_io.resp_data[7:0]};
+                            HALF:  mm_o.data = {{16{mem_io.resp_data[15]}}, mem_io.resp_data[15:0]};
+                            UHALF: mm_o.data = {16'b0, mem_io.resp_data[15:0]};
+                            WORD:  mm_o.data = {mem_io.resp_data};
                         endcase
                     end
                 end
                 RESP: begin
                     mm_o.do_stall = mem_io.resp_valid ? 0 : 1;
                     unique case (ex_i.mem_width)
-                        BYTE:  mm_o.data = {{24{mem_io.resp_data[31]}}, mem_io.resp_data[31:24]};
-                        UBYTE: mm_o.data = {24'b0, mem_io.resp_data[31:24]};
-                        HALF:  mm_o.data = {{16{mem_io.resp_data[31]}}, mem_io.resp_data[31:16]};
-                        UHALF: mm_o.data = {16'b0, mem_io.resp_data[31:16]};
+                        BYTE:  mm_o.data = {{24{mem_io.resp_data[7]}}, mem_io.resp_data[7:0]};
+                        UBYTE: mm_o.data = {24'b0, mem_io.resp_data[7:0]};
+                        HALF:  mm_o.data = {{16{mem_io.resp_data[15]}}, mem_io.resp_data[15:0]};
+                        UHALF: mm_o.data = {16'b0, mem_io.resp_data[15:0]};
                         WORD:  mm_o.data = {mem_io.resp_data};
                     endcase
                 end
