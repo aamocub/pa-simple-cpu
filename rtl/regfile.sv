@@ -19,6 +19,11 @@ module regfile #(
     output reg  [      DATAWIDTH-1:0] rdata_b_o,  // read B data
     input  wire [$clog2(NUMREGS)-1:0] raddr_b_i,  // read B address
 
+    // reading port C
+    input  wire                       re_c_i,     // read C enable
+    output reg  [      DATAWIDTH-1:0] rdata_c_o,  // read C data
+    input  wire [$clog2(NUMREGS)-1:0] raddr_c_i,  // read C address
+
     // writing port
     input wire                       we_i,     // write enable
     input wire [      DATAWIDTH-1:0] wdata_i,  // write data
@@ -26,9 +31,7 @@ module regfile #(
 );
 
     reg     [DATAWIDTH-1:0] bank                          [NUMREGS];  // register bank
-
     logic                   should_write;
-
     integer                 i;  // iterator for 'for loop'
 
     // Read sequential logic (same in both ports, so explained for port A, but it applies for both)
@@ -42,6 +45,7 @@ module regfile #(
         should_write = we_i && (waddr_i != 0) ? 1 : 0;
         rdata_a_o = (re_a_i & we_i & raddr_a_i == waddr_i) ? wdata_i : (re_a_i) ? bank[raddr_a_i] : 0;
         rdata_b_o = (re_b_i & we_i & raddr_b_i == waddr_i) ? wdata_i : (re_b_i) ? bank[raddr_b_i] : 0;
+        rdata_c_o = (re_c_i & we_i & raddr_c_i == waddr_i) ? wdata_i : (re_c_i) ? bank[raddr_c_i] : 0;
     end
 
     // Write sequential logic

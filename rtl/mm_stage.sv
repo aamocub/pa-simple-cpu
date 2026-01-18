@@ -23,6 +23,7 @@ module mm_stage
         mm_o.rs1      = ex_i.rs1;
         mm_o.rs2      = ex_i.rs2;
         mm_o.pc       = ex_i.pc;
+        mm_o.hf_id    = ex_i.hf_id;
         mm_o.is_wb    = ex_i.is_wb;
         mm_o.data_rs2 = ex_i.data_rs2;
     end

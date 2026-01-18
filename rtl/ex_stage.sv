@@ -26,6 +26,7 @@ module ex_stage
         ex_o.rs2       = id_i.rs2;
         ex_o.pc        = id_i.pc;
         ex_o.mem_width = id_i.mem_width;
+        ex_o.hf_id     = id_i.hf_id;
     end
 
     logic [XLEN-1:0] alu_a, alu_b;

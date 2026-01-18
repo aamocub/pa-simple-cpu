@@ -14,7 +14,6 @@ module core
     memory_intf.CL mem_b_io
 );
 
-
     if_stage_t if_out, if_id;
     id_stage_t id_out, id_ex;
     ex_stage_t ex_out, ex_mm;
@@ -27,10 +26,37 @@ module core
     cu_mm_t cu_mm;
     cu_wb_t cu_wb;
 
+    logic hf_empty;
+    logic hf_full;
+    logic [$clog2(HISTFILE_DEPTH)-1:0] hf_tail;
+    logic hf_issue;
+    hf_entry_t hf_entry_in;
+    logic hf_wren;
+    logic [$clog2(HISTFILE_DEPTH)-1:0] hf_wrid;
+    logic hf_ready;
+    exception_t hf_evec;
+    logic hf_rden;
+    logic [$clog2(HISTFILE_DEPTH)-1:0] hf_rdid;
+    logic [XLEN-1:0] hf_value;
+    logic [XLEN-1:0] hf_rd;
+    logic [$clog2(HISTFILE_DEPTH)-1:0] hf_head;
+    logic hf_commit;
+    hf_entry_t hf_entry_out;
+
     memory_intf icache_port ();
     memory_intf dcache_port ();
     memory_intf #(.DATA_WIDTH(CACHE_LINE_LEN)) icache_arb_port ();
     memory_intf #(.DATA_WIDTH(CACHE_LINE_LEN)) dcache_arb_port ();
+
+    // Performance counters
+    integer unsigned cycles;
+    always_ff @(posedge clk_i, posedge rst_i) begin
+        if (rst_i) begin
+            cycles <= 0;
+        end else begin
+            cycles <= cycles + 1;
+        end
+    end
 
     cache icache (
         .clk_i  (clk_i),
@@ -61,6 +87,34 @@ module core
         .ex_o   (cu_ex),
         .mm_o   (cu_mm),
         .wb_o   (cu_wb)
+    );
+
+    assign hf_issue = !cu_id.stall;
+    assign hf_entry_in.ready = '0;
+    assign hf_entry_in.evec = '0;
+    assign hf_entry_in.pc = '0;
+    assign hf_entry_in.miss = '0;
+    assign hf_entry_in.rd = id_out.rd;
+    assign hf_entry_in.value = id_out.data_rd;
+    histfile #() histfile (
+        .clk_i   (clk_i),
+        .rst_i   (rst_i),
+        .empty_o (hf_empty),
+        .full_o  (hf_full),
+        .tail_i  (hf_tail),
+        .issue_i (hf_issue),
+        .entry_i (hf_entry_in),
+        .wren_i  (1),
+        .wrid_i  (wb_out.hf_id),
+        .ready_i (1),
+        .evec_i  (wb_out.evec),
+        .rden_i  (),
+        .rdid_i  (),
+        .value_o (hf_value),
+        .rd_o    (hf_rd),
+        .head_i  (hf_head),
+        .commit_i(hf_commit),
+        .entry_o (hf_entry_out)
     );
 
     // mem_arbitrer mem_arbitrer (
@@ -99,10 +153,23 @@ module core
     /*                                            Instruction Decode Stage                                            */
     /* -------------------------------------------------------------------------------------------------------------- */
 
+    register #(
+        .reg_t(logic [$clog2(HISTFILE_DEPTH)-1:0])
+    ) histfile_tail (
+        .clk_i    (clk_i),
+        .rst_i    (rst_i),
+        .en_i     (!cu_id.stall),
+        .flush_i  (0),
+        .default_i(0),
+        .d_i      ((hf_tail + 1) % HISTFILE_DEPTH),
+        .q_o      (hf_tail)
+    );
+
     id_stage id_stage (
         .clk_i    (clk_i),
         .rst_i    (rst_i),
         .fetch_i  (if_id),
+        .hf_id_i  (hf_tail),
         .from_wb_i(wb_out),
         .decode_o (id_out)
     );
@@ -130,6 +197,7 @@ module core
         .d_i      (cu_id.epc),
         .q_o      ()
     );
+
 
     /* -------------------------------------------------------------------------------------------------------------- */
     /*                                                 Execution Stage                                                */
@@ -190,6 +258,18 @@ module core
         .rst_i(rst_i),
         .mm_i (mm_wb),
         .wb_o (wb_out)
+    );
+
+    register #(
+        .reg_t(logic [$clog2(HISTFILE_DEPTH)-1:0])
+    ) histfile_head (
+        .clk_i    (clk_i),
+        .rst_i    (rst_i),
+        .en_i     (hf_entry_out.ready && hf_entry_out.valid),
+        .flush_i  (0),
+        .default_i(0),
+        .d_i      ((hf_head + 1) % HISTFILE_DEPTH),
+        .q_o      (hf_head)
     );
 
 endmodule
