@@ -87,20 +87,22 @@ module alu
 
             // Division / Remainder
             DIV: begin
-                div_zero_o = (b_i == 0) ? 1 : 0;
-                out_o = (b_i == 0) ? 'x : $signed(a_i) / $signed(b_i);
+                div_zero_o = (b_i == 0);
+                out_o = (b_i == 0) ? '1 : $signed($signed(a_i) / $signed(b_i));
+                if (a_i == 32'h8000_0000 && b_i == 32'hFFFF_FFFF) out_o = 32'h8000_0000;
             end
             DIVU: begin
-                div_zero_o = (b_i == 0) ? 1 : 0;
-                out_o = (b_i == 0) ? 'x : a_i / b_i;
+                div_zero_o = (b_i == 0);
+                out_o = (b_i == 0) ? '1 : a_i / b_i;
             end
             REM: begin
-                div_zero_o = (b_i == 0) ? 1 : 0;
-                out_o = (b_i == 0) ? 'x : $signed(a_i) % $signed(b_i);
+                div_zero_o = (b_i == 0);
+                out_o = (b_i == 0) ? a_i : $signed($signed(a_i) % $signed(b_i));
+                if (a_i == 32'h8000_0000 && b_i == 32'hFFFF_FFFF) out_o = '0;
             end
             REMU: begin
-                div_zero_o = (b_i == 0) ? 1 : 0;
-                out_o = (b_i == 0) ? 'x : a_i % b_i;
+                div_zero_o = (b_i == 0);
+                out_o = (b_i == 0) ? a_i : a_i % b_i;
             end
 
             // Branches
