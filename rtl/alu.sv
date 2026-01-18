@@ -15,7 +15,18 @@ module alu
 );
 
     logic [           XLEN*2-1:0] mul_tmp;  // mul intermediate result
+    logic [           XLEN*2-1:0] mul_result;  // mul pipelined result
     logic [$clog2(MUL_DELAY)-1:0] mul_delay;  // mul delay counter register
+
+    pipeline #(
+        .CYCLES(MUL_DELAY - 1),
+        .data_t(logic [XLEN*2-1:0])
+    ) mul_pipeline (
+        .clk_i(clk_i),
+        .rst_i(rst_i),
+        .d_i  (mul_tmp),
+        .q_o  (mul_result)
+    );
 
     always_ff @(posedge clk_i, posedge rst_i) begin
         if (rst_i) begin
@@ -66,22 +77,22 @@ module alu
             // Multiplication
             MUL: begin  // low XLEN bits
                 mul_tmp = a_i * b_i;
-                out_o   = mul_tmp[XLEN-1:0];
+                out_o   = mul_result[XLEN-1:0];
                 if (mul_delay < MUL_DELAY - 1) stall_o = 1;
             end
             MULH: begin  // high XLEN bits (signed * signed)
                 mul_tmp = $signed(a_i) * $signed(b_i);
-                out_o   = mul_tmp[XLEN*2-1:XLEN];
+                out_o   = mul_result[XLEN*2-1:XLEN];
                 if (mul_delay < MUL_DELAY - 1) stall_o = 1;
             end
             MULHSU: begin  // high XLEN bits (signed * unsigned)
-                out_o   = mul_tmp[XLEN*2-1:XLEN];
                 mul_tmp = $signed(a_i) * $signed({1'b0, b_i});
+                out_o   = mul_result[XLEN*2-1:XLEN];
                 if (mul_delay < MUL_DELAY - 1) stall_o = 1;
             end
             MULHU: begin  // high XLEN bits (unsigned * unsigned)
                 mul_tmp = $unsigned(a_i) * $unsigned(b_i);
-                out_o   = mul_tmp[XLEN*2-1:XLEN];
+                out_o   = mul_result[XLEN*2-1:XLEN];
                 if (mul_delay < MUL_DELAY - 1) stall_o = 1;
             end
 
