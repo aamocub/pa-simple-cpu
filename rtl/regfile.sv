@@ -40,8 +40,8 @@ module regfile #(
 
     always_comb begin
         should_write = we_i && (waddr_i != 0) ? 1 : 0;
-        rdata_a_o = (re_a_i & we_i & raddr_a_i == waddr_i) ? wdata_i : (re_a_i) ? bank[raddr_a_i] : 0;
-        rdata_b_o = (re_b_i & we_i & raddr_b_i == waddr_i) ? wdata_i : (re_b_i) ? bank[raddr_b_i] : 0;
+        rdata_a_o = (re_a_i & should_write & raddr_a_i == waddr_i) ? wdata_i : (re_a_i) ? bank[raddr_a_i] : 0;
+        rdata_b_o = (re_b_i & should_write & raddr_b_i == waddr_i) ? wdata_i : (re_b_i) ? bank[raddr_b_i] : 0;
     end
 
     // Write sequential logic
