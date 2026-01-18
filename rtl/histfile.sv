@@ -48,7 +48,6 @@ module histfile
         end else begin
             if (issue_i && list[tail_i].valid == 0) begin
                 list[tail_i] <= entry_i;
-                list[tail_i].valid <= 1;
             end
             if (wren_i) begin
                 list[wrid_i].ready <= ready_i;

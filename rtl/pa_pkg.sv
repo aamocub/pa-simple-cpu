@@ -127,6 +127,7 @@ package pa_pkg;
         instruction_t    instr;  // Instruction
         logic [XLEN-1:0] pc;     // Current PC
         exception_t      evec;   // Exception vector
+        logic            valid;
     } if_stage_t;
 
     // Instruction codes
@@ -164,6 +165,7 @@ package pa_pkg;
         instr_op_t                         op;         // Operation to perform
         exception_t                        evec;       // Exception vector
         logic [$clog2(HISTFILE_DEPTH)-1:0] hf_id;      // History file entry id
+        logic                              valid;      // Is Instruction valid
     } id_stage_t;
 
     // EX stage output
@@ -183,6 +185,7 @@ package pa_pkg;
         logic                              do_stall;    // Should previous instr be stalled
         exception_t                        evec;        // Exception vector
         logic [$clog2(HISTFILE_DEPTH)-1:0] hf_id;       // History file entry id
+        logic                              valid;       // Is Instruction valid
     } ex_stage_t;
 
     // MM memory interface
@@ -213,6 +216,7 @@ package pa_pkg;
         logic [4:0]                        rd;        // Destination register
         exception_t                        evec;      // Exception vector
         logic [$clog2(HISTFILE_DEPTH)-1:0] hf_id;     // History file entry id
+        logic                              valid;     // Is Instruction valid
     } mm_stage_t;
 
     // WB stage output
@@ -223,6 +227,7 @@ package pa_pkg;
         logic [XLEN-1:0]                   data;
         exception_t                        evec;   // Exception vector
         logic [$clog2(HISTFILE_DEPTH)-1:0] hf_id;  // History file entry id
+        logic                              valid;  // Is Instruction valid
     } wb_stage_t;  // from WB to ID stage
 
 endpackage

@@ -27,6 +27,7 @@ module top_tb ();
         .rst_i(rst)
     );
 
+    initial #(CLK_PERIOD * 200) $finish();
     initial begin
         string filename;
 

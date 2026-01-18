@@ -12,6 +12,10 @@ module cu
     input mm_stage_t mm_wb_i,
     input wb_stage_t wb_i,
 
+    input  hf_entry_t hf_head_entry_i,
+    input  logic      hf_full_i,
+    output logic      hf_commit_o,
+
     output cu_if_t if_o,
     output cu_id_t id_o,
     output cu_ex_t ex_o,
@@ -23,11 +27,18 @@ module cu
     wire mm_rs1_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs1 && !ex_rs1_hazard;
     wire mm_rs2_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs2 && !ex_rs2_hazard;
 
+    wire waw_hazard = id_ex_i.is_wb && ex_mm_i.valid && ex_mm_i.is_wb && ex_mm_i.rd != 0 && ex_mm_i.rd == id_ex_i.rd &&
+                      mm_wb_i.valid && mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rd;
+
     wire is_exception = |wb_i.evec;
     wire is_taken = ex_mm_i.is_taken;
 
+    always_comb begin : histfile_ctrl
+        hf_commit_o = hf_head_entry_i.valid && hf_head_entry_i.ready && |hf_head_entry_i.evec == 0;
+    end
+
     always_comb begin : IF_stage
-        if_o.stall = ex_i.do_stall | mm_i.do_stall;
+        if_o.stall = waw_hazard | hf_full_i | ex_i.do_stall | mm_i.do_stall;
         if_o.flush = is_exception | is_taken;
 
         // PC selection logic
@@ -36,7 +47,7 @@ module cu
     end
 
     always_comb begin : ID_stage
-        id_o.stall = ex_i.do_stall | mm_i.do_stall;
+        id_o.stall = waw_hazard | hf_full_i | ex_i.do_stall | mm_i.do_stall;
         id_o.flush = is_taken | is_exception;
         id_o.epc   = wb_i.pc;
         id_o.ewe   = is_exception;

@@ -73,24 +73,28 @@ module core
     );
 
     cu cu (
-        .if_i   (if_out),
-        .if_id_i(if_id),
-        .id_i   (id_out),
-        .id_ex_i(id_ex),
-        .ex_i   (ex_out),
-        .ex_mm_i(ex_mm),
-        .mm_i   (mm_out),
-        .mm_wb_i(mm_wb),
-        .wb_i   (wb_out),
-        .if_o   (cu_if),
-        .id_o   (cu_id),
-        .ex_o   (cu_ex),
-        .mm_o   (cu_mm),
-        .wb_o   (cu_wb)
+        .if_i           (if_out),
+        .if_id_i        (if_id),
+        .id_i           (id_out),
+        .id_ex_i        (id_ex),
+        .ex_i           (ex_out),
+        .ex_mm_i        (ex_mm),
+        .mm_i           (mm_out),
+        .mm_wb_i        (mm_wb),
+        .wb_i           (wb_out),
+        .hf_head_entry_i(hf_entry_out),
+        .hf_full_i      (hf_full),
+        .hf_commit_o    (hf_commit),
+        .if_o           (cu_if),
+        .id_o           (cu_id),
+        .ex_o           (cu_ex),
+        .mm_o           (cu_mm),
+        .wb_o           (cu_wb)
     );
 
-    assign hf_issue = !cu_id.stall;
+    assign hf_issue = !cu_id.stall && id_out.valid;
     assign hf_entry_in.ready = '0;
+    assign hf_entry_in.valid = id_out.valid;
     assign hf_entry_in.evec = '0;
     assign hf_entry_in.pc = '0;
     assign hf_entry_in.miss = '0;
@@ -106,7 +110,7 @@ module core
         .entry_i (hf_entry_in),
         .wren_i  (1),
         .wrid_i  (wb_out.hf_id),
-        .ready_i (1),
+        .ready_i (wb_out.valid),
         .evec_i  (wb_out.evec),
         .rden_i  (),
         .rdid_i  (),
@@ -265,7 +269,7 @@ module core
     ) histfile_head (
         .clk_i    (clk_i),
         .rst_i    (rst_i),
-        .en_i     (hf_entry_out.ready && hf_entry_out.valid),
+        .en_i     (hf_commit),
         .flush_i  (0),
         .default_i(0),
         .d_i      ((hf_head + 1) % HISTFILE_DEPTH),

@@ -26,6 +26,7 @@ module mm_stage
         mm_o.hf_id    = ex_i.hf_id;
         mm_o.is_wb    = ex_i.is_wb;
         mm_o.data_rs2 = ex_i.data_rs2;
+        mm_o.valid    = ex_i.valid;
     end
 
     always_ff @(posedge clk_i, posedge rst_i) begin : transitions

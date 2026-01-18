@@ -47,6 +47,7 @@ module id_stage
         decode_o.rd = rd;
         decode_o.is_wb = is_wb;
         decode_o.pc = fetch_i.pc;
+        decode_o.valid = fetch_i.valid;
     end
 
     // Immediate
