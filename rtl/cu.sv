@@ -24,15 +24,14 @@ module cu
     wire mm_rs2_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs2 && !ex_rs2_hazard;
 
     wire is_exception = |wb_i.evec;
-    wire is_taken = ex_mm_i.is_taken;
+    wire is_taken = ex_i.is_taken;
 
     always_comb begin : IF_stage
         if_o.stall = ex_i.do_stall | mm_i.do_stall;
-        if_o.flush = is_exception | is_taken;
 
         // PC selection logic
         if_o.pcsel = is_exception ? 2 : is_taken ? 1 : 0;
-        if_o.addr  = is_taken ? ex_mm_i.alu_result : 0;
+        if_o.addr  = is_taken ? ex_i.alu_result : 0;
     end
 
     always_comb begin : ID_stage
@@ -75,7 +74,7 @@ module cu
 
     always_comb begin : MM_stage
         mm_o.stall = mm_i.do_stall;
-        mm_o.flush = is_taken | is_exception;
+        mm_o.flush = is_exception;
     end
 
     always_comb begin : WB_stage
