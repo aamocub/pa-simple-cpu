@@ -92,7 +92,7 @@ module core
         .wb_o           (cu_wb)
     );
 
-    assign hf_issue = !cu_id.stall && id_out.valid;
+    assign hf_issue = !cu_id.stall && id_out.valid && !cu_id.flush;
     assign hf_entry_in.ready = '0;
     assign hf_entry_in.valid = id_out.valid;
     assign hf_entry_in.evec = '0;
@@ -162,7 +162,7 @@ module core
     ) histfile_tail (
         .clk_i    (clk_i),
         .rst_i    (rst_i),
-        .en_i     (!cu_id.stall && id_out.valid),
+        .en_i     (hf_issue),
         .flush_i  (0),
         .default_i(0),
         .d_i      ((hf_tail + 1) % HISTFILE_DEPTH),

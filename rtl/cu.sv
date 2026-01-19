@@ -12,9 +12,12 @@ module cu
     input mm_stage_t mm_wb_i,
     input wb_stage_t wb_i,
 
-    input  hf_entry_t hf_head_entry_i,
-    input  logic      hf_full_i,
-    output logic      hf_commit_o,
+    input  hf_entry_t                              hf_head_entry_i,
+    input  logic                                   hf_full_i,
+    output logic                                   hf_commit_o,
+    input  logic      [$clog2(HISTFILE_DEPTH)-1:0] hf_head_i,
+    input  logic      [$clog2(HISTFILE_DEPTH)-1:0] hf_tail_i,
+    output logic      [$clog2(HISTFILE_DEPTH)-1:0] hf_entry_to_read_o,
 
     output cu_if_t if_o,
     output cu_id_t id_o,
