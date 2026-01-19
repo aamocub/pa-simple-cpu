@@ -22,8 +22,6 @@ module ex_stage
         ex_o.is_st     = id_i.is_st;
         ex_o.uses_rs2  = id_i.uses_rs2;
         ex_o.rd        = id_i.rd;
-        ex_o.rs1       = id_i.rs1;
-        ex_o.rs2       = id_i.rs2;
         ex_o.pc        = id_i.pc;
         ex_o.mem_width = id_i.mem_width;
     end

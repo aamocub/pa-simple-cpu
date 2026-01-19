@@ -137,8 +137,6 @@ package pa_pkg;
 
     // EX stage output
     typedef struct packed {
-        logic [4:0]      rs1;         // Source register 1
-        logic [4:0]      rs2;         // Source register 2
         logic [4:0]      rd;          // Destination register
         logic            is_wb;       // Is it going to write to regfile
         logic [XLEN-1:0] alu_result;
@@ -176,8 +174,6 @@ package pa_pkg;
         logic [XLEN-1:0] pc;        // Current PC
         logic            is_wb;     // Is it going to write to regfile
         logic            do_stall;  // Should previous instr be stalled
-        logic [4:0]      rs1;       // Source register 1
-        logic [4:0]      rs2;       // Source register 2
         logic [4:0]      rd;        // Destination register
         exception_t      evec;      // Exception vector
     } mm_stage_t;
