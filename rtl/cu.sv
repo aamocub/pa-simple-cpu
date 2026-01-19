@@ -32,7 +32,7 @@ module cu
     wire waw_hazard = 0 && (ex_rd_hazard || mm_rd_hazard);
 
     wire is_exception = |wb_i.evec;
-    wire is_taken = ex_mm_i.is_taken;
+    wire is_taken = ex_i.is_taken;
 
     always_comb begin : histfile_ctrl
         hf_commit_o = hf_head_entry_i.valid && hf_head_entry_i.ready && |hf_head_entry_i.evec == 0;
@@ -44,7 +44,7 @@ module cu
 
         // PC selection logic
         if_o.pcsel = is_exception ? 2 : is_taken ? 1 : 0;
-        if_o.addr  = is_taken ? ex_mm_i.alu_result : 0;
+        if_o.addr  = is_taken ? ex_i.alu_result : 0;
     end
 
     always_comb begin : ID_stage
@@ -87,7 +87,7 @@ module cu
 
     always_comb begin : MM_stage
         mm_o.stall = mm_i.do_stall;
-        mm_o.flush = is_taken | is_exception;
+        mm_o.flush = is_exception;
     end
 
     always_comb begin : WB_stage

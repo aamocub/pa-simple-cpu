@@ -20,12 +20,13 @@ module cache_data
 
     output logic hit_o,
     output logic dirty_o,
+    output logic [ADDR_WIDTH-M-1:0] tag_o,  // Tag + index of line
     output logic [XLEN-1:0] data_o,
     output logic [LINE_LEN-1:0] line_data_o
 );
     typedef struct packed {
         logic valid, dirty;
-        logic [PHY_ADDR_LEN-N-1:0] tag;
+        logic [ADDR_WIDTH-N-1:0] tag;
         logic [LINE_LEN-1:0] data;
     } line_t;
 
@@ -40,15 +41,16 @@ module cache_data
 
     assign hit_o = lines[idx].tag == tag && lines[idx].valid;
     assign dirty_o = lines[idx].dirty;
+    assign tag_o = {lines[idx].tag, idx};
+    assign line_data_o = lines[idx].data;
 
     always_comb begin
         data_o = '0;
         unique case (kind_i)
             BYTE, UBYTE: data_o = {24'b0, lines[idx].data[offset*8+:8]};
             HALF, UHALF: data_o = {16'b0, lines[idx].data[offset*8+:16]};
-            WORD: data_o = {lines[idx].data[offset*8+:32]};
+            WORD:        data_o = {lines[idx].data[offset*8+:32]};
         endcase
-        line_data_o = lines[idx].data;
     end
 
     always_ff @(posedge clk_i, posedge rst_i) begin
