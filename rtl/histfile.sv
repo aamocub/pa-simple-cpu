@@ -7,6 +7,7 @@ module histfile
 ) (
     input  logic                  clk_i,
     input  logic                  rst_i,
+    input  logic                  flush_i,
     output logic                  empty_o,
     output logic                  full_o,
     /* --------------------------------------- Issue ports -------------------------------------- */
@@ -44,6 +45,8 @@ module histfile
 
     always_ff @(posedge clk_i, posedge rst_i) begin
         if (rst_i) begin
+            foreach (list[i]) list[i] <= '0;
+        end else if (flush_i) begin
             foreach (list[i]) list[i] <= '0;
         end else begin
             if (issue_i && list[tail_i].valid == 0) begin

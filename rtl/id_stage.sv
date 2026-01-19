@@ -6,6 +6,9 @@ module id_stage
     input  logic                                   rst_i,
     input  if_stage_t                              fetch_i,
     input  logic      [$clog2(HISTFILE_DEPTH)-1:0] hf_id_i,
+    input  logic                                   hf_wr_en_i,
+    input  logic      [          $clog2(XLEN)-1:0] hf_wr_reg_i,
+    input  logic      [                  XLEN-1:0] hf_wr_data_i,
     input  wb_stage_t                              from_wb_i,
     output id_stage_t                              decode_o
 );
@@ -211,9 +214,9 @@ module id_stage
         .re_c_i   (1),
         .rdata_c_o(decode_o.data_rd),
         .raddr_c_i(rd),
-        .we_i     (from_wb_i.is_wb),
-        .wdata_i  (from_wb_i.data),
-        .waddr_i  (from_wb_i.rd)
+        .we_i     (from_wb_i.is_wb | hf_wr_en_i),
+        .wdata_i  (from_wb_i.data | hf_wr_data_i),
+        .waddr_i  (from_wb_i.rd | hf_wr_reg_i)
     );
 
 endmodule

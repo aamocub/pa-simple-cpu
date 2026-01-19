@@ -46,8 +46,10 @@ module top_tb ();
         #(CLK_PERIOD) rst = 0;
         $display("%t tb: reset done", $time);
         wait (top.core.cu.is_exception);
-        // #(CLK_PERIOD * 200);
+        // #(CLK_PERIOD * 50);
         $display("%t tb: system halted", $time);
+        $display("%t tb: CYCLES (%0d) NUMINSTR (%0d) CPI(%0f)", $time, top.core.cycles, top.core.num_instructions,
+                 real'(top.core.cycles) / real'(top.core.num_instructions));
 
         if (top.core.id_stage.regfile.bank[17] == 93) begin
             static int testnum = top.core.id_stage.regfile.bank[3] >> 1;
