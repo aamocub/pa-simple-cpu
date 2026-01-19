@@ -33,8 +33,8 @@ module histfile
     logic [DEPTH-1:0] valids;
 
     assign entry_o = list[head_i];
-    assign empty_o = tail_i == head_i && !full_o ? 1 : '0;
-    assign full_o = &valids;
+    assign empty_o = tail_i == head_i && |valids == 0 ? 1 : '0;
+    assign full_o = tail_i == head_i && &valids;
     assign value_o = rden_i ? list[rdid_i].value : '0;
     assign rd_o = rden_i ? list[rdid_i].rd : '0;
 
@@ -57,6 +57,12 @@ module histfile
                 list[head_i].valid <= 0;
             end
         end
+    end
+
+    integer cycle;
+    always_ff @(posedge clk_i) begin
+        cycle <= cycle + 1;
+        // $display( "[%0d] HISTFILE: tail(%0d) head(%0d) full(%0b) empty(%0b) head_entry_valid(%0b) head_entry_ready(%0b)\n", cycle, tail_i, head_i, full_o, empty_o, entry_o.valid, entry_o.ready);
     end
 
 endmodule

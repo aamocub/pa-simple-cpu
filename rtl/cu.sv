@@ -27,8 +27,9 @@ module cu
     wire mm_rs1_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs1 && !ex_rs1_hazard;
     wire mm_rs2_hazard = mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rs2 && !ex_rs2_hazard;
 
-    wire waw_hazard = id_ex_i.is_wb && ex_mm_i.valid && ex_mm_i.is_wb && ex_mm_i.rd != 0 && ex_mm_i.rd == id_ex_i.rd &&
-                      mm_wb_i.valid && mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rd;
+    wire ex_rd_hazard = ex_mm_i.valid && ex_mm_i.is_wb && ex_mm_i.rd != 0 && ex_mm_i.rd == id_ex_i.rd;
+    wire mm_rd_hazard = mm_wb_i.valid && mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_ex_i.rd;
+    wire waw_hazard = 0 && (ex_rd_hazard || mm_rd_hazard);
 
     wire is_exception = |wb_i.evec;
     wire is_taken = ex_mm_i.is_taken;
@@ -54,7 +55,7 @@ module cu
     end
 
     always_comb begin : EX_stage
-        ex_o.stall = ex_i.do_stall | mm_i.do_stall;
+        ex_o.stall = hf_full_i | ex_i.do_stall | mm_i.do_stall;
         ex_o.flush = is_taken | is_exception;
 
         // ALU input mux select

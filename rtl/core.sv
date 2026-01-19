@@ -108,7 +108,7 @@ module core
         .tail_i  (hf_tail),
         .issue_i (hf_issue),
         .entry_i (hf_entry_in),
-        .wren_i  (1),
+        .wren_i  (wb_out.valid),
         .wrid_i  (wb_out.hf_id),
         .ready_i (wb_out.valid),
         .evec_i  (wb_out.evec),
@@ -162,7 +162,7 @@ module core
     ) histfile_tail (
         .clk_i    (clk_i),
         .rst_i    (rst_i),
-        .en_i     (!cu_id.stall),
+        .en_i     (!cu_id.stall && id_out.valid),
         .flush_i  (0),
         .default_i(0),
         .d_i      ((hf_tail + 1) % HISTFILE_DEPTH),
