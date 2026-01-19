@@ -14,17 +14,17 @@ Disassembly of section .text:
   10:	00112e23          	sw	ra,28(sp)
   14:	00812c23          	sw	s0,24(sp)
   18:	02010413          	addi	s0,sp,32
-  1c:	fffd02b7          	lui	t0,0xfffd0
+  1c:	ffffd2b7          	lui	t0,0xffffd
   20:	00510133          	add	sp,sp,t0
   24:	fe042623          	sw	zero,-20(s0)
   28:	1200006f          	j	148 <_start+0x13c>
   2c:	fe042423          	sw	zero,-24(s0)
   30:	1000006f          	j	130 <_start+0x124>
-  34:	fffd07b7          	lui	a5,0xfffd0
-  38:	ff078793          	addi	a5,a5,-16 # fffcfff0 <_end+0xfffceff0>
+  34:	ffffd7b7          	lui	a5,0xffffd
+  38:	ff078793          	addi	a5,a5,-16 # ffffcff0 <_end+0xffffbff0>
   3c:	00878733          	add	a4,a5,s0
   40:	fec42783          	lw	a5,-20(s0)
-  44:	00779693          	slli	a3,a5,0x7
+  44:	00579693          	slli	a3,a5,0x5
   48:	fe842783          	lw	a5,-24(s0)
   4c:	00f687b3          	add	a5,a3,a5
   50:	00279793          	slli	a5,a5,0x2
@@ -32,31 +32,31 @@ Disassembly of section .text:
   58:	fe07aa23          	sw	zero,-12(a5)
   5c:	fe042223          	sw	zero,-28(s0)
   60:	0b80006f          	j	118 <_start+0x10c>
-  64:	fffd07b7          	lui	a5,0xfffd0
-  68:	ff078793          	addi	a5,a5,-16 # fffcfff0 <_end+0xfffceff0>
+  64:	ffffd7b7          	lui	a5,0xffffd
+  68:	ff078793          	addi	a5,a5,-16 # ffffcff0 <_end+0xffffbff0>
   6c:	00878733          	add	a4,a5,s0
   70:	fec42783          	lw	a5,-20(s0)
-  74:	00779693          	slli	a3,a5,0x7
+  74:	00579693          	slli	a3,a5,0x5
   78:	fe842783          	lw	a5,-24(s0)
   7c:	00f687b3          	add	a5,a3,a5
   80:	00279793          	slli	a5,a5,0x2
   84:	00f707b3          	add	a5,a4,a5
   88:	ff47a703          	lw	a4,-12(a5)
-  8c:	ffff07b7          	lui	a5,0xffff0
-  90:	ff078793          	addi	a5,a5,-16 # fffefff0 <_end+0xfffeeff0>
+  8c:	fffff7b7          	lui	a5,0xfffff
+  90:	ff078793          	addi	a5,a5,-16 # ffffeff0 <_end+0xffffdff0>
   94:	008786b3          	add	a3,a5,s0
   98:	fec42783          	lw	a5,-20(s0)
-  9c:	00779613          	slli	a2,a5,0x7
+  9c:	00579613          	slli	a2,a5,0x5
   a0:	fe442783          	lw	a5,-28(s0)
   a4:	00f607b3          	add	a5,a2,a5
   a8:	00279793          	slli	a5,a5,0x2
   ac:	00f687b3          	add	a5,a3,a5
   b0:	ff47a683          	lw	a3,-12(a5)
-  b4:	fffe07b7          	lui	a5,0xfffe0
-  b8:	ff078793          	addi	a5,a5,-16 # fffdfff0 <_end+0xfffdeff0>
+  b4:	ffffe7b7          	lui	a5,0xffffe
+  b8:	ff078793          	addi	a5,a5,-16 # ffffdff0 <_end+0xffffcff0>
   bc:	00878633          	add	a2,a5,s0
   c0:	fe442783          	lw	a5,-28(s0)
-  c4:	00779593          	slli	a1,a5,0x7
+  c4:	00579593          	slli	a1,a5,0x5
   c8:	fe842783          	lw	a5,-24(s0)
   cc:	00f587b3          	add	a5,a1,a5
   d0:	00279793          	slli	a5,a5,0x2
@@ -64,11 +64,11 @@ Disassembly of section .text:
   d8:	ff47a783          	lw	a5,-12(a5)
   dc:	02f687b3          	mul	a5,a3,a5
   e0:	00f70733          	add	a4,a4,a5
-  e4:	fffd07b7          	lui	a5,0xfffd0
-  e8:	ff078793          	addi	a5,a5,-16 # fffcfff0 <_end+0xfffceff0>
+  e4:	ffffd7b7          	lui	a5,0xffffd
+  e8:	ff078793          	addi	a5,a5,-16 # ffffcff0 <_end+0xffffbff0>
   ec:	008786b3          	add	a3,a5,s0
   f0:	fec42783          	lw	a5,-20(s0)
-  f4:	00779613          	slli	a2,a5,0x7
+  f4:	00579613          	slli	a2,a5,0x5
   f8:	fe842783          	lw	a5,-24(s0)
   fc:	00f607b3          	add	a5,a2,a5
  100:	00279793          	slli	a5,a5,0x2
@@ -78,23 +78,23 @@ Disassembly of section .text:
  110:	00178793          	addi	a5,a5,1
  114:	fef42223          	sw	a5,-28(s0)
  118:	fe442703          	lw	a4,-28(s0)
- 11c:	07f00793          	li	a5,127
+ 11c:	01f00793          	li	a5,31
  120:	f4e7d2e3          	bge	a5,a4,64 <_start+0x58>
  124:	fe842783          	lw	a5,-24(s0)
  128:	00178793          	addi	a5,a5,1
  12c:	fef42423          	sw	a5,-24(s0)
  130:	fe842703          	lw	a4,-24(s0)
- 134:	07f00793          	li	a5,127
+ 134:	01f00793          	li	a5,31
  138:	eee7dee3          	bge	a5,a4,34 <_start+0x28>
  13c:	fec42783          	lw	a5,-20(s0)
  140:	00178793          	addi	a5,a5,1
  144:	fef42623          	sw	a5,-20(s0)
  148:	fec42703          	lw	a4,-20(s0)
- 14c:	07f00793          	li	a5,127
+ 14c:	01f00793          	li	a5,31
  150:	ece7dee3          	bge	a5,a4,2c <_start+0x20>
  154:	00000073          	ecall
  158:	00000013          	nop
- 15c:	000302b7          	lui	t0,0x30
+ 15c:	000032b7          	lui	t0,0x3
  160:	00510133          	add	sp,sp,t0
  164:	01c12083          	lw	ra,28(sp)
  168:	01812403          	lw	s0,24(sp)
