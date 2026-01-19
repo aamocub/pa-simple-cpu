@@ -33,6 +33,7 @@ module cache
     logic write_line_to_cache;
     logic [LINE_LEN-1:0] write_data_to_cache;
     mem_width_t width;
+    logic [ADDR_WIDTH-M-1:0] tag_from_cache;
     logic [XLEN-1:0] data_from_cache;
     logic [LINE_LEN-1:0] line_from_cache;
     logic is_hit, is_dirty;
@@ -51,6 +52,7 @@ module cache
         .kind_i      (width),
         .hit_o       (is_hit),
         .dirty_o     (is_dirty),
+        .tag_o       (tag_from_cache),
         .data_o      (data_from_cache),
         .line_data_o (line_from_cache)
     );
@@ -148,7 +150,7 @@ module cache
                     end else begin
                         if (is_dirty) begin : WRITEBACK_LINE
                             mem_io.req_valid = 1;
-                            mem_io.req_addr = {core_io.req_addr[ADDR_WIDTH-1:M], {M{1'b0}}};
+                            mem_io.req_addr = {tag_from_cache, {M{1'b0}}};
                             mem_io.req_write_en = 1;
                             mem_io.req_data = line_from_cache;
                         end else begin : GET_LINE
@@ -186,7 +188,7 @@ module cache
                 end else begin
                     if (is_dirty) begin
                         mem_io.req_valid = 1;
-                        mem_io.req_addr = {next_req.addr[ADDR_WIDTH-1:M], {M{1'b0}}};
+                        mem_io.req_addr = {tag_from_cache, {M{1'b0}}};
                         mem_io.req_write_en = 1;
                         mem_io.req_data = line_from_cache;
                     end else begin
