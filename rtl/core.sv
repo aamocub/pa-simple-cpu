@@ -14,37 +14,34 @@ module core
     memory_intf.CL mem_b_io
 );
 
+    /* Control unit */
+    cu_if_t cu_if;
+    cu_id_t cu_id;
+    cu_ex_t cu_ex;
+    cu_mm_t cu_mm;
+    cu_wb_t cu_wb;
+
+    /* Stage outputs and inter-stage registers */
     if_stage_t if_out, if_id;
     id_stage_t id_out, id_ex;
     ex_stage_t ex_out, ex_mm;
     mm_stage_t mm_out, mm_wb;
     wb_stage_t wb_out, wb_id;
 
-    cu_if_t                                  cu_if;
-    cu_id_t                                  cu_id;
-    cu_ex_t                                  cu_ex;
-    cu_mm_t                                  cu_mm;
-    cu_wb_t                                  cu_wb;
-
-    logic                                    hf_empty;
-    logic                                    hf_full;
-    logic                                    hf_reset;
-    logic       [$clog2(HISTFILE_DEPTH)-1:0] hf_tail;
-    logic                                    hf_issue;
-    hf_entry_t                               hf_entry_in;
-    logic                                    hf_wren;
-    logic       [$clog2(HISTFILE_DEPTH)-1:0] hf_wrid;
-    logic                                    hf_ready;
-    exception_t                              hf_evec;
-    logic                                    hf_rden;
-    logic       [$clog2(HISTFILE_DEPTH)-1:0] hf_rdid;
-    logic       [                  XLEN-1:0] hf_value;
-    logic       [$clog2(HISTFILE_DEPTH)-1:0] hf_head;
-    logic                                    hf_commit;
-    hf_entry_t                               hf_entry_out;
-    logic       [$clog2(HISTFILE_DEPTH)-1:0] hf_entry_to_read;
-    logic                                    hf_recovery;
+    /* History file */
+    logic                                   hf_empty;
+    logic                                   hf_full;
+    logic                                   hf_reset;
+    logic      [$clog2(HISTFILE_DEPTH)-1:0] hf_tail;
+    logic                                   hf_issue;
+    hf_entry_t                              hf_entry_in;
+    logic      [                  XLEN-1:0] hf_value;
     logic      [                       4:0] hf_rd;
+    logic      [$clog2(HISTFILE_DEPTH)-1:0] hf_head;
+    logic                                   hf_commit;
+    hf_entry_t                              hf_entry_out;
+    logic      [$clog2(HISTFILE_DEPTH)-1:0] hf_entry_to_read;
+    logic                                   hf_recovery;
 
     memory_intf icache_port ();
     memory_intf dcache_port ();
@@ -113,7 +110,7 @@ module core
     assign hf_entry_in.miss = '0;
     assign hf_entry_in.rd = id_out.rd;
     assign hf_entry_in.value = id_out.data_rd;
-    histfile #() histfile (
+    histfile histfile (
         .clk_i   (clk_i),
         .rst_i   (rst_i),
         .flush_i (hf_reset),
@@ -134,14 +131,6 @@ module core
         .commit_i(hf_commit),
         .entry_o (hf_entry_out)
     );
-
-    // mem_arbitrer mem_arbitrer (
-    //     .clk_i    (clk_i),
-    //     .rst_i    (rst_i),
-    //     .icache_io(icache_arb_port.SV),
-    //     .dcache_io(dcache_arb_port.SV),
-    //     .mem_io   (mem_io)
-    // );
 
     /* -------------------------------------------------------------------------------------------------------------- */
     /*                                             Instruction Fetch Stage                                            */
