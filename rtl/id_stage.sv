@@ -104,7 +104,7 @@ module id_stage
                     FUNCT3_ORI:   decode_o.op = ORI;
                     FUNCT3_ANDI:  decode_o.op = ANDI;
                     FUNCT3_SLLI:  decode_o.op = SLLI;
-                    FUNCT3_SRLI, FUNCT3_SRAI: begin
+                    FUNCT3_SRLI: begin
                         decode_o.op = (fetch_i.instr.rtype.funct7 == FUNCT7_SRLI) ? SRLI :
                                       (fetch_i.instr.rtype.funct7 == FUNCT7_SRAI) ? SRAI : ILLEGAL;
                     end
