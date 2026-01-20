@@ -8,9 +8,9 @@ module pipeline #(
     output data_t q_o
 );
     generate
-        if (CYCLES == 0) begin
+        if (CYCLES == 0) begin : pipeline_blk1
             assign q_o = d_i;
-        end else begin
+        end else begin : pipeline_blk2
             data_t piperegs[CYCLES];
             assign q_o = piperegs[CYCLES-1];
             always_ff @(posedge clk_i, posedge rst_i) begin : PIPE_REG_0
