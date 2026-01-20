@@ -28,10 +28,14 @@ module cu
 
     always_comb begin : IF_stage
         if_o.stall = ex_i.do_stall | mm_i.do_stall;
+        if_o.flush = 0;
 
         // PC selection logic
         if_o.pcsel = is_exception ? 2 : is_taken ? 1 : 0;
         if_o.addr  = is_taken ? ex_i.alu_result : 0;
+
+        if_o.except_valid = '0;
+        if_o.except_addr = PC_EXCEPTION_ADDR;
     end
 
     always_comb begin : ID_stage
