@@ -21,8 +21,10 @@ module mm_stage
     always_comb begin : passthrough_signals
         mm_o.rd       = ex_i.rd;
         mm_o.pc       = ex_i.pc;
+        mm_o.hf_id    = ex_i.hf_id;
         mm_o.is_wb    = ex_i.is_wb;
         mm_o.data_rs2 = ex_i.data_rs2;
+        mm_o.valid    = ex_i.valid;
     end
 
     always_ff @(posedge clk_i, posedge rst_i) begin : transitions

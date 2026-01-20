@@ -16,7 +16,9 @@ module wb_stage
         wb_o.is_wb = mm_i.is_wb;
         wb_o.rd    = mm_i.rd;
         wb_o.pc    = mm_i.pc;
+        wb_o.hf_id = mm_i.hf_id;
         wb_o.data  = mm_i.data;
+        wb_o.valid = mm_i.valid;
     end
 
 endmodule

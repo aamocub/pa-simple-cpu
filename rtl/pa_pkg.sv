@@ -24,6 +24,18 @@ package pa_pkg;
 
     /* ---------------------------- Core definitions ---------------------------- */
 
+    /* ------------------------- History file definitions ----------------------- */
+    localparam integer unsigned HISTFILE_DEPTH = 10;
+    typedef struct packed {
+        logic                    valid;
+        logic                    ready;
+        exception_t              evec;
+        logic [PHY_ADDR_LEN-1:0] pc;
+        logic [PHY_ADDR_LEN-1:0] miss;
+        logic [4:0]              rd;
+        logic [XLEN-1:0]         value;
+    } hf_entry_t;
+
     /* --------------------------- Memory definitions --------------------------- */
     // Memory access width ({U}BYTE, {U}HALF, WORD)
     typedef enum logic [2:0] {
@@ -98,6 +110,7 @@ package pa_pkg;
         instruction_t    instr;  // Instruction
         logic [XLEN-1:0] pc;     // Current PC
         exception_t      evec;   // Exception vector
+        logic            valid;
     } if_stage_t;
 
     // Instruction codes
@@ -118,37 +131,44 @@ package pa_pkg;
 
     // ID stage ouput
     typedef struct packed {
-        logic [4:0]      rs1;        // Source register 1
-        logic [4:0]      rs2;        // Source register 2
-        logic [4:0]      rd;         // Destination register
-        logic [XLEN-1:0] data_rs1;   // Value of register 1
-        logic [XLEN-1:0] data_rs2;   // Value of register 2
-        logic            is_wb;      // Is it going to write to regfile
-        logic            is_ld;      // Is it a load
-        logic            is_st;      // Is it a store
-        logic            is_br;      // Is it a jump/branch
-        logic            uses_rs2;   // Does the instruction use rs2
-        logic [XLEN-1:0] imm;        // Immediate
-        logic [XLEN-1:0] pc;         // Current PC
-        mem_width_t      mem_width;  // Width of memory access
-        instr_op_t       op;         // Operation to perform
-        exception_t      evec;       // Exception vector
+        logic [4:0]                        rs1;        // Source register 1
+        logic [4:0]                        rs2;        // Source register 2
+        logic [4:0]                        rd;         // Destination register
+        logic [XLEN-1:0]                   data_rs1;   // Value of register 1
+        logic [XLEN-1:0]                   data_rs2;   // Value of register 2
+        logic [XLEN-1:0]                   data_rd;    // Value of destination register
+        logic                              is_wb;      // Is it going to write to regfile
+        logic                              is_ld;      // Is it a load
+        logic                              is_st;      // Is it a store
+        logic                              is_br;      // Is it a jump/branch
+        logic                              uses_rs2;   // Does the instruction use rs2
+        logic [XLEN-1:0]                   imm;        // Immediate
+        logic [XLEN-1:0]                   pc;         // Current PC
+        mem_width_t                        mem_width;  // Width of memory access
+        instr_op_t                         op;         // Operation to perform
+        exception_t                        evec;       // Exception vector
+        logic [$clog2(HISTFILE_DEPTH)-1:0] hf_id;      // History file entry id
+        logic                              valid;      // Is Instruction valid
     } id_stage_t;
 
     // EX stage output
     typedef struct packed {
-        logic [4:0]      rd;          // Destination register
-        logic            is_wb;       // Is it going to write to regfile
-        logic [XLEN-1:0] alu_result;
-        logic            is_taken;    // Is branch taken
-        logic            is_ld;       // Is it a load
-        logic            is_st;       // Is it a store
-        logic [XLEN-1:0] pc;          // Current PC
-        logic            uses_rs2;    // Does the instruction use rs2
-        logic [XLEN-1:0] data_rs2;    // Value of register 2
-        mem_width_t      mem_width;   // Width of memory access
-        logic            do_stall;    // Should previous instr be stalled
-        exception_t      evec;        // Exception vector
+        logic [4:0]                        rs1;         // Source register 1
+        logic [4:0]                        rs2;         // Source register 2
+        logic [4:0]                        rd;          // Destination register
+        logic                              is_wb;       // Is it going to write to regfile
+        logic [XLEN-1:0]                   alu_result;
+        logic                              is_taken;    // Is branch taken
+        logic                              is_ld;       // Is it a load
+        logic                              is_st;       // Is it a store
+        logic [XLEN-1:0]                   pc;          // Current PC
+        logic                              uses_rs2;    // Does the instruction use rs2
+        logic [XLEN-1:0]                   data_rs2;    // Value of register 2
+        mem_width_t                        mem_width;   // Width of memory access
+        logic                              do_stall;    // Should previous instr be stalled
+        exception_t                        evec;        // Exception vector
+        logic [$clog2(HISTFILE_DEPTH)-1:0] hf_id;       // History file entry id
+        logic                              valid;       // Is Instruction valid
     } ex_stage_t;
 
     // MM memory interface
@@ -169,22 +189,28 @@ package pa_pkg;
 
     // MM stage output
     typedef struct packed {
-        logic [XLEN-1:0] data;
-        logic [XLEN-1:0] data_rs2;  // Value of register 2
-        logic [XLEN-1:0] pc;        // Current PC
-        logic            is_wb;     // Is it going to write to regfile
-        logic            do_stall;  // Should previous instr be stalled
-        logic [4:0]      rd;        // Destination register
-        exception_t      evec;      // Exception vector
+        logic [XLEN-1:0]                   data;
+        logic [XLEN-1:0]                   data_rs2;  // Value of register 2
+        logic [XLEN-1:0]                   pc;        // Current PC
+        logic                              is_wb;     // Is it going to write to regfile
+        logic                              do_stall;  // Should previous instr be stalled
+        logic [4:0]                        rs1;       // Source register 1
+        logic [4:0]                        rs2;       // Source register 2
+        logic [4:0]                        rd;        // Destination register
+        exception_t                        evec;      // Exception vector
+        logic [$clog2(HISTFILE_DEPTH)-1:0] hf_id;     // History file entry id
+        logic                              valid;     // Is Instruction valid
     } mm_stage_t;
 
     // WB stage output
     typedef struct packed {
-        logic            is_wb;
-        logic [XLEN-1:0] pc;     // Current PC
-        logic [4:0]      rd;
-        logic [XLEN-1:0] data;
-        exception_t      evec;   // Exception vector
+        logic                              is_wb;
+        logic [XLEN-1:0]                   pc;     // Current PC
+        logic [4:0]                        rd;
+        logic [XLEN-1:0]                   data;
+        exception_t                        evec;   // Exception vector
+        logic [$clog2(HISTFILE_DEPTH)-1:0] hf_id;  // History file entry id
+        logic                              valid;  // Is Instruction valid
     } wb_stage_t;  // from WB to ID stage
 
 endpackage

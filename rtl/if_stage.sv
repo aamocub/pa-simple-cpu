@@ -21,6 +21,7 @@ module if_stage
         if_o.pc    = pc;
         if_o.instr = instr;
         if_o.evec  = '0;
+        if_o.valid = rst_i ? 0 : 1;
     end
 
     always_ff @(posedge clk_i, posedge rst_i) begin

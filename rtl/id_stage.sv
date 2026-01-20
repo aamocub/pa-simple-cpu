@@ -2,11 +2,15 @@ module id_stage
     import riscv_pkg::*;
     import pa_pkg::*;
 (
-    input  logic      clk_i,
-    input  logic      rst_i,
-    input  if_stage_t fetch_i,
-    input  wb_stage_t from_wb_i,
-    output id_stage_t decode_o
+    input  logic                                   clk_i,
+    input  logic                                   rst_i,
+    input  if_stage_t                              fetch_i,
+    input  logic      [$clog2(HISTFILE_DEPTH)-1:0] hf_id_i,
+    input  logic                                   hf_wr_en_i,
+    input  logic      [          $clog2(XLEN)-1:0] hf_wr_reg_i,
+    input  logic      [                  XLEN-1:0] hf_wr_data_i,
+    input  wb_stage_t                              from_wb_i,
+    output id_stage_t                              decode_o
 );
 
     // TODO: change sign extension based on if the instruction uses sign or unsigned numbers
@@ -42,9 +46,11 @@ module id_stage
     always_comb begin : id_out
         decode_o.rs1 = rs1;
         decode_o.rs2 = rs2;
+        decode_o.hf_id = hf_id_i;
         decode_o.rd = rd;
         decode_o.is_wb = is_wb;
         decode_o.pc = fetch_i.pc;
+        decode_o.valid = fetch_i.valid;
     end
 
     // Immediate
@@ -205,9 +211,12 @@ module id_stage
         .re_b_i   (1),
         .rdata_b_o(decode_o.data_rs2),
         .raddr_b_i(rs2),
-        .we_i     (from_wb_i.is_wb),
-        .wdata_i  (from_wb_i.data),
-        .waddr_i  (from_wb_i.rd)
+        .re_c_i   (1),
+        .rdata_c_o(decode_o.data_rd),
+        .raddr_c_i(rd),
+        .we_i     (from_wb_i.is_wb | hf_wr_en_i),
+        .wdata_i  (from_wb_i.data | hf_wr_data_i),
+        .waddr_i  (from_wb_i.rd | hf_wr_reg_i)
     );
 
 endmodule
