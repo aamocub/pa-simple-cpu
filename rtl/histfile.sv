@@ -40,7 +40,9 @@ module histfile
     assign rd_o = rden_i ? list[rdid_i].rd : '0;
 
     generate
-        for (genvar i = 0; i < DEPTH; i = i + 1) assign valids[i] = list[i].valid;
+        for (genvar i = 0; i < DEPTH; i = i + 1) begin : hf_valids
+            assign valids[i] = list[i].valid;
+        end
     endgenerate
 
     always_ff @(posedge clk_i, posedge rst_i) begin
