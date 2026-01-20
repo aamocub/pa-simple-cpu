@@ -206,6 +206,8 @@ package pa_pkg;
         logic [XLEN-1:0]                   data_rs2;       // Value of register 2
         logic [XLEN-1:0]                   pc;             // Current PC
         logic                              is_wb;          // Is it going to write to regfile
+        logic                              is_ld;          // Is it a load
+        logic                              is_st;          // Is it a store
         logic                              do_stall;       // Should previous instr be stalled
         logic [4:0]                        rs1;            // Source register 1
         logic [4:0]                        rs2;            // Source register 2
@@ -214,11 +216,15 @@ package pa_pkg;
         logic [$clog2(HISTFILE_DEPTH)-1:0] hf_id;          // History file entry id
         logic                              valid;          // Is Instruction valid
         sb_entry_t                         sb_head_entry;
+        logic                              sb_full;
+        logic                              sb_empty;
     } mm_stage_t;
 
     // WB stage output
     typedef struct packed {
         logic                              is_wb;
+        logic                              is_ld;  // Is it a load
+        logic                              is_st;  // Is it a store
         logic [XLEN-1:0]                   pc;     // Current PC
         logic [4:0]                        rd;
         logic [XLEN-1:0]                   data;

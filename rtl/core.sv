@@ -71,12 +71,12 @@ module core
         .mem_io (mem_a_io)
     );
 
-    cache dcache (
-        .clk_i  (clk_i),
-        .rst_i  (rst_i),
-        .core_io(dcache_port.SV),
-        .mem_io (mem_b_io)
-    );
+    //  cache dcache (
+    //      .clk_i  (clk_i),
+    //      .rst_i  (rst_i),
+    //      .core_io(dcache_port.SV),
+    //      .mem_io (mem_b_io)
+    //  );
 
     cu cu (
         .clk_i             (clk_i),
@@ -256,6 +256,7 @@ module core
         .ex_i  (ex_mm),
         .cu_i  (cu_mm),
         .mm_o  (mm_out),
+        // .mem_io(mem_b_io)
         .mem_io(dcache_port.CL)
     );
 

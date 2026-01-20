@@ -23,6 +23,9 @@ module cu
     output logic                                   hf_recovery_o,
     output logic                                   hf_reset_o,
 
+    output logic                              hf_wr_en_o,
+    output logic [$clog2(HISTFILE_DEPTH)-1:0] hf_wr_id_o,
+
     output cu_if_t if_o,
     output cu_id_t id_o,
     output cu_ex_t ex_o,
@@ -37,6 +40,8 @@ module cu
     wire ex_rd_hazard = ex_mm_i.valid && ex_mm_i.is_wb && ex_mm_i.rd != 0 && ex_mm_i.rd == id_i.rd;
     wire mm_rd_hazard = mm_wb_i.valid && mm_wb_i.is_wb && mm_wb_i.rd != 0 && mm_wb_i.rd == id_i.rd;
     wire waw_hazard = 0 && (ex_rd_hazard || mm_rd_hazard);
+
+    wire loads_wait_sb = !mm_i.sb_empty && id_i.is_ld;
 
     wire is_exception = |hf_head_entry_i.evec && hf_head_entry_i.ready;
     wire is_taken = ex_i.is_taken;
@@ -90,7 +95,7 @@ module cu
     end
 
     always_comb begin : IF_stage
-        if_o.stall = waw_hazard | hf_recovery_o | hf_full_i | ex_i.do_stall | mm_i.do_stall;
+        if_o.stall = waw_hazard | loads_wait_sb | hf_recovery_o | hf_full_i | ex_i.do_stall | mm_i.do_stall;
         if_o.flush = is_exception | is_taken;
 
         // PC selection logic
@@ -99,7 +104,7 @@ module cu
     end
 
     always_comb begin : ID_stage
-        id_o.stall = hf_recovery_o | hf_full_i | ex_i.do_stall | mm_i.do_stall;
+        id_o.stall = waw_hazard | loads_wait_sb | hf_recovery_o | hf_full_i | ex_i.do_stall | mm_i.do_stall;
         id_o.flush = is_taken | is_exception;
         id_o.epc   = hf_head_entry_i.pc;
         id_o.ewe   = is_exception;
