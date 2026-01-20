@@ -23,7 +23,7 @@ module histfile
     input  logic                  rden_i,    // Read enable
     input  logic       [   W-1:0] rdid_i,    // Entry id to be read from
     output logic       [XLEN-1:0] value_o,   // Value in entry
-    output logic       [XLEN-1:0] rd_o,      // Rdest in entry
+    output logic       [     4:0] rd_o,      // Rdest in entry
     /* -------------------------------------- Commit ports -------------------------------------- */
     input  logic       [   W-1:0] head_i,    // Head pointer
     input  logic                  commit_i,  // read enable (commit instruction at the head of the list)

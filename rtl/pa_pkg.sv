@@ -32,7 +32,7 @@ package pa_pkg;
         exception_t              evec;
         logic [PHY_ADDR_LEN-1:0] pc;
         logic [PHY_ADDR_LEN-1:0] miss;
-        logic [XLEN-1:0]         rd;
+        logic [4:0]              rd;
         logic [XLEN-1:0]         value;
     } hf_entry_t;
 

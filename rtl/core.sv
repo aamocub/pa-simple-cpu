@@ -39,12 +39,12 @@ module core
     logic                                    hf_rden;
     logic       [$clog2(HISTFILE_DEPTH)-1:0] hf_rdid;
     logic       [                  XLEN-1:0] hf_value;
-    logic       [                  XLEN-1:0] hf_rd;
     logic       [$clog2(HISTFILE_DEPTH)-1:0] hf_head;
     logic                                    hf_commit;
     hf_entry_t                               hf_entry_out;
     logic       [$clog2(HISTFILE_DEPTH)-1:0] hf_entry_to_read;
     logic                                    hf_recovery;
+    logic      [                       4:0] hf_rd;
 
     memory_intf icache_port ();
     memory_intf dcache_port ();
