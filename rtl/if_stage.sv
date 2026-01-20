@@ -11,7 +11,7 @@ module if_stage
     output if_stage_t if_o
 );
     //verilog_format: off
-    enum { RST, FETCH, WAIT, JUMP } state, next_state;
+    enum { RST, FETCH, WAIT, JUMP } state;
     //verilog_format: on
     logic [ADDR_WIDTH-1:0] pc, next_pc, pend_addr;
     instruction_t instr;
@@ -20,6 +20,7 @@ module if_stage
     always_comb begin
         if_o.pc    = pc;
         if_o.instr = instr;
+        if_o.evec  = '0;
     end
 
     always_ff @(posedge clk_i, posedge rst_i) begin
