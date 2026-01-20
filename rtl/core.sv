@@ -254,6 +254,7 @@ module core
         .clk_i (clk_i),
         .rst_i (rst_i),
         .ex_i  (ex_mm),
+        .cu_i  (cu_mm),
         .mm_o  (mm_out),
         .mem_io(dcache_port.CL)
     );

@@ -85,7 +85,8 @@ module cu
     end
 
     always_comb begin : histfile_ctrl
-        hf_commit_o = hf_head_entry_i.valid && hf_head_entry_i.ready && |hf_head_entry_i.evec == 0;
+        hf_commit_o = (hf_head_entry_i.valid && hf_head_entry_i.ready && |hf_head_entry_i.evec == 0) ||
+        (hf_head_entry_i.valid && |hf_head_entry_i.evec == 0 && mm_i.sb_head_entry.valid && mm_i.sb_head_entry.hf_id == hf_head_i);
     end
 
     always_comb begin : IF_stage
@@ -138,6 +139,8 @@ module cu
     always_comb begin : MM_stage
         mm_o.stall = mm_i.do_stall;
         mm_o.flush = is_exception;
+        mm_o.hf_head_id = hf_head_i;
+        mm_o.hf_commit = hf_commit_o;
     end
 
     always_comb begin : WB_stage

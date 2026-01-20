@@ -57,7 +57,7 @@ module histfile
                 list[wrid_i].evec  <= evec_i;
             end
             if (commit_i) begin
-                list[head_i].valid <= 0;
+                list[head_i] <= '0;
             end
         end
     end

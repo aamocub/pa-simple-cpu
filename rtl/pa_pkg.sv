@@ -21,6 +21,8 @@ package pa_pkg;
     localparam integer unsigned PC_RESET_ADDR = 32'h0000;
     // Number of registers in regfile
     localparam integer unsigned RF_NUMREGS = 32;
+    localparam integer unsigned SB_DEPTH = 4;
+
 
     /* ---------------------------- Core definitions ---------------------------- */
 
@@ -62,6 +64,15 @@ package pa_pkg;
         logic valid;  //
     } mem_write_resp_t;
 
+    /* -------------------------------- Store buffer definitions -------------------------------- */
+    typedef struct packed {
+        logic                              valid;
+        logic [PHY_ADDR_LEN-1:0]           addr;
+        logic [XLEN-1:0]                   data;
+        mem_width_t                        kind;
+        logic [$clog2(HISTFILE_DEPTH)-1:0] hf_id;  // History file entry id
+    } sb_entry_t;
+
     /* ---------------------------- Cache parameters ---------------------------- */
     // Cache line length in bits (should be set to 128)
     localparam integer unsigned CACHE_LINE_LEN = 128;
@@ -95,8 +106,10 @@ package pa_pkg;
     } cu_ex_t;
     // Control signals to MM stage
     typedef struct packed {
-        logic stall;  // Stall stage
-        logic flush;  // Flush stage
+        logic                              stall;       // Stall stage
+        logic                              flush;       // Flush stage
+        logic [$clog2(HISTFILE_DEPTH)-1:0] hf_head_id;  // History file entry id
+        logic                              hf_commit;
     } cu_mm_t;
     // Control signals to WB stage
     typedef struct packed {
@@ -190,16 +203,17 @@ package pa_pkg;
     // MM stage output
     typedef struct packed {
         logic [XLEN-1:0]                   data;
-        logic [XLEN-1:0]                   data_rs2;  // Value of register 2
-        logic [XLEN-1:0]                   pc;        // Current PC
-        logic                              is_wb;     // Is it going to write to regfile
-        logic                              do_stall;  // Should previous instr be stalled
-        logic [4:0]                        rs1;       // Source register 1
-        logic [4:0]                        rs2;       // Source register 2
-        logic [4:0]                        rd;        // Destination register
-        exception_t                        evec;      // Exception vector
-        logic [$clog2(HISTFILE_DEPTH)-1:0] hf_id;     // History file entry id
-        logic                              valid;     // Is Instruction valid
+        logic [XLEN-1:0]                   data_rs2;       // Value of register 2
+        logic [XLEN-1:0]                   pc;             // Current PC
+        logic                              is_wb;          // Is it going to write to regfile
+        logic                              do_stall;       // Should previous instr be stalled
+        logic [4:0]                        rs1;            // Source register 1
+        logic [4:0]                        rs2;            // Source register 2
+        logic [4:0]                        rd;             // Destination register
+        exception_t                        evec;           // Exception vector
+        logic [$clog2(HISTFILE_DEPTH)-1:0] hf_id;          // History file entry id
+        logic                              valid;          // Is Instruction valid
+        sb_entry_t                         sb_head_entry;
     } mm_stage_t;
 
     // WB stage output
