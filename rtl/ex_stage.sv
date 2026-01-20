@@ -49,6 +49,7 @@ module ex_stage
             0: cmp_a = id_i.data_rs1;
             1: cmp_a = bypass_mm_data;
             2: cmp_a = bypass_wb_data;
+            3: cmp_a = 'x;
         endcase
     end
     always_comb begin : mux_cmp_b
@@ -56,6 +57,7 @@ module ex_stage
             0: cmp_b = id_i.data_rs2;
             1: cmp_b = bypass_mm_data;
             2: cmp_b = bypass_wb_data;
+            3: cmp_b = 'x;
         endcase
         ex_o.data_rs2 = cmp_b;
     end
