@@ -105,7 +105,7 @@ module cu
     end
 
     always_comb begin : EX_stage
-        ex_o.stall = hf_full_i | ex_i.do_stall | mm_i.do_stall;
+        ex_o.stall = ex_i.do_stall | mm_i.do_stall;
         ex_o.flush = is_taken | is_exception;
 
         // ALU input mux select
